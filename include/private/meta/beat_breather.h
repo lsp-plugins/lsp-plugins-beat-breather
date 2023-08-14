@@ -63,10 +63,10 @@ namespace lsp
             static constexpr float  SHORT_RMS_DFL           = 10.0f;
             static constexpr float  SHORT_RMS_STEP          = 0.01f;
 
-            static constexpr float  LOOKAHEAD_MIN           = 0.0f;
-            static constexpr float  LOOKAHEAD_MAX           = 2.0f;
-            static constexpr float  LOOKAHEAD_DFL           = 0.0f;
-            static constexpr float  LOOKAHEAD_STEP          = 0.01f;
+            static constexpr float  PF_LOOKAHEAD_MIN        = 0.0f;
+            static constexpr float  PF_LOOKAHEAD_MAX        = 2.0f;
+            static constexpr float  PF_LOOKAHEAD_DFL        = 0.0f;
+            static constexpr float  PF_LOOKAHEAD_STEP       = 0.01f;
 
             static constexpr float  PF_ATTACK_MIN           = 0.0f;
             static constexpr float  PF_ATTACK_MAX           = 10.0f;
@@ -146,6 +146,20 @@ namespace lsp
             static constexpr size_t FFT_MESH_POINTS         = 640;
             static constexpr size_t CURVE_MESH_POINTS       = 256;
             static constexpr size_t BANDS_MAX               = 8;
+            static constexpr size_t FFT_XOVER_RANK_MIN      = 12;
+            static constexpr size_t FFT_XOVER_FREQ_MIN      = 44100;
+            static constexpr float  LEVEL_NORMING           = GAIN_AMP_M_18_DB;
+
+            enum listen_t
+            {
+                LISTEN_CROSSOVER,
+                LISTEN_RMS,
+                LISTEN_PUNCH,
+                LISTEN_BEAT,
+
+                LISTEN_DFL = LISTEN_BEAT
+            };
+
         } beat_breather;
 
         // Plugin type metadata

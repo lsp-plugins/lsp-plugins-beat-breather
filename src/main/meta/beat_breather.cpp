@@ -48,6 +48,15 @@ namespace lsp
             { NULL, NULL }
         };
 
+        static const port_item_t bb_listen[] =
+        {
+            { "Crossover",      "bit_breather.listen.crossover"         },
+            { "RMS",            "bit_breather.listen.RMS"               },
+            { "Punch Filter",   "bit_breather.listen.punch_filter"      },
+            { "Beat Processor", "bit_breather.listen.beat_processor"    },
+            { NULL, NULL }
+        };
+
         #define BB_COMMON \
             BYPASS, \
             IN_GAIN, \
@@ -75,16 +84,15 @@ namespace lsp
         #define BB_BAND(id, label) \
             SWITCH("bs" id, "Solo band" label, 0.0f), \
             SWITCH("bm" id, "Mute band" label, 0.0f), \
-            SWITCH("bls" id, "Band listen" label, 0.0f), \
+            COMBO("bls" id, "Band listen stage" label, beat_breather::LISTEN_DFL, bb_listen), \
             CONTROL("lps" id, "Lo-pass slope" label, U_DB, beat_breather::SLOPE), \
             CONTROL("hps" id, "Hi-pass slope" label, U_DB, beat_breather::SLOPE), \
             CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
             LOG_CONTROL("bg" id, "Band output gain" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
             METER("fre" id, "Frequency range end" label, U_HZ,  beat_breather::OUT_FREQ), \
-            SWITCH("pfls" id, "Punch filter listen" label, 0.0f), \
             CONTROL("pflt" id, "Punch filter long-time RMS estimation" label, U_GAIN_AMP, beat_breather::LONG_RMS), \
             CONTROL("pfst" id, "Punch filter short-time RMS estimation" label, U_GAIN_AMP, beat_breather::SHORT_RMS), \
-            CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::LOOKAHEAD), \
+            CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \
             LOG_CONTROL("pfat" id, "Punch filter attack time" label, U_MSEC, beat_breather::PF_ATTACK), \
             LOG_CONTROL("pfrt" id, "Punch filter release time" label, U_MSEC, beat_breather::PF_RELEASE), \
             CONTROL("pfth" id, "Punch filter threshold" label, U_DB, beat_breather::PF_THRESHOLD), \
