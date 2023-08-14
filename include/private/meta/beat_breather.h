@@ -33,17 +33,112 @@ namespace lsp
     {
         typedef struct beat_breather
         {
-            static constexpr float  SAMPLES_MIN         = 0.0f;
-            static constexpr float  SAMPLES_MAX         = 10000.0f;
-            static constexpr float  SAMPLES_DFL         = 0.0f;
-            static constexpr float  SAMPLES_STEP        = 1.0f;
+            static constexpr float  FREQ_MIN                = 10.0f;
+            static constexpr float  FREQ_MAX                = 20000.0f;
+            static constexpr float  FREQ_DFL                = 1000.0f;
+            static constexpr float  FREQ_STEP               = 0.002f;
 
-            static constexpr float  TIME_MIN            = 0.0f;
-            static constexpr float  TIME_MAX            = 1000.0f;
-            static constexpr float  TIME_DFL            = 0.0f;
-            static constexpr float  TIME_STEP           = 0.01f;
+            static constexpr float  SLOPE_MIN               = 0.0f;
+            static constexpr float  SLOPE_MAX               = 72.0f;
+            static constexpr float  SLOPE_DFL               = 36.0f;
+            static constexpr float  SLOPE_STEP              = 0.1f;
 
-            static constexpr float  DELAY_OUT_MAX_TIME  = 10000.0f;
+            static constexpr float  FLATTEN_MIN             = 0.0f;
+            static constexpr float  FLATTEN_MAX             = 6.0f;
+            static constexpr float  FLATTEN_DFL             = 0.0f;
+            static constexpr float  FLATTEN_STEP            = 0.01f;
+
+            static constexpr float  BAND_GAIN_MIN           = GAIN_AMP_M_INF_DB;
+            static constexpr float  BAND_GAIN_MAX           = GAIN_AMP_P_12_DB;
+            static constexpr float  BAND_GAIN_DFL           = GAIN_AMP_0_DB;
+            static constexpr float  BAND_GAIN_STEP          = 0.05f;
+
+            static constexpr float  LONG_RMS_MIN            = 100.0f;
+            static constexpr float  LONG_RMS_MAX            = 1000.0f;
+            static constexpr float  LONG_RMS_DFL            = 400.0f;
+            static constexpr float  LONG_RMS_STEP           = 0.5f;
+
+            static constexpr float  SHORT_RMS_MIN           = 0.5f;
+            static constexpr float  SHORT_RMS_MAX           = 20.0f;
+            static constexpr float  SHORT_RMS_DFL           = 10.0f;
+            static constexpr float  SHORT_RMS_STEP          = 0.01f;
+
+            static constexpr float  LOOKAHEAD_MIN           = 0.0f;
+            static constexpr float  LOOKAHEAD_MAX           = 2.0f;
+            static constexpr float  LOOKAHEAD_DFL           = 0.0f;
+            static constexpr float  LOOKAHEAD_STEP          = 0.01f;
+
+            static constexpr float  PF_ATTACK_MIN           = 0.0f;
+            static constexpr float  PF_ATTACK_MAX           = 10.0f;
+            static constexpr float  PF_ATTACK_DFL           = 5.0f;
+            static constexpr float  PF_ATTACK_STEP          = 0.01f;
+
+            static constexpr float  PF_RELEASE_MIN          = 0.0f;
+            static constexpr float  PF_RELEASE_MAX          = 100.0f;
+            static constexpr float  PF_RELEASE_DFL          = 20.0f;
+            static constexpr float  PF_RELEASE_STEP         = 0.01f;
+
+            static constexpr float  PF_THRESHOLD_MIN        = -48.0f;
+            static constexpr float  PF_THRESHOLD_MAX        = 0.0f;
+            static constexpr float  PF_THRESHOLD_DFL        = -24.0f;
+            static constexpr float  PF_THRESHOLD_STEP       = 0.1f;
+
+            static constexpr float  PF_REDUCTION_MIN        = 0.0f;
+            static constexpr float  PF_REDUCTION_MAX        = -48.0f;
+            static constexpr float  PF_REDUCTION_DFL        = -12.0f;
+            static constexpr float  PF_REDUCTION_STEP       = 0.1f;
+
+            static constexpr float  PF_ZONE_MIN             = 0.0f;
+            static constexpr float  PF_ZONE_MAX             = -24.0f;
+            static constexpr float  PF_ZONE_DFL             = -3.0f;
+            static constexpr float  PF_ZONE_STEP            = 0.1f;
+
+            static constexpr float  BP_ATTACK_MIN           = 0.0f;
+            static constexpr float  BP_ATTACK_MAX           = 100.0f;
+            static constexpr float  BP_ATTACK_DFL           = 10.0f;
+            static constexpr float  BP_ATTACK_STEP          = 0.001f;
+
+            static constexpr float  BP_RELEASE_MIN          = 0.0f;
+            static constexpr float  BP_RELEASE_MAX          = 200.0f;
+            static constexpr float  BP_RELEASE_DFL          = 20.0f;
+            static constexpr float  BP_RELEASE_STEP         = 0.001f;
+
+            static constexpr float  BP_TIME_SHIFT_MIN       = -5.0f;
+            static constexpr float  BP_TIME_SHIFT_MAX       = 5.0f;
+            static constexpr float  BP_TIME_SHIFT_DFL       = 0.0f;
+            static constexpr float  BP_TIME_SHIFT_STEP      = 0.01f;
+
+            static constexpr float  BP_THRESHOLD_MIN        = -72.0f;
+            static constexpr float  BP_THRESHOLD_MAX        = 0.0f;
+            static constexpr float  BP_THRESHOLD_DFL        = -24.0f;
+            static constexpr float  BP_THRESHOLD_STEP       = 0.1f;
+
+            static constexpr float  BP_RATIO_MIN            = 1.0f;
+            static constexpr float  BP_RATIO_MAX            = 10.0f;
+            static constexpr float  BP_RATIO_DFL            = 2.0f;
+            static constexpr float  BP_RATIO_STEP           = 0.001f;
+
+            static constexpr float  BP_MAX_GAIN_MIN         = 0.0f;
+            static constexpr float  BP_MAX_GAIN_MAX         = 24.0f;
+            static constexpr float  BP_MAX_GAIN_DFL         = 6.0f;
+            static constexpr float  BP_MAX_GAIN_STEP        = 0.1f;
+
+            static constexpr float  FFT_REACT_TIME_MIN      = 0.000f;
+            static constexpr float  FFT_REACT_TIME_MAX      = 1.000f;
+            static constexpr float  FFT_REACT_TIME_DFL      = 0.200f;
+            static constexpr float  FFT_REACT_TIME_STEP     = 0.001f;
+
+            static constexpr float  FFT_SHIFT_MIN           = -40.0f;
+            static constexpr float  FFT_SHIFT_MAX           = 60.0f;
+            static constexpr float  FFT_SHIFT_DFL           = 0.0f;
+            static constexpr float  FFT_SHIFT_STEP          = 0.1f;
+
+            static constexpr float  ZOOM_MIN                = GAIN_AMP_M_18_DB;
+            static constexpr float  ZOOM_MAX                = GAIN_AMP_0_DB;
+            static constexpr float  ZOOM_DFL                = GAIN_AMP_0_DB;
+            static constexpr float  ZOOM_STEP               = 0.0125f;
+
+            static constexpr size_t FFT_MESH_POINTS         = 640;
         } beat_breather;
 
         // Plugin type metadata

@@ -40,83 +40,185 @@ namespace lsp
     {
         //-------------------------------------------------------------------------
         // Plugin metadata
+        static const port_item_t bb_tabs[] =
+        {
+            { "Crossover",      "bit_breather.tabs.crossover" },
+            { "Punch Filter",   "bit_breather.tabs.punch_filter" },
+            { "Beat Processor", "bit_breather.tabs.beat_processor" },
+            { NULL, NULL }
+        };
 
-        // NOTE: Port identifiers should not be longer than 7 characters as it will overflow VST2 parameter name buffers
+        #define BB_COMMON \
+            BYPASS, \
+            DRY_GAIN(0.0f), \
+            WET_GAIN(1.0f), \
+            OUT_GAIN, \
+            SWITCH("ssplit", "Stereo split", 0.0f), \
+            COMBO("ts", "Tab selector", 0, bb_tabs), \
+            LOG_CONTROL("react", "FFT reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \
+            CONTROL("shift", "FFT shift gain", U_DB, beat_breather::FFT_SHIFT), \
+            LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, beat_breather::ZOOM)
+
+        #define BB_COMMON_METERS(id, label) \
+            METER_GAIN("ilm" id, "Input level meter" label, GAIN_AMP_P_24_DB), \
+            METER_GAIN("olm" id, "Output level meter" label, GAIN_AMP_P_24_DB), \
+            SWITCH("ife" id, "Input FFT graph enable" label, 1.0f), \
+            SWITCH("ofe" id, "Output FFT graph enable" label, 1.0f), \
+            MESH("ifg" id, "Input FFT graph" label, 2, beat_breather::FFT_MESH_POINTS + 2), \
+            MESH("ofg" id, "Output FFT graph" label, 2, beat_breather::FFT_MESH_POINTS)
+
+        #define BB_SPLIT(id, label, freq, on) \
+            SWITCH("se" id, "Frequency split enable" label, on), \
+            LOG_CONTROL_DFL("sf" id, "Split frequency" label, U_HZ, beat_breather::FREQ, freq)
+
+        #define BB_BAND(id, label) \
+            SWITCH("bs" id, "Solo band" label, 0.0f), \
+            SWITCH("bm" id, "Mute band" label, 0.0f), \
+            SWITCH("bls" id, "Band listen" label, 0.0f), \
+            CONTROL("lps" id, "Lo-pass slope" label, U_DB, beat_breather::SLOPE), \
+            CONTROL("hps" id, "Hi-pass slope" label, U_DB, beat_breather::SLOPE), \
+            CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
+            LOG_CONTROL("bg" id, "Band output gain" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
+            SWITCH("pfls" id, "Punch filter listen" label, 0.0f), \
+            CONTROL("pflt" id, "Punch filter long-time RMS estimation" label, U_GAIN_AMP, beat_breather::LONG_RMS), \
+            CONTROL("pfst" id, "Punch filter short-time RMS estimation" label, U_GAIN_AMP, beat_breather::SHORT_RMS), \
+            CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::LOOKAHEAD), \
+            LOG_CONTROL("pfat" id, "Punch filter attack time" label, U_MSEC, beat_breather::PF_ATTACK), \
+            LOG_CONTROL("pfrt" id, "Punch filter release time" label, U_MSEC, beat_breather::PF_RELEASE), \
+            CONTROL("pfth" id, "Punch filter threshold" label, U_DB, beat_breather::PF_THRESHOLD), \
+            CONTROL("pfrl" id, "Punch filter reduction level" label, U_DB, beat_breather::PF_REDUCTION), \
+            CONTROL("pfrz" id, "Punch filter reduction zone" label, U_DB, beat_breather::PF_ZONE), \
+            LOG_CONTROL("bpat" id, "Beat processor attack time" label, U_DB, beat_breather::BP_ATTACK), \
+            LOG_CONTROL("bprt" id, "Beat processor release time" label, U_DB, beat_breather::BP_RELEASE), \
+            CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
+            CONTROL("bpth" id, "Beat processor threshold" label, U_DB, beat_breather::BP_THRESHOLD), \
+            CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
+            CONTROL("bpgm" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN)
+
+        #define BB_BAND_METERS(id, label) \
+            METER_OUT_GAIN("ilm" id, "Band input level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("olm" id, "Band output level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("pfem" id, "Punch filter envelope level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("pfcm" id, "Punch filter curve level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("pfgm" id, "Punch filter gain level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("bpem" id, "Beat processor envelope level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("bpcm" id, "Beat processor curve level meter" label, GAIN_AMP_P_36_DB), \
+            METER_OUT_GAIN("bpgm" id, "Beat processor gain level meter" label, GAIN_AMP_P_36_DB)
+
         static const port_t beat_breather_mono_ports[] =
         {
             // Input and output audio ports
             PORTS_MONO_PLUGIN,
+            BB_COMMON,
+            BB_COMMON_METERS("", ""),
 
-            // Input controls
-            BYPASS,
-            INT_CONTROL("d_in", "Delay in samples", U_SAMPLES, beat_breather::SAMPLES),
-            DRY_GAIN(0.0f),
-            WET_GAIN(1.0f),
-            OUT_GAIN,
+            BB_SPLIT("_1", " 1", 0.0f, 40.0f),
+            BB_SPLIT("_2", " 2", 1.0f, 100.0f),
+            BB_SPLIT("_3", " 3", 0.0f, 252.0f),
+            BB_SPLIT("_4", " 4", 1.0f, 632.0f),
+            BB_SPLIT("_5", " 5", 0.0f, 1587.0f),
+            BB_SPLIT("_6", " 6", 1.0f, 3984.0f),
+            BB_SPLIT("_7", " 7", 0.0f, 10000.0f),
 
-            // Output controls
-            METER_MINMAX("d_out", "Delay time in milliseconds", U_MSEC, 0.0f, beat_breather::DELAY_OUT_MAX_TIME),
-            METER_GAIN("min", "Input gain", GAIN_AMP_P_48_DB),
-            METER_GAIN("mout", "Output gain", GAIN_AMP_P_48_DB),
+            BB_BAND("_1", " 1"),
+            BB_BAND("_2", " 2"),
+            BB_BAND("_3", " 3"),
+            BB_BAND("_4", " 4"),
+            BB_BAND("_5", " 5"),
+            BB_BAND("_6", " 6"),
+            BB_BAND("_7", " 7"),
+            BB_BAND("_8", " 8"),
+
+            BB_BAND_METERS("_1", " 1"),
+            BB_BAND_METERS("_2", " 2"),
+            BB_BAND_METERS("_3", " 3"),
+            BB_BAND_METERS("_4", " 4"),
+            BB_BAND_METERS("_5", " 5"),
+            BB_BAND_METERS("_6", " 6"),
+            BB_BAND_METERS("_7", " 7"),
+            BB_BAND_METERS("_8", " 8"),
 
             PORTS_END
         };
 
-        // NOTE: Port identifiers should not be longer than 7 characters as it will overflow VST2 parameter name buffers
         static const port_t beat_breather_stereo_ports[] =
         {
             // Input and output audio ports
             PORTS_STEREO_PLUGIN,
+            BB_COMMON,
+            BB_COMMON_METERS("_l", " Left"),
+            BB_COMMON_METERS("_r", " Right"),
 
-            // Input controls
-            BYPASS,
-            INT_CONTROL("d_in", "Delay in samples", U_SAMPLES, beat_breather::SAMPLES),
-            DRY_GAIN(0.0f),
-            WET_GAIN(1.0f),
-            OUT_GAIN,
+            BB_SPLIT("_1", " 1", 0.0f, 40.0f),
+            BB_SPLIT("_2", " 2", 1.0f, 100.0f),
+            BB_SPLIT("_3", " 3", 0.0f, 252.0f),
+            BB_SPLIT("_4", " 4", 1.0f, 632.0f),
+            BB_SPLIT("_5", " 5", 0.0f, 1587.0f),
+            BB_SPLIT("_6", " 6", 1.0f, 3984.0f),
+            BB_SPLIT("_7", " 7", 0.0f, 10000.0f),
 
-            // Output controls
-            METER_MINMAX("d_out", "Delay time in milliseconds", U_MSEC, 0.0f, beat_breather::DELAY_OUT_MAX_TIME),
-            METER_GAIN("min_l", "Input gain left",  GAIN_AMP_P_48_DB),
-            METER_GAIN("mout_l", "Output gain left",  GAIN_AMP_P_48_DB),
-            METER_GAIN("min_r", "Input gain right",  GAIN_AMP_P_48_DB),
-            METER_GAIN("mout_r", "Output gain right", GAIN_AMP_P_48_DB),
+            BB_BAND("_1", " 1"),
+            BB_BAND("_2", " 2"),
+            BB_BAND("_3", " 3"),
+            BB_BAND("_4", " 4"),
+            BB_BAND("_5", " 5"),
+            BB_BAND("_6", " 6"),
+            BB_BAND("_7", " 7"),
+            BB_BAND("_8", " 8"),
+
+            BB_BAND_METERS("_1l", " 1 Left"),
+            BB_BAND_METERS("_2l", " 2 Left"),
+            BB_BAND_METERS("_3l", " 3 Left"),
+            BB_BAND_METERS("_4l", " 4 Left"),
+            BB_BAND_METERS("_5l", " 5 Left"),
+            BB_BAND_METERS("_6l", " 6 Left"),
+            BB_BAND_METERS("_7l", " 7 Left"),
+            BB_BAND_METERS("_8l", " 8 Left"),
+
+            BB_BAND_METERS("_1r", " 1 Right"),
+            BB_BAND_METERS("_2r", " 2 Right"),
+            BB_BAND_METERS("_3r", " 3 Right"),
+            BB_BAND_METERS("_4r", " 4 Right"),
+            BB_BAND_METERS("_5r", " 5 Right"),
+            BB_BAND_METERS("_6r", " 6 Right"),
+            BB_BAND_METERS("_7r", " 7 Right"),
+            BB_BAND_METERS("_8r", " 8 Right"),
 
             PORTS_END
         };
 
-        static const int plugin_classes[]       = { C_DELAY, -1 };
+        static const int plugin_classes[]       = { C_DYNAMICS, -1 };
         static const int clap_features_mono[]   = { CF_AUDIO_EFFECT, CF_UTILITY, CF_MONO, -1 };
         static const int clap_features_stereo[] = { CF_AUDIO_EFFECT, CF_UTILITY, CF_STEREO, -1 };
 
         const meta::bundle_t beat_breather_bundle =
         {
             "beat_breather",
-            "Plugin Template",
-            B_UTILITIES,
+            "Beat Breather",
+            B_DYNAMICS,
             "", // TODO: provide ID of the video on YouTube
-            "" // TODO: write plugin description, should be the same to the english version in 'bundles.json'
+            "This plugin allows to drive much more dynamics into punchy sounds like drums and make them breathe again."
         };
 
         const plugin_t beat_breather_mono =
         {
-            "Pluginschablone Mono",
-            "Plugin Template Mono",
-            "PS1M",
+            "Beat Breather Mono",
+            "Beat Breather Mono",
+            "BB1M",
             &developers::v_sadovnikov,
             "beat_breather_mono",
             LSP_LV2_URI("beat_breather_mono"),
             LSP_LV2UI_URI("beat_breather_mono"),
-            "xxxx",         // TODO: fill valid VST2 ID (4 letters/digits)
-            1,              // TODO: fill valid LADSPA identifier (positive decimal integer)
+            "bb1m",
+            LSP_LADSPA_BIT_BREATHER_BASE + 0,
             LSP_LADSPA_URI("beat_breather_mono"),
             LSP_CLAP_URI("beat_breather_mono"),
             LSP_PLUGINS_BEAT_BREATHER_VERSION,
             plugin_classes,
             clap_features_mono,
-            E_DUMP_STATE,
+            E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_mono_ports,
-            "template/plugin.xml",
+            "dynamics/beat_breather.xml",
             NULL,
             mono_plugin_port_groups,
             &beat_breather_bundle
@@ -124,23 +226,23 @@ namespace lsp
 
         const plugin_t beat_breather_stereo =
         {
-            "Pluginschablone Stereo",
-            "Plugin Template Stereo",
-            "PS1S",
+            "Beat Breather Stereo",
+            "Beat Breather Stereo",
+            "BB1S",
             &developers::v_sadovnikov,
             "beat_breather_stereo",
             LSP_LV2_URI("beat_breather_stereo"),
             LSP_LV2UI_URI("beat_breather_stereo"),
-            "yyyy",         // TODO: fill valid VST2 ID (4 letters/digits)
-            2,              // TODO: fill valid LADSPA identifier (positive decimal integer)
+            "bb1s",
+            LSP_LADSPA_BIT_BREATHER_BASE + 1,
             LSP_LADSPA_URI("beat_breather_stereo"),
             LSP_CLAP_URI("beat_breather_stereo"),
             LSP_PLUGINS_BEAT_BREATHER_VERSION,
             plugin_classes,
             clap_features_stereo,
-            E_DUMP_STATE,
+            E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_stereo_ports,
-            "template/plugin.xml",
+            "dynamics/beat_breather.xml",
             NULL,
             stereo_plugin_port_groups,
             &beat_breather_bundle
