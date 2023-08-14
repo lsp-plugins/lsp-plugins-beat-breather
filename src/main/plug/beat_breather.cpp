@@ -60,18 +60,32 @@ namespace lsp
         beat_breather::beat_breather(const meta::plugin_t *meta):
             Module(meta)
         {
-            // Compute the number of audio channels by the number of inputs
-            nChannels       = 0;
-            for (const meta::port_t *p = meta->ports; p->id != NULL; ++p)
-                if (meta::is_audio_in_port(p))
-                    ++nChannels;
+            nChannels       = 1;
+            if (!strcmp(meta->uid, meta::beat_breather_stereo.uid))
+                nChannels       = 2;
 
-            // Initialize other parameters
             vChannels       = NULL;
-            vBuffer         = NULL;
 
             pBypass         = NULL;
-            pGainOut        = NULL;
+            pInGain         = NULL;
+            pDryGain        = NULL;
+            pWetGain        = NULL;
+            pOutGain        = NULL;
+            pStereoSplit    = NULL;
+            pFFTReactivity  = NULL;
+            pFFTShift       = NULL;
+
+            for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
+            {
+                split_t *s      = &vSplits[i];
+
+                s->nBandId      = i + 1;
+                s->fFrequency   = 0.0f;
+                s->bEnabled     = false;
+
+                s->pEnable      = NULL;
+                s->pFrequency   = NULL;
+            }
 
             pData           = NULL;
         }
@@ -79,109 +93,6 @@ namespace lsp
         beat_breather::~beat_breather()
         {
             destroy();
-        }
-
-        void beat_breather::init(plug::IWrapper *wrapper, plug::IPort **ports)
-        {
-            // Call parent class for initialization
-            Module::init(wrapper, ports);
-
-            // Estimate the number of bytes to allocate
-            size_t szof_channels    = align_size(sizeof(channel_t) * nChannels, OPTIMAL_ALIGN);
-            size_t buf_sz           = BUFFER_SIZE * sizeof(float);
-            size_t alloc            = szof_channels + buf_sz;
-
-            // Allocate memory-aligned data
-            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, alloc, OPTIMAL_ALIGN);
-            if (ptr == NULL)
-                return;
-
-            // Initialize pointers to channels and temporary buffer
-            vChannels               = reinterpret_cast<channel_t *>(ptr);
-            ptr                    += szof_channels;
-            vBuffer                 = reinterpret_cast<float *>(ptr);
-            ptr                    += buf_sz;
-
-            for (size_t i=0; i < nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                // Construct in-place DSP processors
-                c->sLine.construct();
-                c->sBypass.construct();
-
-                // Initialize fields
-                c->nDelay               = 0;
-                c->fDryGain             = 0.0f;
-                c->fWetGain             = 0.0f;
-
-                c->pIn                  = NULL;
-                c->pOut                 = NULL;
-                c->pDelay               = NULL;
-                c->pDry                 = NULL;
-                c->pWet                 = NULL;
-
-                c->pOutDelay            = NULL;
-            }
-
-            // Bind ports
-            lsp_trace("Binding ports");
-            size_t port_id      = 0;
-
-            // Bind input audio ports
-            for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pIn    = TRACE_PORT(ports[port_id++]);
-
-            // Bind output audio ports
-            for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pOut   = TRACE_PORT(ports[port_id++]);
-
-            // Bind bypass
-            pBypass              = TRACE_PORT(ports[port_id++]);
-
-            // Bind ports for audio processing channels
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                if (i > 0)
-                {
-                    channel_t *pc           = &vChannels[0];
-
-                    // Share some controls across all channels
-                    c->pDelay               = pc->pDelay;
-                    c->pDry                 = pc->pDry;
-                    c->pWet                 = pc->pWet;
-                }
-                else
-                {
-                    // Initialize input controls for the first channel
-                    c->pDelay               = TRACE_PORT(ports[port_id++]);
-                    c->pDry                 = TRACE_PORT(ports[port_id++]);
-                    c->pWet                 = TRACE_PORT(ports[port_id++]);
-                }
-            }
-
-            // Bind output gain
-            pGainOut            = TRACE_PORT(ports[port_id++]);
-
-            // Bind output meters
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                if (i > 0)
-                {
-                    channel_t *pc           = &vChannels[0];
-                    // Share some meters across all channels
-                    c->pOutDelay            = pc->pOutDelay;
-                }
-                else
-                    c->pOutDelay            = TRACE_PORT(ports[port_id++]);
-
-                c->pInLevel             = TRACE_PORT(ports[port_id++]);
-                c->pOutLevel            = TRACE_PORT(ports[port_id++]);
-            }
         }
 
         void beat_breather::destroy()
@@ -194,12 +105,27 @@ namespace lsp
                 for (size_t i=0; i<nChannels; ++i)
                 {
                     channel_t *c    = &vChannels[i];
-                    c->sLine.destroy();
+
+                    c->sBypass.destroy();
+                    c->sCrossover.destroy();
+                    c->sDelay.destroy();
+
+                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    {
+                        band_t *b               = &c->vBands[j];
+
+                        b->sDelay.destroy();
+                        b->sLongSc.destroy();
+                        b->sShortSc.destroy();
+                        b->sShortDelay.destroy();
+                        b->sPf.destroy();
+                        b->sPfDelay.destroy();
+                        b->sBp.destroy();
+                        b->sBpDelay.destroy();
+                    }
                 }
                 vChannels   = NULL;
             }
-
-            vBuffer     = NULL;
 
             // Free previously allocated data chunk
             if (pData != NULL)
@@ -209,133 +135,257 @@ namespace lsp
             }
         }
 
-        void beat_breather::update_sample_rate(long sr)
+        void beat_breather::init(plug::IWrapper *wrapper, plug::IPort **ports)
         {
-            // Update sample rate for the bypass processors
+            // Call parent class for initialization
+            Module::init(wrapper, ports);
+
+            // Allocate data
+            size_t szof_channels    = align_size(sizeof(channel_t) * nChannels, DEFAULT_ALIGN);
+            size_t to_alloc         = szof_channels;
+
+            uint8_t *ptr            = alloc_aligned<uint8_t>(pData, to_alloc);
+            if (ptr == NULL)
+                return;
+
+            // Initialize channels
+            size_t an_ch            = 0;
             for (size_t i=0; i<nChannels; ++i)
             {
-                channel_t *c    = &vChannels[i];
-                c->sLine.init(dspu::millis_to_samples(sr, meta::beat_breather::DELAY_OUT_MAX_TIME));
-                c->sBypass.init(sr);
+                channel_t *c            = &vChannels[i];
+
+                c->sBypass.construct();
+                c->sCrossover.construct();
+                c->sDelay.construct();
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+
+                    b->sDelay.construct();
+                    b->sLongSc.construct();
+                    b->sShortSc.construct();
+                    b->sShortDelay.construct();
+                    b->sPf.construct();
+                    b->sPfDelay.construct();
+                    b->sBp.construct();
+                    b->sBpDelay.construct();
+
+                    b->nAnIn                = an_ch++;
+                    b->nAnOut               = an_ch++;
+
+                    b->pInLevel             = NULL;
+                    b->pOutLevel            = NULL;
+
+                    b->pSolo                = NULL;
+                    b->pMute                = NULL;
+                    b->pListen              = NULL;
+                    b->pLpfSlope            = NULL;
+                    b->pHpfSlope            = NULL;
+                    b->pFlatten             = NULL;
+                    b->pOutGain             = NULL;
+                    b->pFreqEnd             = NULL;
+
+                    b->pPfListen            = NULL;
+                    b->pPfLongTime          = NULL;
+                    b->pPfShortTime         = NULL;
+                    b->pPfLookahead         = NULL;
+                    b->pPfAttack            = NULL;
+                    b->pPfRelease           = NULL;
+                    b->pPfThreshold         = NULL;
+                    b->pPfReduction         = NULL;
+                    b->pPfZone              = NULL;
+                    b->pPfMesh              = NULL;
+                    b->pPfEnvLevel          = NULL;
+                    b->pPfCurveLevel        = NULL;
+                    b->pPfGainLevel         = NULL;
+
+                    b->pBpAttack            = NULL;
+                    b->pBpRelease           = NULL;
+                    b->pBpTimeShift         = NULL;
+                    b->pBpThreshold         = NULL;
+                    b->pBpRatio             = NULL;
+                    b->pBpMaxGain           = NULL;
+                    b->pBpMesh              = NULL;
+                    b->pBpEnvLevel          = NULL;
+                    b->pBpCurveLevel        = NULL;
+                    b->pBpGainLevel         = NULL;
+                }
+
+                c->pIn                  = NULL;
+                c->pOut                 = NULL;
+
+                c->pInLevel             = NULL;
+                c->pOutLevel            = NULL;
+                c->pInFft               = NULL;
+                c->pOutFft              = NULL;
+                c->pInMesh              = NULL;
+                c->pOutMesh             = NULL;
             }
+
+            // Bind ports
+            size_t port_id = 0;
+
+            // Input ports
+            lsp_trace("Binding input ports");
+            for (size_t i=0; i<nChannels; ++i)
+                vChannels[i].pIn        = TRACE_PORT(ports[port_id++]);
+
+            // Output ports
+            lsp_trace("Binding output ports");
+            for (size_t i=0; i<nChannels; ++i)
+                vChannels[i].pOut       = TRACE_PORT(ports[port_id++]);
+
+            // Common ports
+            lsp_trace("Binding common ports");
+            pBypass                 = TRACE_PORT(ports[port_id++]);
+            pInGain                 = TRACE_PORT(ports[port_id++]);
+            pDryGain                = TRACE_PORT(ports[port_id++]);
+            pWetGain                = TRACE_PORT(ports[port_id++]);
+            pOutGain                = TRACE_PORT(ports[port_id++]);
+            pStereoSplit            = TRACE_PORT(ports[port_id++]);
+            TRACE_PORT(ports[port_id++]); // skip tab selector
+            pFFTReactivity          = TRACE_PORT(ports[port_id++]);
+            pFFTShift               = TRACE_PORT(ports[port_id++]);
+            TRACE_PORT(ports[port_id++]); // skip zoom
+
+            // Channel meters
+            lsp_trace("Binding channel meters");
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+
+                c->pInLevel             = TRACE_PORT(ports[port_id++]);
+                c->pOutLevel            = TRACE_PORT(ports[port_id++]);
+                c->pInFft               = TRACE_PORT(ports[port_id++]);
+                c->pOutFft              = TRACE_PORT(ports[port_id++]);
+                c->pInMesh              = TRACE_PORT(ports[port_id++]);
+                c->pOutMesh             = TRACE_PORT(ports[port_id++]);
+            }
+
+            // Splits
+            lsp_trace("Binding split ports");
+            for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
+            {
+                split_t *s              = &vSplits[i];
+
+                s->pEnable              = TRACE_PORT(ports[port_id++]);
+                s->pFrequency           = TRACE_PORT(ports[port_id++]);
+            }
+
+            // Band controls
+            lsp_trace("Binding band ports");
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+
+                    if (i > 0)
+                    {
+                        band_t *sb              = &vChannels[0].vBands[j];
+
+                        b->pSolo                = sb->pSolo;
+                        b->pMute                = sb->pMute;
+                        b->pListen              = sb->pListen;
+                        b->pLpfSlope            = sb->pLpfSlope;
+                        b->pHpfSlope            = sb->pHpfSlope;
+                        b->pFlatten             = sb->pFlatten;
+                        b->pOutGain             = sb->pOutGain;
+                        b->pFreqEnd             = sb->pFreqEnd;
+
+                        b->pPfListen            = sb->pPfListen;
+                        b->pPfLongTime          = sb->pPfLongTime;
+                        b->pPfShortTime         = sb->pPfShortTime;
+                        b->pPfLookahead         = sb->pPfLookahead;
+                        b->pPfAttack            = sb->pPfAttack;
+                        b->pPfRelease           = sb->pPfRelease;
+                        b->pPfThreshold         = sb->pPfThreshold;
+                        b->pPfReduction         = sb->pPfReduction;
+                        b->pPfZone              = sb->pPfZone;
+                        b->pPfMesh              = sb->pPfMesh;
+
+                        b->pBpAttack            = sb->pBpAttack;
+                        b->pBpRelease           = sb->pBpRelease;
+                        b->pBpTimeShift         = sb->pBpTimeShift;
+                        b->pBpThreshold         = sb->pBpThreshold;
+                        b->pBpRatio             = sb->pBpRatio;
+                        b->pBpMaxGain           = sb->pBpMaxGain;
+                        b->pBpMesh              = sb->pBpMesh;
+                    }
+                    else
+                    {
+                        b->pSolo                = TRACE_PORT(ports[port_id++]);
+                        b->pMute                = TRACE_PORT(ports[port_id++]);
+                        b->pListen              = TRACE_PORT(ports[port_id++]);
+                        b->pLpfSlope            = TRACE_PORT(ports[port_id++]);
+                        b->pHpfSlope            = TRACE_PORT(ports[port_id++]);
+                        b->pFlatten             = TRACE_PORT(ports[port_id++]);
+                        b->pOutGain             = TRACE_PORT(ports[port_id++]);
+                        b->pFreqEnd             = TRACE_PORT(ports[port_id++]);
+
+                        b->pPfListen            = TRACE_PORT(ports[port_id++]);
+                        b->pPfLongTime          = TRACE_PORT(ports[port_id++]);
+                        b->pPfShortTime         = TRACE_PORT(ports[port_id++]);
+                        b->pPfLookahead         = TRACE_PORT(ports[port_id++]);
+                        b->pPfAttack            = TRACE_PORT(ports[port_id++]);
+                        b->pPfRelease           = TRACE_PORT(ports[port_id++]);
+                        b->pPfThreshold         = TRACE_PORT(ports[port_id++]);
+                        b->pPfReduction         = TRACE_PORT(ports[port_id++]);
+                        b->pPfZone              = TRACE_PORT(ports[port_id++]);
+                        b->pPfMesh              = TRACE_PORT(ports[port_id++]);
+
+                        b->pBpAttack            = TRACE_PORT(ports[port_id++]);
+                        b->pBpRelease           = TRACE_PORT(ports[port_id++]);
+                        b->pBpTimeShift         = TRACE_PORT(ports[port_id++]);
+                        b->pBpThreshold         = TRACE_PORT(ports[port_id++]);
+                        b->pBpRatio             = TRACE_PORT(ports[port_id++]);
+                        b->pBpMaxGain           = TRACE_PORT(ports[port_id++]);
+                        b->pBpMesh              = TRACE_PORT(ports[port_id++]);
+                    }
+                }
+            }
+
+            // Band meters
+            lsp_trace("Binding band meters");
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+
+                    b->pInLevel             = TRACE_PORT(ports[port_id++]);
+                    b->pOutLevel            = TRACE_PORT(ports[port_id++]);
+
+                    b->pPfEnvLevel          = TRACE_PORT(ports[port_id++]);
+                    b->pPfCurveLevel        = TRACE_PORT(ports[port_id++]);
+                    b->pPfGainLevel         = TRACE_PORT(ports[port_id++]);
+
+                    b->pBpEnvLevel          = TRACE_PORT(ports[port_id++]);
+                    b->pBpCurveLevel        = TRACE_PORT(ports[port_id++]);
+                    b->pBpGainLevel         = TRACE_PORT(ports[port_id++]);
+                }
+            }
+        }
+
+        void beat_breather::update_sample_rate(long sr)
+        {
         }
 
         void beat_breather::update_settings()
         {
-            float out_gain          = pGainOut->value();
-            bool bypass             = pBypass->value() >= 0.5f;
-
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                // Store the parameters for each processor
-                c->fDryGain             = c->pDry->value() * out_gain;
-                c->fWetGain             = c->pWet->value() * out_gain;
-                c->nDelay               = c->pDelay->value();
-
-                // Update processors
-                c->sLine.set_delay(c->nDelay);
-                c->sBypass.set_bypass(bypass);
-            }
         }
 
         void beat_breather::process(size_t samples)
         {
-            // Process each channel independently
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                // Get input and output buffers
-                const float *in         = c->pIn->buffer<float>();
-                float *out              = c->pOut->buffer<float>();
-                if ((in == NULL) || (out == NULL))
-                    continue;
-
-                // Input and output gain meters
-                float in_gain           = 0.0f;
-                float out_gain          = 0.0f;
-
-                // Process the channel with BUFFER_SIZE chunks
-                // Note: since input buffer pointer can be the same to output buffer pointer,
-                // we need to store the processed signal data to temporary buffer before
-                // it gets processed by the dspu::Bypass processor.
-                for (size_t n=0; n<samples; )
-                {
-                    size_t count            = lsp_min(samples - n, BUFFER_SIZE);
-
-                    // Pre-process signal (fill buffer)
-                    c->sLine.process_ramping(vBuffer, in, c->fWetGain, c->nDelay, samples);
-
-                    // Apply 'dry' control
-                    if (c->fDryGain > 0.0f)
-                        dsp::fmadd_k3(vBuffer, in, c->fDryGain, count);
-
-                    // Compute the gain of input and output signal.
-                    in_gain             = lsp_max(in_gain, dsp::abs_max(in, samples));
-                    out_gain            = lsp_max(out_gain, dsp::abs_max(vBuffer, samples));
-
-                    // Process the
-                    //  - dry (unprocessed) signal stored in 'in'
-                    //  - wet (processed) signal stored in 'vBuffer'
-                    // Output the result to 'out' buffer
-                    c->sBypass.process(out, in, vBuffer, count);
-
-                    // Increment pointers
-                    in          +=  count;
-                    out         +=  count;
-                    n           +=  count;
-                }
-
-                // Update meters
-                c->pInLevel->set_value(in_gain);
-                c->pOutLevel->set_value(out_gain);
-
-                // Output the delay value in milliseconds
-                float millis = dspu::samples_to_millis(fSampleRate, c->nDelay);
-                c->pOutDelay->set_value(millis);
-            }
         }
 
         void beat_breather::dump(dspu::IStateDumper *v) const
         {
-            // It is very useful to dump plugin state for debug purposes
-            v->write("nChannels", nChannels);
-            v->begin_array("vChannels", vChannels, nChannels);
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                v->begin_object(c, sizeof(channel_t));
-                {
-                    v->write_object("sLine", &c->sLine);
-                    v->write_object("sBypass", &c->sBypass);
-
-                    v->write("nDelay", c->nDelay);
-                    v->write("fDryGain", c->fDryGain);
-                    v->write("fWetWain", c->fWetGain);
-
-                    v->write("pIn", c->pIn);
-                    v->write("pOut", c->pOut);
-                    v->write("pDelay", c->pDelay);
-                    v->write("pDry", c->pDry);
-                    v->write("pWet", c->pWet);
-
-                    v->write("pOutDelay", c->pOutDelay);
-                    v->write("pInLevel", c->pInLevel);
-                    v->write("pOutLevel", c->pOutLevel);
-                }
-                v->end_object();
-            }
-            v->end_array();
-
-            v->write("vBuffer", vBuffer);
-
-            v->write("pBypass", pBypass);
-            v->write("pGainOut", pGainOut);
-
-            v->write("pData", pData);
         }
 
     } /* namespace plugins */

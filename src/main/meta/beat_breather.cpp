@@ -50,6 +50,7 @@ namespace lsp
 
         #define BB_COMMON \
             BYPASS, \
+            IN_GAIN, \
             DRY_GAIN(0.0f), \
             WET_GAIN(1.0f), \
             OUT_GAIN, \
@@ -59,7 +60,7 @@ namespace lsp
             CONTROL("shift", "FFT shift gain", U_DB, beat_breather::FFT_SHIFT), \
             LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, beat_breather::ZOOM)
 
-        #define BB_COMMON_METERS(id, label) \
+        #define BB_CHANNEL_METERS(id, label) \
             METER_GAIN("ilm" id, "Input level meter" label, GAIN_AMP_P_24_DB), \
             METER_GAIN("olm" id, "Output level meter" label, GAIN_AMP_P_24_DB), \
             SWITCH("ife" id, "Input FFT graph enable" label, 1.0f), \
@@ -79,6 +80,7 @@ namespace lsp
             CONTROL("hps" id, "Hi-pass slope" label, U_DB, beat_breather::SLOPE), \
             CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
             LOG_CONTROL("bg" id, "Band output gain" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
+            METER("fre" id, "Frequency range end" label, U_HZ,  beat_breather::OUT_FREQ), \
             SWITCH("pfls" id, "Punch filter listen" label, 0.0f), \
             CONTROL("pflt" id, "Punch filter long-time RMS estimation" label, U_GAIN_AMP, beat_breather::LONG_RMS), \
             CONTROL("pfst" id, "Punch filter short-time RMS estimation" label, U_GAIN_AMP, beat_breather::SHORT_RMS), \
@@ -88,12 +90,14 @@ namespace lsp
             CONTROL("pfth" id, "Punch filter threshold" label, U_DB, beat_breather::PF_THRESHOLD), \
             CONTROL("pfrl" id, "Punch filter reduction level" label, U_DB, beat_breather::PF_REDUCTION), \
             CONTROL("pfrz" id, "Punch filter reduction zone" label, U_DB, beat_breather::PF_ZONE), \
+            MESH("pfg" id, "Punch filter curve graph" label, 2, beat_breather::CURVE_MESH_POINTS), \
             LOG_CONTROL("bpat" id, "Beat processor attack time" label, U_DB, beat_breather::BP_ATTACK), \
             LOG_CONTROL("bprt" id, "Beat processor release time" label, U_DB, beat_breather::BP_RELEASE), \
             CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
             CONTROL("bpth" id, "Beat processor threshold" label, U_DB, beat_breather::BP_THRESHOLD), \
             CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
-            CONTROL("bpgm" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN)
+            CONTROL("bpgm" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN), \
+            MESH("bpg" id, "Beat processor curve graph" label, 2, beat_breather::CURVE_MESH_POINTS)
 
         #define BB_BAND_METERS(id, label) \
             METER_OUT_GAIN("ilm" id, "Band input level meter" label, GAIN_AMP_P_36_DB), \
@@ -110,7 +114,7 @@ namespace lsp
             // Input and output audio ports
             PORTS_MONO_PLUGIN,
             BB_COMMON,
-            BB_COMMON_METERS("", ""),
+            BB_CHANNEL_METERS("", ""),
 
             BB_SPLIT("_1", " 1", 0.0f, 40.0f),
             BB_SPLIT("_2", " 2", 1.0f, 100.0f),
@@ -146,8 +150,8 @@ namespace lsp
             // Input and output audio ports
             PORTS_STEREO_PLUGIN,
             BB_COMMON,
-            BB_COMMON_METERS("_l", " Left"),
-            BB_COMMON_METERS("_r", " Right"),
+            BB_CHANNEL_METERS("_l", " Left"),
+            BB_CHANNEL_METERS("_r", " Right"),
 
             BB_SPLIT("_1", " 1", 0.0f, 40.0f),
             BB_SPLIT("_2", " 2", 1.0f, 100.0f),

@@ -138,7 +138,14 @@ namespace lsp
             static constexpr float  ZOOM_DFL                = GAIN_AMP_0_DB;
             static constexpr float  ZOOM_STEP               = 0.0125f;
 
+            static constexpr float  OUT_FREQ_MIN            = 0.0f;
+            static constexpr float  OUT_FREQ_MAX            = MAX_SAMPLE_RATE;
+            static constexpr float  OUT_FREQ_DFL            = 20000.0f;
+            static constexpr float  OUT_FREQ_STEP           = 0.002f;
+
             static constexpr size_t FFT_MESH_POINTS         = 640;
+            static constexpr size_t CURVE_MESH_POINTS       = 256;
+            static constexpr size_t BANDS_MAX               = 8;
         } beat_breather;
 
         // Plugin type metadata
