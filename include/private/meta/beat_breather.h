@@ -24,6 +24,7 @@
 
 #include <lsp-plug.in/plug-fw/meta/types.h>
 #include <lsp-plug.in/plug-fw/const.h>
+#include <lsp-plug.in/dsp-units/misc/windows.h>
 
 namespace lsp
 {
@@ -149,6 +150,10 @@ namespace lsp
             static constexpr size_t FFT_XOVER_RANK_MIN      = 12;
             static constexpr size_t FFT_XOVER_FREQ_MIN      = 44100;
             static constexpr float  LEVEL_NORMING           = GAIN_AMP_M_18_DB;
+            static constexpr size_t FFT_ANALYZER_RANK       = 13;
+            static constexpr size_t FFT_ANALYZER_ITEMS      = 1 << FFT_ANALYZER_RANK;
+            static constexpr size_t FFT_ANALYZER_WINDOW     = dspu::windows::HANN;
+            static constexpr size_t FFT_ANALYZER_RATE       = 20;
 
             enum listen_t
             {

@@ -49,10 +49,10 @@ namespace lsp
                 {
                     BAND_OFF,
                     BAND_MUTE,
-                    BAND_LISTEN_XOVER,
-                    BAND_LISTEN_RMS,
-                    BAND_LISTEN_PF,
-                    BAND_ON
+                    BAND_XOVER,
+                    BAND_RMS,
+                    BAND_PF,
+                    BAND_BP
                 };
 
                 typedef struct split_t
@@ -77,15 +77,17 @@ namespace lsp
                     dspu::Delay         sBpScDelay;     // Beat processor sidechain delay
                     dspu::Delay         sBpDelay;       // Beat processor delay
 
-                    size_t              nAnIn;          // Analyzer input channel identifier
-                    size_t              nAnOut;         // Analyzer output channel identifier
                     band_mode_t         nMode;          // Band mode
                     float               fGain;          // Band gain
+                    float               fInLevel;       // Input level measured
+                    float               fOutLevel;      // Output level measured
+                    bool                bSyncCurve;     // Synchronize curve
 
-                    float              *vIn;            // Original band data after crossover
-                    float              *vRMS;           // RMS signal normalized
+                    float              *vInData;        // Original band data after crossover
+                    float              *vRmsData;       // RMS signal normalized
                     float              *vPfData;        // Output of Peak Filter
                     float              *vBpData;        // Output of Beat Processor
+                    float              *vFreqChart;     // Frequency chart
 
                     plug::IPort        *pSolo;          // Solo band
                     plug::IPort        *pMute;          // Mute band
@@ -95,6 +97,7 @@ namespace lsp
                     plug::IPort        *pFlatten;       // Band flatten
                     plug::IPort        *pOutGain;       // Output gain
                     plug::IPort        *pFreqEnd;       // Frequency of the lo-pass filter
+                    plug::IPort        *pFreqMesh;      // Output transfer function mesh
 
                     plug::IPort        *pInLevel;       // Input level meter
                     plug::IPort        *pOutLevel;      // Output level meter
@@ -128,13 +131,21 @@ namespace lsp
                 {
                     dspu::Bypass        sBypass;        // Bypass
                     dspu::FFTCrossover  sCrossover;     // FFT crossover
-                    dspu::Delay         sDelay;         // Delay for Dry signal
+                    dspu::Delay         sDelay;         // Delay for channel signal
+                    dspu::Delay         sDryDelay;      // Delay compensation for the dry (unprocessed) signal
 
                     band_t              vBands[meta::beat_breather::BANDS_MAX];     // Bands
 
+                    size_t              nAnIn;          // Analyzer input channel identifier
+                    size_t              nAnOut;         // Analyzer output channel identifier
+                    float               fInLevel;       // Input level measured
+                    float               fOutLevel;      // Output level measured
+
                     float              *vIn;            // Input buffer
                     float              *vOut;           // Output buffer
-                    float              *vData;          // Processed channel data
+                    float              *vInData;        // Processed input data
+                    float              *vOutData;       // Processed channel data
+                    float              *vFreqChart;     // Frequency chart
 
                     plug::IPort        *pIn;            // Input
                     plug::IPort        *pOut;           // Output
@@ -145,6 +156,7 @@ namespace lsp
                     plug::IPort        *pOutFft;        // Output FFT enable
                     plug::IPort        *pInMesh;        // Input FFT mesh
                     plug::IPort        *pOutMesh;       // Output FFT mesh
+                    plug::IPort        *pFreqMesh;      // Output transfer function mesh
                 } channel_t;
 
             protected:
@@ -154,12 +166,14 @@ namespace lsp
                 float               fInGain;            // Input gain
                 float               fDryGain;           // Dry gain
                 float               fWetGain;           // Wet gain
+                float              *vAnalyze[4];        // Buffers for spectrum analyzer
 
                 dspu::Analyzer      sAnalyzer;          // Analyzer
                 split_t             vSplits[meta::beat_breather::BANDS_MAX-1];
 
-                float              *vScBuffer;          // Temporary buffer for sidechain processing
                 float              *vBuffer;            // Temporary buffer for processing
+                float              *vFftFreqs;          // List of FFT frequencies
+                uint32_t           *vFftIndexes;        // List of analyzer FFT indexes
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pInGain;            // Input gain
@@ -173,9 +187,11 @@ namespace lsp
                 uint8_t            *pData;              // Allocated data
 
             protected:
-                static inline size_t                    select_fft_rank(size_t sample_rate);
-                static void                             process_band(void *object, void *subject, size_t band, const float *data, size_t sample, size_t count);
-                static void                             normalize_rms(float *dst, const float *lrms, const float *srms, size_t samples);
+                static inline size_t        select_fft_rank(size_t sample_rate);
+                static void                 process_band(void *object, void *subject, size_t band, const float *data, size_t sample, size_t count);
+                static void                 normalize_rms(float *dst, const float *lrms, const float *srms, size_t samples);
+                static int                  compare_splits(const void *a1, const void *a2, void *data);
+                static band_mode_t          decode_band_mode(size_t mode);
 
             protected:
                 void                bind_inputs();
@@ -183,8 +199,9 @@ namespace lsp
                 void                apply_peak_filter(size_t samples);
                 void                apply_beat_processor(size_t samples);
                 void                mix_bands(size_t samples);
-                void                post_process(size_t samples);
+                void                post_process_block(size_t samples);
                 void                update_pointers(size_t samples);
+                void                output_meters();
 
             public:
                 explicit beat_breather(const meta::plugin_t *meta);
@@ -197,6 +214,8 @@ namespace lsp
                 virtual void        update_sample_rate(long sr) override;
                 virtual void        update_settings() override;
                 virtual void        process(size_t samples) override;
+                virtual void        ui_activated() override;
+                virtual bool        inline_display(plug::ICanvas *cv, size_t width, size_t height) override;
                 virtual void        dump(dspu::IStateDumper *v) const override;
         };
 

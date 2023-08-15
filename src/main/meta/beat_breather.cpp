@@ -42,18 +42,18 @@ namespace lsp
         // Plugin metadata
         static const port_item_t bb_tabs[] =
         {
-            { "Crossover",      "bit_breather.tabs.crossover" },
-            { "Punch Filter",   "bit_breather.tabs.punch_filter" },
-            { "Beat Processor", "bit_breather.tabs.beat_processor" },
+            { "Crossover",      "beat_breather.tabs.crossover"          },
+            { "Punch Filter",   "beat_breather.tabs.punch_filter"       },
+            { "Beat Processor", "beat_breather.tabs.beat_processor"     },
             { NULL, NULL }
         };
 
         static const port_item_t bb_listen[] =
         {
-            { "Crossover",      "bit_breather.listen.crossover"         },
-            { "RMS",            "bit_breather.listen.RMS"               },
-            { "Punch Filter",   "bit_breather.listen.punch_filter"      },
-            { "Beat Processor", "bit_breather.listen.beat_processor"    },
+            { "Crossover",      "beat_breather.listen.crossover"        },
+            { "RMS",            "beat_breather.listen.RMS"              },
+            { "Punch Filter",   "beat_breather.listen.punch_filter"     },
+            { "Beat Processor", "beat_breather.listen.beat_processor"   },
             { NULL, NULL }
         };
 
@@ -63,11 +63,13 @@ namespace lsp
             DRY_GAIN(0.0f), \
             WET_GAIN(1.0f), \
             OUT_GAIN, \
-            SWITCH("ssplit", "Stereo split", 0.0f), \
             COMBO("ts", "Tab selector", 0, bb_tabs), \
             LOG_CONTROL("react", "FFT reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \
             CONTROL("shift", "FFT shift gain", U_DB, beat_breather::FFT_SHIFT), \
             LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, beat_breather::ZOOM)
+
+        #define BB_COMMON_STEREO \
+            SWITCH("ssplit", "Stereo split", 0.0f)
 
         #define BB_CHANNEL_METERS(id, label) \
             METER_GAIN("ilm" id, "Input level meter" label, GAIN_AMP_P_24_DB), \
@@ -75,7 +77,8 @@ namespace lsp
             SWITCH("ife" id, "Input FFT graph enable" label, 1.0f), \
             SWITCH("ofe" id, "Output FFT graph enable" label, 1.0f), \
             MESH("ifg" id, "Input FFT graph" label, 2, beat_breather::FFT_MESH_POINTS + 2), \
-            MESH("ofg" id, "Output FFT graph" label, 2, beat_breather::FFT_MESH_POINTS)
+            MESH("ofg" id, "Output FFT graph" label, 2, beat_breather::FFT_MESH_POINTS), \
+            MESH("ag" id, "Output filter graph" label, 2, beat_breather::FFT_MESH_POINTS)
 
         #define BB_SPLIT(id, label, freq, on) \
             SWITCH("se" id, "Frequency split enable" label, on), \
@@ -90,6 +93,7 @@ namespace lsp
             CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
             LOG_CONTROL("bg" id, "Band output gain" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
             METER("fre" id, "Frequency range end" label, U_HZ,  beat_breather::OUT_FREQ), \
+            MESH("bfg" id, "Band filter graph" label, 2, beat_breather::FFT_MESH_POINTS + 2), \
             CONTROL("pflt" id, "Punch filter long-time RMS estimation" label, U_GAIN_AMP, beat_breather::LONG_RMS), \
             CONTROL("pfst" id, "Punch filter short-time RMS estimation" label, U_GAIN_AMP, beat_breather::SHORT_RMS), \
             CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \
@@ -104,7 +108,7 @@ namespace lsp
             CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
             CONTROL("bpth" id, "Beat processor threshold" label, U_DB, beat_breather::BP_THRESHOLD), \
             CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
-            CONTROL("bpgm" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN), \
+            CONTROL("bpmg" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN), \
             MESH("bpg" id, "Beat processor curve graph" label, 2, beat_breather::CURVE_MESH_POINTS)
 
         #define BB_BAND_METERS(id, label) \
@@ -158,6 +162,7 @@ namespace lsp
             // Input and output audio ports
             PORTS_STEREO_PLUGIN,
             BB_COMMON,
+            BB_COMMON_STEREO,
             BB_CHANNEL_METERS("_l", " Left"),
             BB_CHANNEL_METERS("_r", " Right"),
 
@@ -230,7 +235,7 @@ namespace lsp
             clap_features_mono,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_mono_ports,
-            "dynamics/beat_breather.xml",
+            "dynamics/beat_breather/mono.xml",
             NULL,
             mono_plugin_port_groups,
             &beat_breather_bundle
@@ -254,7 +259,7 @@ namespace lsp
             clap_features_stereo,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_stereo_ports,
-            "dynamics/beat_breather.xml",
+            "dynamics/beat_breather/stereo.xml",
             NULL,
             stereo_plugin_port_groups,
             &beat_breather_bundle

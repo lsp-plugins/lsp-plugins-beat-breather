@@ -23,6 +23,7 @@
 #include <lsp-plug.in/common/bits.h>
 #include <lsp-plug.in/common/debug.h>
 #include <lsp-plug.in/dsp/dsp.h>
+#include <lsp-plug.in/dsp-units/misc/envelope.h>
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
 
@@ -92,8 +93,14 @@ namespace lsp
                 s->pFrequency   = NULL;
             }
 
-            vScBuffer       = NULL;
+            vAnalyze[0]     = NULL;
+            vAnalyze[1]     = NULL;
+            vAnalyze[2]     = NULL;
+            vAnalyze[3]     = NULL;
+
             vBuffer         = NULL;
+            vFftFreqs       = NULL;
+            vFftIndexes     = NULL;
 
             pData           = NULL;
         }
@@ -117,6 +124,7 @@ namespace lsp
                     c->sBypass.destroy();
                     c->sCrossover.destroy();
                     c->sDelay.destroy();
+                    c->sDryDelay.destroy();
 
                     for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                     {
@@ -149,35 +157,57 @@ namespace lsp
             // Call parent class for initialization
             Module::init(wrapper, ports);
 
+            // Initialize analyzer
+            size_t an_cid           = 0;
+            if (!sAnalyzer.init(2*nChannels, meta::beat_breather::FFT_ANALYZER_RANK,
+                MAX_SAMPLE_RATE, meta::beat_breather::FFT_ANALYZER_RATE))
+                return;
+
+            sAnalyzer.set_rank(meta::beat_breather::FFT_ANALYZER_RANK);
+            sAnalyzer.set_activity(false);
+            sAnalyzer.set_envelope(dspu::envelope::WHITE_NOISE);
+            sAnalyzer.set_window(meta::beat_breather::FFT_ANALYZER_WINDOW);
+            sAnalyzer.set_rate(meta::beat_breather::FFT_ANALYZER_RATE);
+
             // Allocate data
             const size_t szof_channels  = align_size(sizeof(channel_t) * nChannels, DEFAULT_ALIGN);
-            const size_t szof_buffer    = sizeof(float) * BUFFER_SIZE;
+            const size_t szof_buffer    = align_size(sizeof(float) * BUFFER_SIZE, DEFAULT_ALIGN);
+            const size_t szof_fft       = align_size(sizeof(float) * meta::beat_breather::FFT_MESH_POINTS, DEFAULT_ALIGN);
+            const size_t szof_ffti      = align_size(sizeof(uint32_t) * meta::beat_breather::FFT_MESH_POINTS, DEFAULT_ALIGN);
             const size_t to_alloc       =
-                szof_channels +
-                szof_buffer +               // vScBuffer
+                szof_channels +             // vChannels
                 szof_buffer +               // vBuffer
+                szof_fft +                  // vFftFreqs
+                szof_ffti +                 // vFftIndexes
                 nChannels * (
+                    szof_buffer +       // channel_t::vInData
+                    szof_buffer +       // channel_t::vOutData
+                    szof_fft +          // channel_t::vFreqChart
                     meta::beat_breather::BANDS_MAX * (
-                        szof_buffer +       // band_t::vIn
-                        szof_buffer +       // band_t::vRMS
+                        szof_buffer +       // band_t::vInData
+                        szof_buffer +       // band_t::vRmsData
                         szof_buffer +       // band_t::vPfData
-                        szof_buffer +       // band_t::vBpData
-                        szof_buffer         // band_t::vData
-                    ));
+                        szof_buffer         // band_t::vBpData
+                    )
+                ) +
+                meta::beat_breather::BANDS_MAX * szof_fft            // band_t::vFreqChart (only for left channel)
+                ;
 
             uint8_t *ptr            = alloc_aligned<uint8_t>(pData, to_alloc);
             if (ptr == NULL)
                 return;
+            lsp_guard_assert(uint8_t *ptr_check = &ptr[to_alloc]);
 
             vChannels               = reinterpret_cast<channel_t *>(ptr);
-            ptr                    += meta::beat_breather::BANDS_MAX;
-            vScBuffer               = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_buffer;
+            ptr                    += szof_channels;
             vBuffer                 = reinterpret_cast<float *>(ptr);
             ptr                    += szof_buffer;
+            vFftFreqs               = reinterpret_cast<float *>(ptr);
+            ptr                    += szof_fft;
+            vFftIndexes             = reinterpret_cast<uint32_t *>(ptr);
+            ptr                    += szof_ffti;
 
             // Initialize channels
-            size_t an_ch            = 0;
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
@@ -185,6 +215,7 @@ namespace lsp
                 c->sBypass.construct();
                 c->sCrossover.construct();
                 c->sDelay.construct();
+                c->sDryDelay.construct();
 
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
@@ -200,19 +231,27 @@ namespace lsp
                     b->sBpScDelay.construct();
                     b->sBpDelay.construct();
 
-                    b->nAnIn                = an_ch++;
-                    b->nAnOut               = an_ch++;
                     b->nMode                = BAND_OFF;
                     b->fGain                = GAIN_AMP_0_DB;
+                    b->fInLevel             = 0.0f;
+                    b->fOutLevel            = 0.0f;
+                    b->bSyncCurve           = true;
 
-                    b->vIn                  = reinterpret_cast<float *>(ptr);
+                    b->vInData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
-                    b->vRMS                 = reinterpret_cast<float *>(ptr);
+                    b->vRmsData             = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
                     b->vPfData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
                     b->vBpData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
+                    if (i == 0)
+                    {
+                        b->vFreqChart           = reinterpret_cast<float *>(ptr);
+                        ptr                    += szof_fft;
+                    }
+                    else
+                        b->vFreqChart           = NULL;
 
                     b->pInLevel             = NULL;
                     b->pOutLevel            = NULL;
@@ -225,6 +264,7 @@ namespace lsp
                     b->pFlatten             = NULL;
                     b->pOutGain             = NULL;
                     b->pFreqEnd             = NULL;
+                    b->pFreqMesh            = NULL;
 
                     b->pPfLongTime          = NULL;
                     b->pPfShortTime         = NULL;
@@ -251,8 +291,22 @@ namespace lsp
                     b->pBpGainLevel         = NULL;
                 }
 
+                c->nAnIn                = an_cid++;
+                c->nAnOut               = an_cid++;
+                c->fInLevel             = 0.0f;
+                c->fOutLevel            = 0.0f;
+
                 c->vIn                  = NULL;
                 c->vOut                 = NULL;
+                c->vInData              = reinterpret_cast<float *>(ptr);
+                ptr                    += szof_buffer;
+                c->vOutData             = reinterpret_cast<float *>(ptr);
+                ptr                    += szof_buffer;
+                c->vFreqChart           = reinterpret_cast<float *>(ptr);
+                ptr                    += szof_fft;
+
+                vAnalyze[c->nAnIn]      = c->vInData;
+                vAnalyze[c->nAnOut]     = c->vOutData;
 
                 c->pIn                  = NULL;
                 c->pOut                 = NULL;
@@ -263,7 +317,11 @@ namespace lsp
                 c->pOutFft              = NULL;
                 c->pInMesh              = NULL;
                 c->pOutMesh             = NULL;
+                c->pFreqMesh            = NULL;
             }
+
+            // Check bounds
+            lsp_assert(ptr <= ptr_check);
 
             // Bind ports
             size_t port_id = 0;
@@ -285,11 +343,12 @@ namespace lsp
             pDryGain                = TRACE_PORT(ports[port_id++]);
             pWetGain                = TRACE_PORT(ports[port_id++]);
             pOutGain                = TRACE_PORT(ports[port_id++]);
-            pStereoSplit            = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]); // skip tab selector
             pFFTReactivity          = TRACE_PORT(ports[port_id++]);
             pFFTShift               = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]); // skip zoom
+            if (nChannels > 1)
+                pStereoSplit            = TRACE_PORT(ports[port_id++]);
 
             // Channel meters
             lsp_trace("Binding channel meters");
@@ -303,6 +362,7 @@ namespace lsp
                 c->pOutFft              = TRACE_PORT(ports[port_id++]);
                 c->pInMesh              = TRACE_PORT(ports[port_id++]);
                 c->pOutMesh             = TRACE_PORT(ports[port_id++]);
+                c->pFreqMesh            = TRACE_PORT(ports[port_id++]);
             }
 
             // Splits
@@ -337,6 +397,7 @@ namespace lsp
                         b->pFlatten             = sb->pFlatten;
                         b->pOutGain             = sb->pOutGain;
                         b->pFreqEnd             = sb->pFreqEnd;
+                        b->pFreqMesh            = NULL;
 
                         b->pPfLongTime          = sb->pPfLongTime;
                         b->pPfShortTime         = sb->pPfShortTime;
@@ -366,8 +427,7 @@ namespace lsp
                         b->pFlatten             = TRACE_PORT(ports[port_id++]);
                         b->pOutGain             = TRACE_PORT(ports[port_id++]);
                         b->pFreqEnd             = TRACE_PORT(ports[port_id++]);
-
-                        b->pListen              = TRACE_PORT(ports[port_id++]);
+                        b->pFreqMesh            = TRACE_PORT(ports[port_id++]);
 
                         b->pPfLongTime          = TRACE_PORT(ports[port_id++]);
                         b->pPfShortTime         = TRACE_PORT(ports[port_id++]);
@@ -436,6 +496,7 @@ namespace lsp
 
                 c->sBypass.init(sr);
                 c->sDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
+                c->sDryDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
                 c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
                 c->sCrossover.set_sample_rate(sr);
                 if (fft_rank != c->sCrossover.rank())
@@ -460,10 +521,182 @@ namespace lsp
                     b->sBpDelay.init(max_delay_rms + max_delay_pflk + max_delay_bpts);
                 }
             }
+
+            // Commit sample rate to analyzer
+            sAnalyzer.set_sample_rate(sr);
+        }
+
+        int beat_breather::compare_splits(const void *a1, const void *a2, void *data)
+        {
+            const split_t * const * s1 = reinterpret_cast<const split_t * const *>(a1);
+            const split_t * const * s2 = reinterpret_cast<const split_t * const *>(a2);
+            if ((*s1)->fFrequency < (*s2)->fFrequency)
+                return -1;
+            else if ((*s1)->fFrequency > (*s2)->fFrequency)
+                return 1;
+            return 0;
+        }
+
+        beat_breather::band_mode_t beat_breather::decode_band_mode(size_t mode)
+        {
+            switch (mode)
+            {
+                case meta::beat_breather::LISTEN_CROSSOVER:
+                    return BAND_XOVER;
+                case meta::beat_breather::LISTEN_RMS:
+                    return BAND_RMS;
+                case meta::beat_breather::LISTEN_PUNCH:
+                    return BAND_PF;
+                case meta::beat_breather::LISTEN_BEAT:
+                    return BAND_BP;
+                default:
+                    break;
+            }
+            return BAND_OFF;
         }
 
         void beat_breather::update_settings()
         {
+            // Configure global parameters
+            float out_gain      = pOutGain->value();
+            bStereoSplit        = ((nChannels > 1) && (pStereoSplit != NULL)) ? pStereoSplit->value() >= 0.5f : false;
+            fInGain             = pInGain->value();
+            fDryGain            = out_gain * pDryGain->value();
+            fWetGain            = out_gain * pWetGain->value();
+            size_t an_channels  = 0;
+            bool sync           = false;
+
+            // Update analyzer settings
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c    = &vChannels[i];
+
+                // Update analyzer settings
+                sAnalyzer.enable_channel(c->nAnIn, c->pInFft->value() >= 0.5f);
+                sAnalyzer.enable_channel(c->nAnOut, c->pOutFft->value() >= 0.5f);
+
+                if (sAnalyzer.channel_active(c->nAnIn))
+                    an_channels ++;
+                if (sAnalyzer.channel_active(c->nAnOut))
+                    an_channels ++;
+            }
+
+            // Update analyzer parameters
+            sAnalyzer.set_reactivity(pFFTReactivity->value());
+            if (pFFTShift != NULL)
+                sAnalyzer.set_shift(dspu::db_to_gain(pFFTShift->value()) * 100.0f);
+            sAnalyzer.set_activity(an_channels > 0);
+
+            if (sAnalyzer.needs_reconfiguration())
+            {
+                sAnalyzer.reconfigure();
+                sAnalyzer.get_frequencies(
+                    vFftFreqs,
+                    vFftIndexes,
+                    SPEC_FREQ_MIN,
+                    SPEC_FREQ_MAX,
+                    meta::beat_breather::FFT_MESH_POINTS);
+                sync                = true;
+            }
+
+            // Configure splits and their order
+            size_t nsplits  = 0;
+            split_t *vsplits[meta::beat_breather::BANDS_MAX];
+
+            for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
+            {
+                split_t *sp         = &vSplits[i];
+                sp->nBandId         = i + 1;
+                sp->bEnabled        = sp->pEnable->value() >= 0.5f;
+                sp->fFrequency      = sp->pFrequency->value();
+                if (sp->bEnabled)
+                    vsplits[nsplits++]  = sp;
+            }
+            if (nsplits > 1)
+                lsp::qsort_r(vsplits, nsplits, sizeof(split_t *), compare_splits, NULL);
+
+            // Configure channels
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+                bool has_solo       = false;
+
+                // Form the list of bands
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    c->vBands[j].nMode          = BAND_OFF;
+
+                // Configure active frequency bands
+                for (size_t j=0; j<=nsplits; ++j)
+                {
+                    size_t band_id  = (j > 0) ? vsplits[j-1]->nBandId : 0;
+                    band_t *b       = &c->vBands[band_id];
+                    b->nMode        = decode_band_mode(b->pListen->value());
+
+                    // Configure hi-pass filter
+                    if (j > 0)
+                    {
+                        c->sCrossover.enable_hpf(band_id, true);
+                        c->sCrossover.set_hpf_frequency(band_id, vsplits[j-1]->fFrequency);
+                        c->sCrossover.set_hpf_slope(band_id, b->pHpfSlope->value());
+                    }
+                    else
+                        c->sCrossover.disable_hpf(band_id);
+
+                    // Configure lo-pass filter
+                    if (j < nsplits)
+                    {
+                        c->sCrossover.enable_lpf(band_id, true);
+                        c->sCrossover.set_lpf_frequency(band_id, vsplits[j]->fFrequency);
+                        c->sCrossover.set_lpf_slope(band_id, b->pLpfSlope->value());
+                        b->pFreqEnd->set_value(vsplits[j]->fFrequency);
+                    }
+                    else
+                    {
+                        c->sCrossover.disable_lpf(band_id);
+                        b->pFreqEnd->set_value(fSampleRate * 0.5f);
+                    }
+
+                    // Check solo option
+                    if (b->pSolo->value() >= 0.5f)
+                        has_solo        = true;
+                }
+
+                // Configure bands
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b           = &c->vBands[j];
+
+                    bool solo           = b->pSolo->value() >= 0.5f;
+                    bool mute           = ((has_solo) && (!solo)) ? true : b->pMute->value() >= 0.5f;
+                    if ((mute) && (b->nMode != BAND_OFF))
+                        b->nMode            = BAND_MUTE;
+
+                    b->fGain            = b->pOutGain->value();
+
+                    // Do we have hi-pass filter?
+                    c->sCrossover.enable_band(j, b->nMode != BAND_OFF);
+                }
+
+                // Reconfigure the crossover
+                bool csync   = (sync) || (c->sCrossover.needs_update());
+                c->sCrossover.update_settings();
+
+                if ((csync) && (i == 0))
+                {
+                    // Output band parameters and update sync curve flag
+                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    {
+                        band_t *b           = &c->vBands[j];
+
+                        // Get frequency response for band
+                        c->sCrossover.freq_chart(j, b->vFreqChart, vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                        b->bSyncCurve       = true;
+                    }
+                }
+            }
+
+            // Report latency
+            set_latency(vChannels[0].sDryDelay.delay());
         }
 
         void beat_breather::process_band(void *object, void *subject, size_t band, const float *data, size_t sample, size_t count)
@@ -472,7 +705,9 @@ namespace lsp
             band_t *b               = &c->vBands[band];
 
             // Apply delay compensation and store to band's data buffer.
-            b->sDelay.process(&b->vIn[sample], data, count);
+            b->sDelay.process(&b->vInData[sample], data, count);
+            // Measure the input level
+            b->fInLevel             = lsp_max(dsp::abs_max(&b->vInData[sample], count), b->fInLevel);
         }
 
         void beat_breather::process(size_t samples)
@@ -485,15 +720,18 @@ namespace lsp
 
                 // Stores band data to band_t::vIn
                 split_signal(to_do);
-                // Stores normalized RMS to band_t::vRMS and post-processed RMS to band_t::vPfData
-                apply_peak_filter(to_do);
-                // Stores the processed band data to band_t::vBpData
-                apply_beat_processor(to_do);
-                // Stores the processed band data to channel_t::vData
-                mix_bands(to_do);
-
-                post_process(to_do);
+//                // Stores normalized RMS to band_t::vRMS and post-processed RMS to band_t::vPfData
+//                apply_peak_filter(to_do);
+//                // Stores the processed band data to band_t::vBpData
+//                apply_beat_processor(to_do);
+//                // Stores the processed band data to channel_t::vData
+//                mix_bands(to_do);
+//
+                post_process_block(to_do);
+                offset             += to_do;
             }
+
+            output_meters();
         }
 
         void beat_breather::bind_inputs()
@@ -503,6 +741,17 @@ namespace lsp
                 channel_t *c        = &vChannels[i];
                 c->vIn              = c->pIn->buffer<float>();
                 c->vOut             = c->pOut->buffer<float>();
+
+                c->fInLevel         = 0.0f;
+                c->fOutLevel        = 0.0f;
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b           = &c->vBands[j];
+
+                    b->fInLevel         = 0.0f;
+                    b->fOutLevel        = 0.0f;
+                }
             }
         }
 
@@ -511,7 +760,10 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c        = &vChannels[i];
-                dsp::mul_k3(vBuffer, c->vIn, fInGain, samples);
+
+                // Apply gain to input signal
+                dsp::mul_k3(c->vInData, c->vIn, fInGain, samples);
+                // Pass the input signal to crossover
                 c->sCrossover.process(vBuffer, samples);
             }
         }
@@ -543,9 +795,9 @@ namespace lsp
                         continue;
 
                     // Estimate long-time RMS
-                    b->sLongSc.process(b->vRMS, const_cast<const float **>(&b->vIn), samples);
+                    b->sLongSc.process(b->vRmsData, const_cast<const float **>(&b->vInData), samples);
                     // Estimate short-time RMS
-                    b->sShortSc.process(b->vPfData, const_cast<const float **>(&b->vIn), samples);
+                    b->sShortSc.process(b->vPfData, const_cast<const float **>(&b->vInData), samples);
                     // Apply delay compensation to short-time RMS estimation
                     b->sShortDelay.process(b->vPfData, b->vPfData, samples);
                 }
@@ -562,9 +814,9 @@ namespace lsp
                         continue;
 
                     // Convert stereo long-time RMS to mono
-                    dsp::lr_to_mid(left->vRMS, left->vRMS, right->vRMS, samples);
+                    dsp::lr_to_mid(left->vRmsData, left->vRmsData, right->vRmsData, samples);
                     // Duplicate long-time RMS to second channel
-                    dsp::copy(right->vRMS, left->vRMS, samples);
+                    dsp::copy(right->vRmsData, left->vRmsData, samples);
                     // Convert stereo short-time RMS to mono
                     dsp::lr_to_mid(left->vPfData, left->vPfData, right->vPfData, samples);
                     // Duplicate short-time RMS to second channel
@@ -584,11 +836,11 @@ namespace lsp
                         continue;
 
                     // Produce normalized Peak/RMS signal
-                    normalize_rms(b->vRMS, b->vRMS, b->vPfData, samples);
+                    normalize_rms(b->vRmsData, b->vRmsData, b->vPfData, samples);
                     // Apply lookahead delay to Peak/RMS signal
-                    b->sPfDelay.process(b->vPfData, b->vRMS, samples);
+                    b->sPfDelay.process(b->vPfData, b->vRmsData, samples);
                     // Process sidechain signal and produce VCA
-                    b->sBp.process(b->vPfData, vBuffer, b->vRMS, samples);
+                    b->sBp.process(b->vPfData, vBuffer, b->vRmsData, samples);
                     // Apply VCA to peak signal
                     dsp::mul2(b->vPfData, b->vPfData, samples);
                 }
@@ -613,9 +865,9 @@ namespace lsp
                     // Process sidechain signal and produce VCA
                     b->sBp.process(b->vPfData, vBuffer, vBuffer, samples);
                     // Apply time shift delay + latency compensation to band signal
-                    b->sBpDelay.process(vBuffer, b->vIn, samples);
+                    b->sBpDelay.process(b->vInData, b->vInData, samples);
                     // Apply VCA to original signal
-                    dsp::mul2(b->vPfData, vBuffer, samples);
+                    dsp::mul2(b->vPfData, b->vInData, samples);
                 }
             }
         }
@@ -627,24 +879,28 @@ namespace lsp
             {
                 channel_t *c        = &vChannels[i];
 
-                dsp::fill_zero(c->vData, samples);
+                dsp::fill_zero(c->vOutData, samples);
 
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
                     band_t *b           = &c->vBands[j];
                     switch (b->nMode)
                     {
-                        case BAND_LISTEN_XOVER:
-                            dsp::fmadd_k3(c->vData, b->vIn, b->fGain, samples);
+                        case BAND_XOVER:
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vInData, samples) * b->fGain, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
                             break;
-                        case BAND_LISTEN_RMS:
-                            dsp::fmadd_k3(c->vData, b->vRMS, b->fGain, samples);
+                        case BAND_RMS:
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vRmsData, samples) * b->fGain, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vRmsData, b->fGain, samples);
                             break;
-                        case BAND_LISTEN_PF:
-                            dsp::fmadd_k3(c->vData, b->vPfData, b->fGain, samples);
+                        case BAND_PF:
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain, samples);
                             break;
-                        case BAND_ON:
-                            dsp::fmadd_k3(c->vData, b->vBpData, b->fGain, samples);
+                        case BAND_BP:
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vBpData, samples) * b->fGain, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vBpData, b->fGain, samples);
                             break;
 
                         case BAND_MUTE:
@@ -656,19 +912,36 @@ namespace lsp
             }
         }
 
-        void beat_breather::post_process(size_t samples)
+        void beat_breather::post_process_block(size_t samples)
         {
-            // Mix bands depending on the band listen mode
+            // Apply delay compensation to input data and measure level
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c        = &vChannels[i];
 
+                // Delay the channel's input data
+                c->sDelay.process(c->vInData, c->vInData, samples);
+                // Measure the input level
+                c->fInLevel         = lsp_max(dsp::abs_max(c->vInData, samples), c->fInLevel);
+
                 // Delay the dry signal
-                c->sDelay.process(vBuffer, c->vIn, samples);
-                // Mix dry/wet into channel_t::vData
-                dsp::mix2(c->vData, vBuffer, fWetGain, fDryGain, samples);
-                // Apply bypass
-                c->sBypass.process(c->vOut, vBuffer, c->vData, samples);
+                c->sDryDelay.process(vBuffer, c->vIn, samples);
+                // Mix dry/wet into channel_t::vOutData
+                dsp::mix2(c->vOutData, c->vInData, fWetGain, fDryGain, samples);
+                // Measure the output level
+                c->fOutLevel        = lsp_max(dsp::abs_max(c->vOut, samples), c->fOutLevel);
+            }
+
+            // Measure levels
+            sAnalyzer.process(vAnalyze, samples);
+
+            // Apply bypass switch
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+
+                // Apply bypass and output data
+                c->sBypass.process(c->vOut, vBuffer, c->vOutData, samples);
             }
         }
 
@@ -680,6 +953,120 @@ namespace lsp
                 c->vIn             += samples;
                 c->vOut            += samples;
             }
+        }
+
+        void beat_breather::output_meters()
+        {
+            // Output meters
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b           = &c->vBands[j];
+
+                    b->pInLevel->set_value(b->fInLevel);
+                    b->pOutLevel->set_value(b->fOutLevel);
+                }
+            }
+
+            // Output meshes
+            plug::mesh_t *mesh;
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+
+                // Output input and output level meters
+                c->pInLevel->set_value(c->fInLevel);
+                c->pOutLevel->set_value(c->fOutLevel);
+
+                // Output transfer function of the channel
+                mesh        = (c->pFreqMesh != NULL) ? c->pFreqMesh->buffer<plug::mesh_t>() : NULL;
+                if ((mesh != NULL) && (mesh->isEmpty()))
+                {
+                    dsp::copy(mesh->pvData[0], vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                    dsp::copy(mesh->pvData[1], c->vFreqChart, meta::beat_breather::FFT_MESH_POINTS);
+                    mesh->data(2, meta::beat_breather::FFT_MESH_POINTS);
+                }
+
+                // Sync characteristics for each band
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b       = &c->vBands[j];
+
+                    b->pInLevel->set_value(b->fInLevel);
+                    b->pOutLevel->set_value(b->fOutLevel);
+
+                    if ((i == 0) && (b->bSyncCurve))
+                    {
+                        // Pass transfer function of the band
+                        mesh        = (b->pFreqMesh != NULL) ? b->pFreqMesh->buffer<plug::mesh_t>() : NULL;
+                        if ((mesh != NULL) && (mesh->isEmpty()))
+                        {
+                            mesh->pvData[0][0] = SPEC_FREQ_MIN*0.5f;
+                            mesh->pvData[0][meta::beat_breather::FFT_MESH_POINTS+1] = SPEC_FREQ_MAX * 2.0f;
+                            mesh->pvData[1][0] = 0.0f;
+                            mesh->pvData[1][meta::beat_breather::FFT_MESH_POINTS+1] = 0.0f;
+
+                            dsp::copy(&mesh->pvData[0][1], vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                            dsp::copy(&mesh->pvData[1][1], b->vFreqChart, meta::beat_breather::FFT_MESH_POINTS);
+                            mesh->data(2, meta::beat_breather::FFT_MESH_POINTS + 2);
+
+                            b->bSyncCurve       = false;
+                        }
+                    }
+                }
+
+                // Output spectrum analysis for input channel
+                mesh        = ((sAnalyzer.channel_active(c->nAnIn)) && (c->pInMesh != NULL)) ? c->pInMesh->buffer<plug::mesh_t>() : NULL;
+                if ((mesh != NULL) && (mesh->isEmpty()))
+                {
+                    // Add extra points
+                    mesh->pvData[0][0] = SPEC_FREQ_MIN*0.5f;
+                    mesh->pvData[0][meta::beat_breather::FFT_MESH_POINTS+1] = SPEC_FREQ_MAX * 2.0f;
+                    mesh->pvData[1][0] = 0.0f;
+                    mesh->pvData[1][meta::beat_breather::FFT_MESH_POINTS+1] = 0.0f;
+
+                    dsp::copy(&mesh->pvData[0][1], vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                    sAnalyzer.get_spectrum(c->nAnIn, &mesh->pvData[1][1], vFftIndexes, meta::beat_breather::FFT_MESH_POINTS);
+
+                    // Mark mesh containing data
+                    mesh->data(2, meta::beat_breather::FFT_MESH_POINTS + 2);
+                }
+
+                // Output spectrum analysis for output channel
+                mesh        = ((sAnalyzer.channel_active(c->nAnOut)) && (c->pOutMesh != NULL)) ? c->pOutMesh->buffer<plug::mesh_t>() : NULL;
+                if ((mesh != NULL) && (mesh->isEmpty()))
+                {
+                    dsp::copy(mesh->pvData[0], vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                    sAnalyzer.get_spectrum(c->nAnIn, mesh->pvData[1], vFftIndexes, meta::beat_breather::FFT_MESH_POINTS);
+
+                    // Mark mesh containing data
+                    mesh->data(2, meta::beat_breather::FFT_MESH_POINTS);
+                }
+            }
+        }
+
+        void beat_breather::ui_activated()
+        {
+            // Determine number of channels
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c    = &vChannels[i];
+
+                for (size_t i=0; i<meta::beat_breather::BANDS_MAX; ++i)
+                {
+                    band_t *b           = &c->vBands[i];
+                    b->bSyncCurve       = (i == 0);
+                }
+            }
+        }
+
+        bool beat_breather::inline_display(plug::ICanvas *cv, size_t width, size_t height)
+        {
+            return false;
         }
 
         void beat_breather::dump(dspu::IStateDumper *v) const
