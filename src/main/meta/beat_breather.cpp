@@ -80,7 +80,7 @@ namespace lsp
             MESH("ofg" id, "Output FFT graph" label, 2, beat_breather::FFT_MESH_POINTS), \
             MESH("ag" id, "Output filter graph" label, 2, beat_breather::FFT_MESH_POINTS)
 
-        #define BB_SPLIT(id, label, freq, on) \
+        #define BB_SPLIT(id, label, on, freq) \
             SWITCH("se" id, "Frequency split enable" label, on), \
             LOG_CONTROL_DFL("sf" id, "Split frequency" label, U_HZ, beat_breather::FREQ, freq)
 

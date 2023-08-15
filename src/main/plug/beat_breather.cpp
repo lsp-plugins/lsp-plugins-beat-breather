@@ -637,7 +637,7 @@ namespace lsp
                     {
                         c->sCrossover.enable_hpf(band_id, true);
                         c->sCrossover.set_hpf_frequency(band_id, vsplits[j-1]->fFrequency);
-                        c->sCrossover.set_hpf_slope(band_id, b->pHpfSlope->value());
+                        c->sCrossover.set_hpf_slope(band_id, - b->pHpfSlope->value());
                     }
                     else
                         c->sCrossover.disable_hpf(band_id);
@@ -647,7 +647,7 @@ namespace lsp
                     {
                         c->sCrossover.enable_lpf(band_id, true);
                         c->sCrossover.set_lpf_frequency(band_id, vsplits[j]->fFrequency);
-                        c->sCrossover.set_lpf_slope(band_id, b->pLpfSlope->value());
+                        c->sCrossover.set_lpf_slope(band_id, - b->pLpfSlope->value());
                         b->pFreqEnd->set_value(vsplits[j]->fFrequency);
                     }
                     else
@@ -655,6 +655,8 @@ namespace lsp
                         c->sCrossover.disable_lpf(band_id);
                         b->pFreqEnd->set_value(fSampleRate * 0.5f);
                     }
+
+                    c->sCrossover.set_flatten(band_id, dspu::db_to_gain(-b->pFlatten->value()));
 
                     // Check solo option
                     if (b->pSolo->value() >= 0.5f)
@@ -924,12 +926,10 @@ namespace lsp
                 // Measure the input level
                 c->fInLevel         = lsp_max(dsp::abs_max(c->vInData, samples), c->fInLevel);
 
-                // Delay the dry signal
-                c->sDryDelay.process(vBuffer, c->vIn, samples);
                 // Mix dry/wet into channel_t::vOutData
                 dsp::mix2(c->vOutData, c->vInData, fWetGain, fDryGain, samples);
                 // Measure the output level
-                c->fOutLevel        = lsp_max(dsp::abs_max(c->vOut, samples), c->fOutLevel);
+                c->fOutLevel        = lsp_max(dsp::abs_max(c->vOutData, samples), c->fOutLevel);
             }
 
             // Measure levels
@@ -940,6 +940,8 @@ namespace lsp
             {
                 channel_t *c        = &vChannels[i];
 
+                // Delay the dry signal
+                c->sDryDelay.process(vBuffer, c->vIn, samples);
                 // Apply bypass and output data
                 c->sBypass.process(c->vOut, vBuffer, c->vOutData, samples);
             }
@@ -1041,7 +1043,7 @@ namespace lsp
                 if ((mesh != NULL) && (mesh->isEmpty()))
                 {
                     dsp::copy(mesh->pvData[0], vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
-                    sAnalyzer.get_spectrum(c->nAnIn, mesh->pvData[1], vFftIndexes, meta::beat_breather::FFT_MESH_POINTS);
+                    sAnalyzer.get_spectrum(c->nAnOut, mesh->pvData[1], vFftIndexes, meta::beat_breather::FFT_MESH_POINTS);
 
                     // Mark mesh containing data
                     mesh->data(2, meta::beat_breather::FFT_MESH_POINTS);
