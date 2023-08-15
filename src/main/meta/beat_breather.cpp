@@ -60,8 +60,8 @@ namespace lsp
         #define BB_COMMON \
             BYPASS, \
             IN_GAIN, \
-            DRY_GAIN(0.0f), \
-            WET_GAIN(1.0f), \
+            AMP_GAIN("g_dry", "Dry gain", 0.0f, 10.0f), \
+            AMP_GAIN("g_wet", "Wet gain", 1.0f, 10.0f), \
             OUT_GAIN, \
             COMBO("ts", "Tab selector", 0, bb_tabs), \
             LOG_CONTROL("react", "FFT reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \

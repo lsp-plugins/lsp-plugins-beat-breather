@@ -497,8 +497,7 @@ namespace lsp
                 c->sBypass.init(sr);
                 c->sDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
                 c->sDryDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
-                c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
-                c->sCrossover.set_sample_rate(sr);
+
                 if (fft_rank != c->sCrossover.rank())
                 {
                     c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
@@ -507,6 +506,7 @@ namespace lsp
                     c->sCrossover.set_rank(fft_rank);
                     c->sCrossover.set_phase(float(i) / float(nChannels));
                 }
+                c->sCrossover.set_sample_rate(sr);
 
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
@@ -726,9 +726,10 @@ namespace lsp
 //                apply_peak_filter(to_do);
 //                // Stores the processed band data to band_t::vBpData
 //                apply_beat_processor(to_do);
-//                // Stores the processed band data to channel_t::vData
-//                mix_bands(to_do);
-//
+
+                // Stores the processed band data to channel_t::vOutData
+                mix_bands(to_do);
+
                 post_process_block(to_do);
                 offset             += to_do;
             }
@@ -766,7 +767,7 @@ namespace lsp
                 // Apply gain to input signal
                 dsp::mul_k3(c->vInData, c->vIn, fInGain, samples);
                 // Pass the input signal to crossover
-                c->sCrossover.process(vBuffer, samples);
+                c->sCrossover.process(c->vInData, samples);
             }
         }
 
@@ -959,21 +960,6 @@ namespace lsp
 
         void beat_breather::output_meters()
         {
-            // Output meters
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c        = &vChannels[i];
-
-
-                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                {
-                    band_t *b           = &c->vBands[j];
-
-                    b->pInLevel->set_value(b->fInLevel);
-                    b->pOutLevel->set_value(b->fOutLevel);
-                }
-            }
-
             // Output meshes
             plug::mesh_t *mesh;
             for (size_t i=0; i<nChannels; ++i)

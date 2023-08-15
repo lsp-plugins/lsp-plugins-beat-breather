@@ -178,7 +178,7 @@
 			<cell rows="2">
 				<vbox spacing="4">
 					<group text="groups.signal" expand="true">
-						<grid rows="2" cols="2" hspacing="4">
+						<grid rows="4" cols="2" hspacing="4">
 							<knob id="g_in" pad.r="4"/>
 							<vbox vfill="false">
 								<label text="labels.input" halign="0"/>
@@ -189,6 +189,18 @@
 							<vbox vfill="false">
 								<label text="labels.output" expand="true" halign="0"/>
 								<value id="g_out" width.min="50" sline="true" halign="0"/>
+							</vbox>
+							
+							<knob id="g_dry" scolor="dry" pad.r="4"/>
+							<vbox vfill="false">
+								<label text="labels.signal.dry" halign="0"/>
+								<value id="g_dry" width.min="50" sline="true" halign="0"/>
+							</vbox>
+
+							<knob id="g_wet" scolor="wet" pad.r="4"/>
+							<vbox vfill="false">
+								<label text="labels.signal.wet" halign="0"/>
+								<value id="g_wet" width.min="50" sline="true" halign="0"/>
 							</vbox>
 						</grid>
 					</group>
