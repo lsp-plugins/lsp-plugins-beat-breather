@@ -84,13 +84,13 @@ namespace lsp
             static constexpr float  PF_THRESHOLD_DFL        = -24.0f;
             static constexpr float  PF_THRESHOLD_STEP       = 0.1f;
 
-            static constexpr float  PF_REDUCTION_MIN        = 0.0f;
-            static constexpr float  PF_REDUCTION_MAX        = -48.0f;
+            static constexpr float  PF_REDUCTION_MIN        = -48.0f;
+            static constexpr float  PF_REDUCTION_MAX        = 0.0f;
             static constexpr float  PF_REDUCTION_DFL        = -12.0f;
             static constexpr float  PF_REDUCTION_STEP       = 0.1f;
 
-            static constexpr float  PF_ZONE_MIN             = 0.0f;
-            static constexpr float  PF_ZONE_MAX             = -24.0f;
+            static constexpr float  PF_ZONE_MIN             = -24.0f;
+            static constexpr float  PF_ZONE_MAX             = 0.0f;
             static constexpr float  PF_ZONE_DFL             = -3.0f;
             static constexpr float  PF_ZONE_STEP            = 0.1f;
 
