@@ -54,18 +54,24 @@ namespace lsp
             static constexpr float  BAND_GAIN_DFL           = GAIN_AMP_0_DB;
             static constexpr float  BAND_GAIN_STEP          = 0.05f;
 
-            static constexpr float  LONG_RMS_MIN            = 100.0f;
-            static constexpr float  LONG_RMS_MAX            = 1000.0f;
-            static constexpr float  LONG_RMS_DFL            = 400.0f;
-            static constexpr float  LONG_RMS_STEP           = 0.5f;
+            static constexpr float  PD_LONG_RMS_MIN         = 100.0f;
+            static constexpr float  PD_LONG_RMS_MAX         = 1000.0f;
+            static constexpr float  PD_LONG_RMS_DFL         = 400.0f;
+            static constexpr float  PD_LONG_RMS_STEP        = 0.5f;
 
-            static constexpr float  SHORT_RMS_MIN           = 0.5f;
-            static constexpr float  SHORT_RMS_MAX           = 20.0f;
-            static constexpr float  SHORT_RMS_DFL           = 10.0f;
-            static constexpr float  SHORT_RMS_STEP          = 0.01f;
+            static constexpr float  PD_SHORT_RMS_MIN        = 0.1f;
+            static constexpr float  PD_SHORT_RMS_MAX        = 20.0f;
+            static constexpr float  PD_SHORT_RMS_DFL        = 10.0f;
+            static constexpr float  PD_SHORT_RMS_STEP       = 0.01f;
+
+            static constexpr float  PD_MAKEUP_MIN           = -12.0f;
+            static constexpr float  PD_MAKEUP_MAX           = 12.0f;
+            static constexpr float  PD_MAKEUP_DFL           = 0.0f;
+            static constexpr float  PD_MAKEUP_STEP          = 0.05f;
+            static constexpr float  PD_MAKEUP_SHIFT         = -12.0f;
 
             static constexpr float  PF_LOOKAHEAD_MIN        = 0.0f;
-            static constexpr float  PF_LOOKAHEAD_MAX        = 2.0f;
+            static constexpr float  PF_LOOKAHEAD_MAX        = 5.0f;
             static constexpr float  PF_LOOKAHEAD_DFL        = 0.0f;
             static constexpr float  PF_LOOKAHEAD_STEP       = 0.01f;
 
@@ -79,7 +85,7 @@ namespace lsp
             static constexpr float  PF_RELEASE_DFL          = 20.0f;
             static constexpr float  PF_RELEASE_STEP         = 0.01f;
 
-            static constexpr float  PF_THRESHOLD_MIN        = -48.0f;
+            static constexpr float  PF_THRESHOLD_MIN        = -36.0f;
             static constexpr float  PF_THRESHOLD_MAX        = 0.0f;
             static constexpr float  PF_THRESHOLD_DFL        = -24.0f;
             static constexpr float  PF_THRESHOLD_STEP       = 0.1f;
@@ -149,11 +155,15 @@ namespace lsp
             static constexpr size_t BANDS_MAX               = 8;
             static constexpr size_t FFT_XOVER_RANK_MIN      = 12;
             static constexpr size_t FFT_XOVER_FREQ_MIN      = 44100;
-            static constexpr float  LEVEL_NORMING           = GAIN_AMP_M_18_DB;
             static constexpr size_t FFT_ANALYZER_RANK       = 13;
             static constexpr size_t FFT_ANALYZER_ITEMS      = 1 << FFT_ANALYZER_RANK;
             static constexpr size_t FFT_ANALYZER_WINDOW     = dspu::windows::HANN;
             static constexpr size_t FFT_ANALYZER_RATE       = 20;
+            static constexpr float  PF_CURVE_MIN            = -48.0f;
+            static constexpr float  PF_CURVE_MAX            = 12.0f;
+
+            static constexpr size_t TIME_MESH_POINTS        = 320;
+            static constexpr float  TIME_HISTORY_MAX        = 2.0f;     // Time history of punch detector
 
             enum listen_t
             {

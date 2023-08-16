@@ -1,11 +1,13 @@
 {
 	"beat_breather": {
 		"chan": {
+			"bf": "BF",
 			"bp": "BP",
-			"nl": "NL",
-			"pf": "PF",
-			"xo": "XO"
-		}
+			"pd": "PD",
+			"pf": "PF"
+		},
+		"long_rms": "Long RMS",
+		"short_rms": "Short RMS"
 	}
 }
 

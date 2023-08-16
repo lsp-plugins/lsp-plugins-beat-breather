@@ -101,6 +101,8 @@ namespace lsp
             vBuffer         = NULL;
             vFftFreqs       = NULL;
             vFftIndexes     = NULL;
+            vPdMesh         = NULL;
+            vPfMesh         = NULL;
 
             pData           = NULL;
         }
@@ -131,9 +133,10 @@ namespace lsp
                         band_t *b               = &c->vBands[j];
 
                         b->sDelay.destroy();
-                        b->sLongSc.destroy();
-                        b->sShortSc.destroy();
-                        b->sShortDelay.destroy();
+                        b->sPdLong.destroy();
+                        b->sPdShort.destroy();
+                        b->sPdDelay.destroy();
+                        b->sPdMeter.destroy();
                         b->sPf.destroy();
                         b->sPfDelay.destroy();
                         b->sBp.destroy();
@@ -174,24 +177,30 @@ namespace lsp
             const size_t szof_buffer    = align_size(sizeof(float) * BUFFER_SIZE, DEFAULT_ALIGN);
             const size_t szof_fft       = align_size(sizeof(float) * meta::beat_breather::FFT_MESH_POINTS, DEFAULT_ALIGN);
             const size_t szof_ffti      = align_size(sizeof(uint32_t) * meta::beat_breather::FFT_MESH_POINTS, DEFAULT_ALIGN);
+            const size_t szof_curve     = align_size(sizeof(float) * meta::beat_breather::CURVE_MESH_POINTS, DEFAULT_ALIGN);
+            const size_t szof_time      = align_size(sizeof(float) * meta::beat_breather::TIME_MESH_POINTS, DEFAULT_ALIGN);
             const size_t to_alloc       =
                 szof_channels +             // vChannels
                 szof_buffer +               // vBuffer
                 szof_fft +                  // vFftFreqs
                 szof_ffti +                 // vFftIndexes
+                szof_time +                 // vPdMesh
+                szof_curve +                // vPfMesh
                 nChannels * (
                     szof_buffer +       // channel_t::vInData
                     szof_buffer +       // channel_t::vOutData
                     szof_fft +          // channel_t::vFreqChart
                     meta::beat_breather::BANDS_MAX * (
                         szof_buffer +       // band_t::vInData
-                        szof_buffer +       // band_t::vRmsData
+                        szof_buffer +       // band_t::vPdData
                         szof_buffer +       // band_t::vPfData
                         szof_buffer         // band_t::vBpData
                     )
                 ) +
-                meta::beat_breather::BANDS_MAX * szof_fft            // band_t::vFreqChart (only for left channel)
-                ;
+                meta::beat_breather::BANDS_MAX * (
+                    szof_fft +          // band_t::vFreqChart (only for left channel)
+                    szof_curve          // band_t::vPfMesh (only for left channel)
+                );
 
             uint8_t *ptr            = alloc_aligned<uint8_t>(pData, to_alloc);
             if (ptr == NULL)
@@ -206,6 +215,10 @@ namespace lsp
             ptr                    += szof_fft;
             vFftIndexes             = reinterpret_cast<uint32_t *>(ptr);
             ptr                    += szof_ffti;
+            vPdMesh                 = reinterpret_cast<float *>(ptr);
+            ptr                    += szof_time;
+            vPfMesh                 = reinterpret_cast<float *>(ptr);
+            ptr                    += szof_curve;
 
             // Initialize channels
             for (size_t i=0; i<nChannels; ++i)
@@ -222,24 +235,31 @@ namespace lsp
                     band_t *b               = &c->vBands[j];
 
                     b->sDelay.construct();
-                    b->sLongSc.construct();
-                    b->sShortSc.construct();
-                    b->sShortDelay.construct();
+                    b->sPdLong.construct();
+                    if (!b->sPdLong.init(1, meta::beat_breather::PD_LONG_RMS_MAX))
+                        return;
+                    b->sPdShort.construct();
+                    if (!b->sPdShort.init(1, meta::beat_breather::PD_SHORT_RMS_MAX))
+                        return;
+                    b->sPdDelay.construct();
+                    b->sPdMeter.construct();
                     b->sPf.construct();
                     b->sPfDelay.construct();
                     b->sBp.construct();
                     b->sBpScDelay.construct();
                     b->sBpDelay.construct();
 
+                    b->nOldMode             = BAND_OFF;
                     b->nMode                = BAND_OFF;
                     b->fGain                = GAIN_AMP_0_DB;
                     b->fInLevel             = 0.0f;
                     b->fOutLevel            = 0.0f;
                     b->bSyncCurve           = true;
+                    b->fPdMakeup            = GAIN_AMP_0_DB;
 
                     b->vInData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
-                    b->vRmsData             = reinterpret_cast<float *>(ptr);
+                    b->vPdData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
                     b->vPfData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
@@ -249,9 +269,14 @@ namespace lsp
                     {
                         b->vFreqChart           = reinterpret_cast<float *>(ptr);
                         ptr                    += szof_fft;
+                        b->vPfMesh              = reinterpret_cast<float *>(ptr);
+                        ptr                    += szof_curve;
                     }
                     else
+                    {
                         b->vFreqChart           = NULL;
+                        b->vPfMesh              = NULL;
+                    }
 
                     b->pInLevel             = NULL;
                     b->pOutLevel            = NULL;
@@ -266,8 +291,11 @@ namespace lsp
                     b->pFreqEnd             = NULL;
                     b->pFreqMesh            = NULL;
 
-                    b->pPfLongTime          = NULL;
-                    b->pPfShortTime         = NULL;
+                    b->pPdLongTime          = NULL;
+                    b->pPdShortTime         = NULL;
+                    b->pPdMakeup            = NULL;
+                    b->pPdMesh              = NULL;
+
                     b->pPfLookahead         = NULL;
                     b->pPfAttack            = NULL;
                     b->pPfRelease           = NULL;
@@ -399,8 +427,10 @@ namespace lsp
                         b->pFreqEnd             = sb->pFreqEnd;
                         b->pFreqMesh            = NULL;
 
-                        b->pPfLongTime          = sb->pPfLongTime;
-                        b->pPfShortTime         = sb->pPfShortTime;
+                        b->pPdLongTime          = sb->pPdLongTime;
+                        b->pPdShortTime         = sb->pPdShortTime;
+                        b->pPdMakeup            = sb->pPdMakeup;
+
                         b->pPfLookahead         = sb->pPfLookahead;
                         b->pPfAttack            = sb->pPfAttack;
                         b->pPfRelease           = sb->pPfRelease;
@@ -429,8 +459,10 @@ namespace lsp
                         b->pFreqEnd             = TRACE_PORT(ports[port_id++]);
                         b->pFreqMesh            = TRACE_PORT(ports[port_id++]);
 
-                        b->pPfLongTime          = TRACE_PORT(ports[port_id++]);
-                        b->pPfShortTime         = TRACE_PORT(ports[port_id++]);
+                        b->pPdLongTime          = TRACE_PORT(ports[port_id++]);
+                        b->pPdShortTime         = TRACE_PORT(ports[port_id++]);
+                        b->pPdMakeup            = TRACE_PORT(ports[port_id++]);
+
                         b->pPfLookahead         = TRACE_PORT(ports[port_id++]);
                         b->pPfAttack            = TRACE_PORT(ports[port_id++]);
                         b->pPfRelease           = TRACE_PORT(ports[port_id++]);
@@ -463,6 +495,8 @@ namespace lsp
                     b->pInLevel             = TRACE_PORT(ports[port_id++]);
                     b->pOutLevel            = TRACE_PORT(ports[port_id++]);
 
+                    b->pPdMesh              = TRACE_PORT(ports[port_id++]);
+
                     b->pPfEnvLevel          = TRACE_PORT(ports[port_id++]);
                     b->pPfCurveLevel        = TRACE_PORT(ports[port_id++]);
                     b->pPfGainLevel         = TRACE_PORT(ports[port_id++]);
@@ -472,6 +506,18 @@ namespace lsp
                     b->pBpGainLevel         = TRACE_PORT(ports[port_id++]);
                 }
             }
+
+            float delta;
+
+            // Initialize coordinates for Peak Detector mesh
+            delta = meta::beat_breather::TIME_HISTORY_MAX / (meta::beat_breather::TIME_MESH_POINTS-1);
+            for (size_t i=0; i<meta::beat_breather::TIME_MESH_POINTS; ++i)
+                vPdMesh[i]  = meta::beat_breather::TIME_HISTORY_MAX - delta * i;
+
+            // Initialize coordinates for Peak Filter mesh
+            delta = (meta::beat_breather::PF_CURVE_MAX - meta::beat_breather::PF_CURVE_MIN) / (meta::beat_breather::CURVE_MESH_POINTS-1);
+            for (size_t i=0; i<meta::beat_breather::CURVE_MESH_POINTS; ++i)
+                vPfMesh[i]  = meta::beat_breather::PF_CURVE_MIN + delta * i;
         }
 
         size_t beat_breather::select_fft_rank(size_t sample_rate)
@@ -484,19 +530,20 @@ namespace lsp
         void beat_breather::update_sample_rate(long sr)
         {
             const size_t fft_rank       = select_fft_rank(sr);
-            const size_t max_delay_rms  = dspu::millis_to_samples(sr,
-                (lsp_max(meta::beat_breather::SHORT_RMS_MAX, meta::beat_breather::LONG_RMS_MAX) + 1)/2);
-            const size_t max_delay_pflk = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
-            const size_t max_delay_bpts = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
+            const size_t max_delay_pd   = dspu::millis_to_samples(sr,
+                (lsp_max(meta::beat_breather::PD_SHORT_RMS_MAX, meta::beat_breather::PD_LONG_RMS_MAX) + 1)/2);
+            const size_t max_delay_pf   = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
+            const size_t max_delay_bp   = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
             const size_t max_delay_fft  = (1 << fft_rank);
+            const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
 
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
 
                 c->sBypass.init(sr);
-                c->sDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
-                c->sDryDelay.init(max_delay_fft + max_delay_rms + max_delay_pflk + max_delay_bpts + BUFFER_SIZE);
+                c->sDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
+                c->sDryDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
 
                 if (fft_rank != c->sCrossover.rank())
                 {
@@ -512,13 +559,14 @@ namespace lsp
                 {
                     band_t *b               = &c->vBands[j];
 
-                    b->sDelay.init(max_delay_rms + max_delay_pflk + max_delay_bpts);
-                    b->sLongSc.set_sample_rate(sr);
-                    b->sShortSc.set_sample_rate(sr);
-                    b->sShortDelay.init(max_delay_pflk);
-                    b->sPfDelay.init(max_delay_pflk);
-                    b->sBpScDelay.init(max_delay_bpts);
-                    b->sBpDelay.init(max_delay_rms + max_delay_pflk + max_delay_bpts);
+                    b->sDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
+                    b->sPdLong.set_sample_rate(sr);
+                    b->sPdShort.set_sample_rate(sr);
+                    b->sPdDelay.init(max_delay_pd);
+                    b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
+                    b->sPfDelay.init(max_delay_pf);
+                    b->sBpScDelay.init(max_delay_bp);
+                    b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
                 }
             }
 
@@ -623,7 +671,11 @@ namespace lsp
 
                 // Form the list of bands
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                    c->vBands[j].nMode          = BAND_OFF;
+                {
+                    band_t *b           = &c->vBands[j];
+                    b->nOldMode         = b->nMode;
+                    b->nMode            = BAND_OFF;
+                }
 
                 // Configure active frequency bands
                 for (size_t j=0; j<=nsplits; ++j)
@@ -666,17 +718,54 @@ namespace lsp
                 // Configure bands
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
-                    band_t *b           = &c->vBands[j];
+                    band_t *b               = &c->vBands[j];
 
-                    bool solo           = b->pSolo->value() >= 0.5f;
-                    bool mute           = ((has_solo) && (!solo)) ? true : b->pMute->value() >= 0.5f;
+                    bool solo               = b->pSolo->value() >= 0.5f;
+                    bool mute               = ((has_solo) && (!solo)) ? true : b->pMute->value() >= 0.5f;
                     if ((mute) && (b->nMode != BAND_OFF))
-                        b->nMode            = BAND_MUTE;
+                        b->nMode                = BAND_MUTE;
 
-                    b->fGain            = b->pOutGain->value();
+                    b->fGain                = b->pOutGain->value();
 
                     // Do we have hi-pass filter?
                     c->sCrossover.enable_band(j, b->nMode != BAND_OFF);
+
+                    // Update Peak detector configuration
+                    float pd_long           = b->pPdLongTime->value();
+                    float pd_short          = b->pPdShortTime->value();
+                    size_t pd_latency       = dspu::millis_to_samples(fSampleRate, pd_long - pd_short) / 2;
+                    b->fPdMakeup            = dspu::db_to_gain(b->pPdMakeup->value() + meta::beat_breather::PD_MAKEUP_SHIFT);
+
+                    b->sPdLong.set_mode(dspu::SCM_RMS);
+                    b->sPdLong.set_source(dspu::SCS_MIDDLE);
+                    b->sPdLong.set_reactivity(pd_long);
+                    b->sPdLong.set_gain(GAIN_AMP_0_DB);
+
+                    b->sPdShort.set_mode(dspu::SCM_RMS);
+                    b->sPdShort.set_source(dspu::SCS_MIDDLE);
+                    b->sPdShort.set_reactivity(pd_short);
+                    b->sPdShort.set_gain(GAIN_AMP_0_DB);
+
+                    b->sPdDelay.set_delay(pd_latency);
+
+                    b->sPdMeter.set_method(dspu::MM_MAXIMUM);
+                    if ((b->nOldMode != BAND_OFF) && (b->nMode == BAND_OFF))
+                        b->sPdMeter.fill(0.0f);
+
+                    // Update peak filter configuration
+                    float pf_thresh         = dspu::db_to_gain(b->pPfThreshold->value());
+                    float pf_zone           = dspu::db_to_gain(b->pPfZone->value());
+                    size_t pf_latency       = dspu::millis_to_samples(fSampleRate, b->pPfLookahead->value());
+
+                    b->sPf.set_attack(b->pPfAttack->value());
+                    b->sPf.set_release(b->pPfRelease->value());
+                    b->sPf.set_threshold(pf_thresh, pf_thresh);
+                    b->sPf.set_zone(pf_zone, pf_zone);
+                    b->sPf.set_reduction(dspu::db_to_gain(b->pPfReduction->value()));
+                    if (b->sPf.modified())
+                        b->sPf.update_settings();
+
+                    b->sPfDelay.set_delay(pf_latency);
                 }
 
                 // Reconfigure the crossover
@@ -722,7 +811,9 @@ namespace lsp
 
                 // Stores band data to band_t::vIn
                 split_signal(to_do);
-//                // Stores normalized RMS to band_t::vRMS and post-processed RMS to band_t::vPfData
+                // Stores normalized RMS difference to band_t::vPdData
+                apply_peak_detector(to_do);
+//                // Stores processed data to band_t::vPfData
 //                apply_peak_filter(to_do);
 //                // Stores the processed band data to band_t::vBpData
 //                apply_beat_processor(to_do);
@@ -771,20 +862,20 @@ namespace lsp
             }
         }
 
-        void beat_breather::normalize_rms(float *dst, const float *lrms, const float *srms, size_t samples)
+        void beat_breather::normalize_rms(float *dst, const float *lrms, const float *srms, float gain, size_t samples)
         {
             for (size_t i=0; i<samples; ++i)
             {
-                const float s       = srms[i];
                 const float l       = lrms[i];
+                const float s       = srms[i];
                 if ((s > l) && (l >= GAIN_AMP_M_140_DB))
-                    dst[i]              = (s * meta::beat_breather::LEVEL_NORMING) / l;
+                    dst[i]              = (s * gain) / l;
                 else
-                    dst[i]              = meta::beat_breather::LEVEL_NORMING;
+                    dst[i]              = gain;
             }
         }
 
-        void beat_breather::apply_peak_filter(size_t samples)
+        void beat_breather::apply_peak_detector(size_t samples)
         {
             // Esimate RMS for all bands
             for (size_t i=0; i<nChannels; ++i)
@@ -798,11 +889,11 @@ namespace lsp
                         continue;
 
                     // Estimate long-time RMS
-                    b->sLongSc.process(b->vRmsData, const_cast<const float **>(&b->vInData), samples);
+                    b->sPdLong.process(b->vPdData, const_cast<const float **>(&b->vInData), samples);
                     // Estimate short-time RMS
-                    b->sShortSc.process(b->vPfData, const_cast<const float **>(&b->vInData), samples);
+                    b->sPdShort.process(b->vPfData, const_cast<const float **>(&b->vInData), samples);
                     // Apply delay compensation to short-time RMS estimation
-                    b->sShortDelay.process(b->vPfData, b->vPfData, samples);
+                    b->sPdDelay.process(b->vPfData, b->vPfData, samples);
                 }
             }
 
@@ -817,9 +908,9 @@ namespace lsp
                         continue;
 
                     // Convert stereo long-time RMS to mono
-                    dsp::lr_to_mid(left->vRmsData, left->vRmsData, right->vRmsData, samples);
+                    dsp::lr_to_mid(left->vPdData, left->vPdData, right->vPdData, samples);
                     // Duplicate long-time RMS to second channel
-                    dsp::copy(right->vRmsData, left->vRmsData, samples);
+                    dsp::copy(right->vPdData, left->vPdData, samples);
                     // Convert stereo short-time RMS to mono
                     dsp::lr_to_mid(left->vPfData, left->vPfData, right->vPfData, samples);
                     // Duplicate short-time RMS to second channel
@@ -839,11 +930,29 @@ namespace lsp
                         continue;
 
                     // Produce normalized Peak/RMS signal
-                    normalize_rms(b->vRmsData, b->vRmsData, b->vPfData, samples);
+                    normalize_rms(b->vPdData, b->vPdData, b->vPfData, b->fPdMakeup, samples);
+                    b->sPdMeter.process(b->vPdData, samples);
+                }
+            }
+        }
+
+        void beat_breather::apply_peak_filter(size_t samples)
+        {
+            // Do post-processing and normalization
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b           = &c->vBands[j];
+                    if (b->nMode == BAND_OFF)
+                        continue;
+
                     // Apply lookahead delay to Peak/RMS signal
-                    b->sPfDelay.process(b->vPfData, b->vRmsData, samples);
+                    b->sPfDelay.process(b->vPfData, b->vPdData, samples);
                     // Process sidechain signal and produce VCA
-                    b->sBp.process(b->vPfData, vBuffer, b->vRmsData, samples);
+                    b->sBp.process(b->vPfData, vBuffer, b->vPdData, samples);
                     // Apply VCA to peak signal
                     dsp::mul2(b->vPfData, b->vPfData, samples);
                 }
@@ -884,6 +993,15 @@ namespace lsp
 
                 dsp::fill_zero(c->vOutData, samples);
 
+                // Compute the averaging value for all peak-detected tracks
+                // Because peak-detected tracks have constant bias, they should be mixed in different way
+                ssize_t num_pd      = 0;
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    if (c->vBands[j].nMode == BAND_RMS)
+                        ++num_pd;
+                float pd_makeup     = (num_pd > 0) ? 1.0f / num_pd : 1.0f;
+
+                // Mix the tracks
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
                     band_t *b           = &c->vBands[j];
@@ -894,8 +1012,8 @@ namespace lsp
                             dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
                             break;
                         case BAND_RMS:
-                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vRmsData, samples) * b->fGain, b->fOutLevel);
-                            dsp::fmadd_k3(c->vOutData, b->vRmsData, b->fGain, samples);
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vPdData, samples) * b->fGain * pd_makeup, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_PF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain, b->fOutLevel);
@@ -979,7 +1097,7 @@ namespace lsp
                     mesh->data(2, meta::beat_breather::FFT_MESH_POINTS);
                 }
 
-                // Sync characteristics for each band
+                // Sync filter characteristics for each band
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
                     band_t *b       = &c->vBands[j];
@@ -1004,6 +1122,22 @@ namespace lsp
 
                             b->bSyncCurve       = false;
                         }
+                    }
+                }
+
+                // Sync peak detector graph for each band
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b       = &c->vBands[j];
+
+                    // Get mesh
+                    mesh            = b->pPdMesh->buffer<plug::mesh_t>();
+                    if ((mesh != NULL) && (mesh->isEmpty()))
+                    {
+                        // Fill mesh with new values
+                        dsp::copy(mesh->pvData[0], vPdMesh, meta::beat_breather::TIME_MESH_POINTS);
+                        dsp::copy(mesh->pvData[1], b->sPdMeter.data(), meta::beat_breather::TIME_MESH_POINTS);
+                        mesh->data(2, meta::beat_breather::TIME_MESH_POINTS);
                     }
                 }
 

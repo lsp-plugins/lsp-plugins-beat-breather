@@ -1,14 +1,9 @@
 {
 	"beat_breather": {
-		"listen": {
-			"beat_processor": "Beat Processor",
-			"crossover": "Crossover",
-			"punch_filter": "Punch Filter",
-			"rms": "RMS"
-		},
 		"tabs": {
+			"band_filter": "Band Filter",
 			"beat_processor": "Beat Processor",
-			"crossover": "Crossover",
+			"punch_detector": "Punch Detector",
 			"punch_filter": "Punch Filter"
 		}
 	}

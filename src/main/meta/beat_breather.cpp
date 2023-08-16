@@ -42,18 +42,10 @@ namespace lsp
         // Plugin metadata
         static const port_item_t bb_tabs[] =
         {
-            { "Crossover",      "beat_breather.tabs.crossover"          },
+            { "Band Filter",    "beat_breather.tabs.band_filter"        },
+            { "Punch Detector", "beat_breather.tabs.punch_detector"     },
             { "Punch Filter",   "beat_breather.tabs.punch_filter"       },
             { "Beat Processor", "beat_breather.tabs.beat_processor"     },
-            { NULL, NULL }
-        };
-
-        static const port_item_t bb_listen[] =
-        {
-            { "Crossover",      "beat_breather.listen.crossover"        },
-            { "RMS",            "beat_breather.listen.RMS"              },
-            { "Punch Filter",   "beat_breather.listen.punch_filter"     },
-            { "Beat Processor", "beat_breather.listen.beat_processor"   },
             { NULL, NULL }
         };
 
@@ -84,18 +76,21 @@ namespace lsp
             SWITCH("se" id, "Frequency split enable" label, on), \
             LOG_CONTROL_DFL("sf" id, "Split frequency" label, U_HZ, beat_breather::FREQ, freq)
 
-        #define BB_BAND(id, label) \
+        #define BB_BAND(id, label, short_rms) \
             SWITCH("bs" id, "Solo band" label, 0.0f), \
             SWITCH("bm" id, "Mute band" label, 0.0f), \
-            COMBO("bls" id, "Band listen stage" label, beat_breather::LISTEN_DFL, bb_listen), \
+            COMBO("bls" id, "Band listen stage" label, beat_breather::LISTEN_DFL, bb_tabs), \
             CONTROL("lps" id, "Lo-pass slope" label, U_DB, beat_breather::SLOPE), \
             CONTROL("hps" id, "Hi-pass slope" label, U_DB, beat_breather::SLOPE), \
             CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
             LOG_CONTROL("bg" id, "Band output gain" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
             METER("fre" id, "Frequency range end" label, U_HZ,  beat_breather::OUT_FREQ), \
             MESH("bfg" id, "Band filter graph" label, 2, beat_breather::FFT_MESH_POINTS + 2), \
-            CONTROL("pflt" id, "Punch filter long-time RMS estimation" label, U_GAIN_AMP, beat_breather::LONG_RMS), \
-            CONTROL("pfst" id, "Punch filter short-time RMS estimation" label, U_GAIN_AMP, beat_breather::SHORT_RMS), \
+            \
+            CONTROL("pdlt" id, "Punch detector long-time RMS estimation" label, U_MSEC, beat_breather::PD_LONG_RMS), \
+            CONTROL_DFL("pdst" id, "Punch detector short-time RMS estimation" label, U_MSEC, beat_breather::PD_SHORT_RMS, short_rms), \
+            CONTROL("pdmk" id, "Punch detector makeup" label, U_DB, beat_breather::PD_MAKEUP), \
+            \
             CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \
             LOG_CONTROL("pfat" id, "Punch filter attack time" label, U_MSEC, beat_breather::PF_ATTACK), \
             LOG_CONTROL("pfrt" id, "Punch filter release time" label, U_MSEC, beat_breather::PF_RELEASE), \
@@ -103,17 +98,19 @@ namespace lsp
             CONTROL("pfrl" id, "Punch filter reduction level" label, U_DB, beat_breather::PF_REDUCTION), \
             CONTROL("pfrz" id, "Punch filter reduction zone" label, U_DB, beat_breather::PF_ZONE), \
             MESH("pfg" id, "Punch filter curve graph" label, 2, beat_breather::CURVE_MESH_POINTS), \
+            \
             LOG_CONTROL("bpat" id, "Beat processor attack time" label, U_DB, beat_breather::BP_ATTACK), \
             LOG_CONTROL("bprt" id, "Beat processor release time" label, U_DB, beat_breather::BP_RELEASE), \
             CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
             CONTROL("bpth" id, "Beat processor threshold" label, U_DB, beat_breather::BP_THRESHOLD), \
             CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
-            CONTROL("bpmg" id, "Beat processor maximum expand gain" label, U_DB, beat_breather::BP_MAX_GAIN), \
+            CONTROL("bpmg" id, "Beat processor maximum gain" label, U_DB, beat_breather::BP_MAX_GAIN), \
             MESH("bpg" id, "Beat processor curve graph" label, 2, beat_breather::CURVE_MESH_POINTS)
 
         #define BB_BAND_METERS(id, label) \
             METER_OUT_GAIN("ilm" id, "Band input level meter" label, GAIN_AMP_P_36_DB), \
             METER_OUT_GAIN("olm" id, "Band output level meter" label, GAIN_AMP_P_36_DB), \
+            MESH("pdgr" id, "Punch detector time graph" label, 2, beat_breather::TIME_MESH_POINTS), \
             METER_OUT_GAIN("pfem" id, "Punch filter envelope level meter" label, GAIN_AMP_P_36_DB), \
             METER_OUT_GAIN("pfcm" id, "Punch filter curve level meter" label, GAIN_AMP_P_36_DB), \
             METER_OUT_GAIN("pfgm" id, "Punch filter gain level meter" label, GAIN_AMP_P_36_DB), \
@@ -136,14 +133,14 @@ namespace lsp
             BB_SPLIT("_6", " 6", 1.0f, 3984.0f),
             BB_SPLIT("_7", " 7", 0.0f, 10000.0f),
 
-            BB_BAND("_1", " 1"),
-            BB_BAND("_2", " 2"),
-            BB_BAND("_3", " 3"),
-            BB_BAND("_4", " 4"),
-            BB_BAND("_5", " 5"),
-            BB_BAND("_6", " 6"),
-            BB_BAND("_7", " 7"),
-            BB_BAND("_8", " 8"),
+            BB_BAND("_1", " 1", 19.84f),
+            BB_BAND("_2", " 2", 14.79f),
+            BB_BAND("_3", " 3", 11.69f),
+            BB_BAND("_4", " 4", 9.24f),
+            BB_BAND("_5", " 5", 7.31f),
+            BB_BAND("_6", " 6", 5.78f),
+            BB_BAND("_7", " 7", 4.57f),
+            BB_BAND("_8", " 8", 3.63f),
 
             BB_BAND_METERS("_1", " 1"),
             BB_BAND_METERS("_2", " 2"),
@@ -174,14 +171,14 @@ namespace lsp
             BB_SPLIT("_6", " 6", 1.0f, 3984.0f),
             BB_SPLIT("_7", " 7", 0.0f, 10000.0f),
 
-            BB_BAND("_1", " 1"),
-            BB_BAND("_2", " 2"),
-            BB_BAND("_3", " 3"),
-            BB_BAND("_4", " 4"),
-            BB_BAND("_5", " 5"),
-            BB_BAND("_6", " 6"),
-            BB_BAND("_7", " 7"),
-            BB_BAND("_8", " 8"),
+            BB_BAND("_1", " 1", 19.84f),
+            BB_BAND("_2", " 2", 14.79f),
+            BB_BAND("_3", " 3", 11.69f),
+            BB_BAND("_4", " 4", 9.24f),
+            BB_BAND("_5", " 5", 7.31f),
+            BB_BAND("_6", " 6", 5.78f),
+            BB_BAND("_7", " 7", 4.57f),
+            BB_BAND("_8", " 8", 3.63f),
 
             BB_BAND_METERS("_1l", " 1 Left"),
             BB_BAND_METERS("_2l", " 2 Left"),

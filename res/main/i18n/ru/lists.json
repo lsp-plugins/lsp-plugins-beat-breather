@@ -1,14 +1,9 @@
 {
 	"beat_breather": {
-		"listen": {
-			"beat_processor": "Процессор ударов",
-			"crossover": "Кроссовер",
-			"punch_filter": "Фильтр ударов",
-			"rms": "СКЗ"
-		},
 		"tabs": {
+			"band_filter": "Полосовой фильтр",
 			"beat_processor": "Просессор ударов",
-			"crossover": "Кроссовер",
+			"punch_detector": "Детектор ударов",
 			"punch_filter": "Фильтр ударов"
 		}
 	}

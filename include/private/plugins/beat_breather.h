@@ -27,6 +27,7 @@
 #include <lsp-plug.in/dsp-units/util/Analyzer.h>
 #include <lsp-plug.in/dsp-units/util/Delay.h>
 #include <lsp-plug.in/dsp-units/util/FFTCrossover.h>
+#include <lsp-plug.in/dsp-units/util/MeterGraph.h>
 #include <lsp-plug.in/dsp-units/util/Sidechain.h>
 #include <lsp-plug.in/plug-fw/plug.h>
 #include <private/meta/beat_breather.h>
@@ -68,26 +69,30 @@ namespace lsp
                 typedef struct band_t
                 {
                     dspu::Delay         sDelay;         // Delay compensation for the whole band
-                    dspu::Sidechain     sLongSc;        // Long RMS estimation
-                    dspu::Sidechain     sShortSc;       // Short RMS estimation
-                    dspu::Delay         sShortDelay;    // Delay for short RMS estimation
+                    dspu::Sidechain     sPdLong;        // Peak detector long RMS estimation
+                    dspu::Sidechain     sPdShort;       // Peak detector short RMS estimation
+                    dspu::Delay         sPdDelay;       // Peak detector delay for short RMS estimation
+                    dspu::MeterGraph    sPdMeter;       // Meter graph
                     dspu::Gate          sPf;            // Punch filter
                     dspu::Delay         sPfDelay;       // Delay for lookahead of punch filter
                     dspu::Gate          sBp;            // Beat processor
                     dspu::Delay         sBpScDelay;     // Beat processor sidechain delay
                     dspu::Delay         sBpDelay;       // Beat processor delay
 
+                    band_mode_t         nOldMode;       // Old band mode
                     band_mode_t         nMode;          // Band mode
                     float               fGain;          // Band gain
                     float               fInLevel;       // Input level measured
                     float               fOutLevel;      // Output level measured
                     bool                bSyncCurve;     // Synchronize curve
+                    float               fPdMakeup;      // Peak detector makeup gain
 
                     float              *vInData;        // Original band data after crossover
-                    float              *vRmsData;       // RMS signal normalized
+                    float              *vPdData;        // Peak detector data
                     float              *vPfData;        // Output of Peak Filter
                     float              *vBpData;        // Output of Beat Processor
                     float              *vFreqChart;     // Frequency chart
+                    float              *vPfMesh;        // Peak filter mesh
 
                     plug::IPort        *pSolo;          // Solo band
                     plug::IPort        *pMute;          // Mute band
@@ -102,9 +107,12 @@ namespace lsp
                     plug::IPort        *pInLevel;       // Input level meter
                     plug::IPort        *pOutLevel;      // Output level meter
 
-                    plug::IPort        *pPfLongTime;    // Long-time RMS estimation
-                    plug::IPort        *pPfShortTime;   // Short-time RMS estimation
-                    plug::IPort        *pPfLookahead;   // Punch filer lookahead
+                    plug::IPort        *pPdLongTime;    // Punch detector Long-time RMS estimation
+                    plug::IPort        *pPdShortTime;   // Punch detector Short-time RMS estimation
+                    plug::IPort        *pPdMakeup;      // Punch detector Makeup gain
+                    plug::IPort        *pPdMesh;        // Punch detector output mesh
+
+                    plug::IPort        *pPfLookahead;   // Punch detector Punch filer lookahead
                     plug::IPort        *pPfAttack;      // Punch filer attack time
                     plug::IPort        *pPfRelease;     // Punch filer release time
                     plug::IPort        *pPfThreshold;   // Punch filer threshold
@@ -174,6 +182,8 @@ namespace lsp
                 float              *vBuffer;            // Temporary buffer for processing
                 float              *vFftFreqs;          // List of FFT frequencies
                 uint32_t           *vFftIndexes;        // List of analyzer FFT indexes
+                float              *vPdMesh;            // Peak detector mesh
+                float              *vPfMesh;            // Horizontal coordinates of peak filter
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pInGain;            // Input gain
@@ -189,13 +199,14 @@ namespace lsp
             protected:
                 static inline size_t        select_fft_rank(size_t sample_rate);
                 static void                 process_band(void *object, void *subject, size_t band, const float *data, size_t sample, size_t count);
-                static void                 normalize_rms(float *dst, const float *lrms, const float *srms, size_t samples);
+                static void                 normalize_rms(float *dst, const float *lrms, const float *srms, float gain, size_t samples);
                 static int                  compare_splits(const void *a1, const void *a2, void *data);
                 static band_mode_t          decode_band_mode(size_t mode);
 
             protected:
                 void                bind_inputs();
                 void                split_signal(size_t samples);
+                void                apply_peak_detector(size_t samples);
                 void                apply_peak_filter(size_t samples);
                 void                apply_beat_processor(size_t samples);
                 void                mix_bands(size_t samples);
