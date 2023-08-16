@@ -590,9 +590,9 @@ namespace lsp
             switch (mode)
             {
                 case meta::beat_breather::LISTEN_CROSSOVER:
-                    return BAND_XOVER;
+                    return BAND_BF;
                 case meta::beat_breather::LISTEN_RMS:
-                    return BAND_RMS;
+                    return BAND_PD;
                 case meta::beat_breather::LISTEN_PUNCH:
                     return BAND_PF;
                 case meta::beat_breather::LISTEN_BEAT:
@@ -997,7 +997,7 @@ namespace lsp
                 // Because peak-detected tracks have constant bias, they should be mixed in different way
                 ssize_t num_pd      = 0;
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                    if (c->vBands[j].nMode == BAND_RMS)
+                    if (c->vBands[j].nMode == BAND_PD)
                         ++num_pd;
                 float pd_makeup     = (num_pd > 0) ? 1.0f / num_pd : 1.0f;
 
@@ -1007,11 +1007,11 @@ namespace lsp
                     band_t *b           = &c->vBands[j];
                     switch (b->nMode)
                     {
-                        case BAND_XOVER:
+                        case BAND_BF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vInData, samples) * b->fGain, b->fOutLevel);
                             dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
                             break;
-                        case BAND_RMS:
+                        case BAND_PD:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPdData, samples) * b->fGain * pd_makeup, b->fOutLevel);
                             dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
                             break;

@@ -48,12 +48,12 @@ namespace lsp
             protected:
                 enum band_mode_t
                 {
-                    BAND_OFF,
-                    BAND_MUTE,
-                    BAND_XOVER,
-                    BAND_RMS,
-                    BAND_PF,
-                    BAND_BP
+                    BAND_OFF,       // Band disabled
+                    BAND_MUTE,      // Band muted
+                    BAND_BF,        // + Band filter
+                    BAND_PD,        // + Peak detector
+                    BAND_PF,        // + Peak filter
+                    BAND_BP         // + Beat processor
                 };
 
                 typedef struct split_t
