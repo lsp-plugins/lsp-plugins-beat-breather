@@ -73,32 +73,32 @@ namespace lsp
             static constexpr float  PF_LOOKAHEAD_MIN        = 0.0f;
             static constexpr float  PF_LOOKAHEAD_MAX        = 5.0f;
             static constexpr float  PF_LOOKAHEAD_DFL        = 0.0f;
-            static constexpr float  PF_LOOKAHEAD_STEP       = 0.01f;
+            static constexpr float  PF_LOOKAHEAD_STEP       = 0.0025f;
 
             static constexpr float  PF_ATTACK_MIN           = 0.0f;
             static constexpr float  PF_ATTACK_MAX           = 10.0f;
-            static constexpr float  PF_ATTACK_DFL           = 5.0f;
-            static constexpr float  PF_ATTACK_STEP          = 0.01f;
+            static constexpr float  PF_ATTACK_DFL           = 1.0f;
+            static constexpr float  PF_ATTACK_STEP          = 0.005f;
 
             static constexpr float  PF_RELEASE_MIN          = 0.0f;
             static constexpr float  PF_RELEASE_MAX          = 100.0f;
-            static constexpr float  PF_RELEASE_DFL          = 20.0f;
-            static constexpr float  PF_RELEASE_STEP         = 0.01f;
+            static constexpr float  PF_RELEASE_DFL          = 5.0f;
+            static constexpr float  PF_RELEASE_STEP         = 0.005f;
 
-            static constexpr float  PF_THRESHOLD_MIN        = -36.0f;
-            static constexpr float  PF_THRESHOLD_MAX        = 0.0f;
-            static constexpr float  PF_THRESHOLD_DFL        = -24.0f;
-            static constexpr float  PF_THRESHOLD_STEP       = 0.1f;
+            static constexpr float  PF_THRESHOLD_MIN        = GAIN_AMP_M_24_DB;
+            static constexpr float  PF_THRESHOLD_MAX        = GAIN_AMP_P_24_DB;
+            static constexpr float  PF_THRESHOLD_DFL        = GAIN_AMP_M_9_DB;
+            static constexpr float  PF_THRESHOLD_STEP       = 0.01f;
 
-            static constexpr float  PF_REDUCTION_MIN        = -48.0f;
-            static constexpr float  PF_REDUCTION_MAX        = 0.0f;
-            static constexpr float  PF_REDUCTION_DFL        = -12.0f;
-            static constexpr float  PF_REDUCTION_STEP       = 0.1f;
+            static constexpr float  PF_REDUCTION_MIN        = GAIN_AMP_M_48_DB;
+            static constexpr float  PF_REDUCTION_MAX        = GAIN_AMP_0_DB;
+            static constexpr float  PF_REDUCTION_DFL        = GAIN_AMP_M_12_DB;
+            static constexpr float  PF_REDUCTION_STEP       = 0.01f;
 
-            static constexpr float  PF_ZONE_MIN             = -24.0f;
-            static constexpr float  PF_ZONE_MAX             = 0.0f;
-            static constexpr float  PF_ZONE_DFL             = -3.0f;
-            static constexpr float  PF_ZONE_STEP            = 0.1f;
+            static constexpr float  PF_ZONE_MIN             = GAIN_AMP_M_24_DB;
+            static constexpr float  PF_ZONE_MAX             = GAIN_AMP_0_DB;
+            static constexpr float  PF_ZONE_DFL             = GAIN_AMP_M_3_DB;
+            static constexpr float  PF_ZONE_STEP            = 0.01f;
 
             static constexpr float  BP_ATTACK_MIN           = 0.0f;
             static constexpr float  BP_ATTACK_MAX           = 100.0f;
@@ -159,8 +159,8 @@ namespace lsp
             static constexpr size_t FFT_ANALYZER_ITEMS      = 1 << FFT_ANALYZER_RANK;
             static constexpr size_t FFT_ANALYZER_WINDOW     = dspu::windows::HANN;
             static constexpr size_t FFT_ANALYZER_RATE       = 20;
-            static constexpr float  PF_CURVE_MIN            = -48.0f;
-            static constexpr float  PF_CURVE_MAX            = 12.0f;
+            static constexpr float  PF_CURVE_MIN            = -36.0f;
+            static constexpr float  PF_CURVE_MAX            = 24.0f;
 
             static constexpr size_t TIME_MESH_POINTS        = 320;
             static constexpr float  TIME_HISTORY_MAX        = 2.0f;     // Time history of punch detector

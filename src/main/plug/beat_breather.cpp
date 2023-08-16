@@ -254,7 +254,7 @@ namespace lsp
                     b->fGain                = GAIN_AMP_0_DB;
                     b->fInLevel             = 0.0f;
                     b->fOutLevel            = 0.0f;
-                    b->bSyncCurve           = true;
+                    b->nSync                = SYNC_ALL;
                     b->fPdMakeup            = GAIN_AMP_0_DB;
 
                     b->vInData              = reinterpret_cast<float *>(ptr);
@@ -517,7 +517,7 @@ namespace lsp
             // Initialize coordinates for Peak Filter mesh
             delta = (meta::beat_breather::PF_CURVE_MAX - meta::beat_breather::PF_CURVE_MIN) / (meta::beat_breather::CURVE_MESH_POINTS-1);
             for (size_t i=0; i<meta::beat_breather::CURVE_MESH_POINTS; ++i)
-                vPfMesh[i]  = meta::beat_breather::PF_CURVE_MIN + delta * i;
+                vPfMesh[i]  = dspu::db_to_gain(meta::beat_breather::PF_CURVE_MIN + delta * i);
         }
 
         size_t beat_breather::select_fft_rank(size_t sample_rate)
@@ -612,6 +612,7 @@ namespace lsp
             fDryGain            = out_gain * pDryGain->value();
             fWetGain            = out_gain * pWetGain->value();
             size_t an_channels  = 0;
+            float bypass        = pBypass->value() >= 0.5f;
             bool sync           = false;
 
             // Update analyzer settings
@@ -668,6 +669,8 @@ namespace lsp
             {
                 channel_t *c        = &vChannels[i];
                 bool has_solo       = false;
+
+                c->sBypass.set_bypass(bypass);
 
                 // Form the list of bands
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
@@ -753,17 +756,22 @@ namespace lsp
                         b->sPdMeter.fill(0.0f);
 
                     // Update peak filter configuration
-                    float pf_thresh         = dspu::db_to_gain(b->pPfThreshold->value());
-                    float pf_zone           = dspu::db_to_gain(b->pPfZone->value());
+                    float pf_thresh         = b->pPfThreshold->value();
+                    float pf_zone           = b->pPfZone->value();
                     size_t pf_latency       = dspu::millis_to_samples(fSampleRate, b->pPfLookahead->value());
 
                     b->sPf.set_attack(b->pPfAttack->value());
                     b->sPf.set_release(b->pPfRelease->value());
                     b->sPf.set_threshold(pf_thresh, pf_thresh);
                     b->sPf.set_zone(pf_zone, pf_zone);
-                    b->sPf.set_reduction(dspu::db_to_gain(b->pPfReduction->value()));
+                    b->sPf.set_reduction(b->pPfReduction->value());
                     if (b->sPf.modified())
+                    {
                         b->sPf.update_settings();
+                        if (i == 0)
+                            b->sPf.curve(b->vPfMesh, vPfMesh, meta::beat_breather::CURVE_MESH_POINTS, false);
+                        b->nSync               |= SYNC_PEAK_FILTER;
+                    }
 
                     b->sPfDelay.set_delay(pf_latency);
                 }
@@ -777,11 +785,11 @@ namespace lsp
                     // Output band parameters and update sync curve flag
                     for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                     {
-                        band_t *b           = &c->vBands[j];
+                        band_t *b               = &c->vBands[j];
 
                         // Get frequency response for band
                         c->sCrossover.freq_chart(j, b->vFreqChart, vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
-                        b->bSyncCurve       = true;
+                        b->nSync               |= SYNC_BAND_FILTER;
                     }
                 }
             }
@@ -813,8 +821,8 @@ namespace lsp
                 split_signal(to_do);
                 // Stores normalized RMS difference to band_t::vPdData
                 apply_peak_detector(to_do);
-//                // Stores processed data to band_t::vPfData
-//                apply_peak_filter(to_do);
+                // Stores processed data to band_t::vPfData
+                apply_punch_filter(to_do);
 //                // Stores the processed band data to band_t::vBpData
 //                apply_beat_processor(to_do);
 
@@ -836,15 +844,19 @@ namespace lsp
                 c->vIn              = c->pIn->buffer<float>();
                 c->vOut             = c->pOut->buffer<float>();
 
-                c->fInLevel         = 0.0f;
-                c->fOutLevel        = 0.0f;
+                c->fInLevel         = GAIN_AMP_M_INF_DB;
+                c->fOutLevel        = GAIN_AMP_M_INF_DB;
 
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
                     band_t *b           = &c->vBands[j];
 
-                    b->fInLevel         = 0.0f;
-                    b->fOutLevel        = 0.0f;
+                    b->fInLevel         = GAIN_AMP_M_INF_DB;
+                    b->fOutLevel        = GAIN_AMP_M_INF_DB;
+
+                    b->fPfInGain        = GAIN_AMP_M_INF_DB;
+                    b->fPfOutGain       = GAIN_AMP_M_INF_DB;
+                    b->fPfReduction     = GAIN_AMP_0_DB;
                 }
             }
         }
@@ -936,7 +948,7 @@ namespace lsp
             }
         }
 
-        void beat_breather::apply_peak_filter(size_t samples)
+        void beat_breather::apply_punch_filter(size_t samples)
         {
             // Do post-processing and normalization
             for (size_t i=0; i<nChannels; ++i)
@@ -949,12 +961,20 @@ namespace lsp
                     if (b->nMode == BAND_OFF)
                         continue;
 
-                    // Apply lookahead delay to Peak/RMS signal
-                    b->sPfDelay.process(b->vPfData, b->vPdData, samples);
                     // Process sidechain signal and produce VCA
-                    b->sBp.process(b->vPfData, vBuffer, b->vPdData, samples);
+                    b->sPf.process(b->vPfData, vBuffer, b->vPdData, samples);
+                    // Update gating dot meter
+                    size_t idx = dsp::max_index(b->vPfData, samples);
+                    if (vBuffer[idx] > b->fPfInGain)
+                    {
+                        b->fPfInGain    = vBuffer[idx];
+                        b->fPfOutGain   = b->vPfData[idx] * b->fPfInGain;
+                    }
+                    b->fPfReduction = lsp_min(dsp::abs_min(b->vPfData, samples), b->fPfReduction);
+                    // Apply lookahead delay to Peak/RMS signal
+                    b->sPfDelay.process(vBuffer, b->vPdData, samples);
                     // Apply VCA to peak signal
-                    dsp::mul2(b->vPfData, b->vPfData, samples);
+                    dsp::mul2(b->vPfData, vBuffer, samples);
                 }
             }
         }
@@ -993,12 +1013,21 @@ namespace lsp
 
                 dsp::fill_zero(c->vOutData, samples);
 
-                // Compute the averaging value for all peak-detected tracks
+                // Compute the averaging value for all peak-detected and peak-filtered tracks
                 // Because peak-detected tracks have constant bias, they should be mixed in different way
                 ssize_t num_pd      = 0;
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                    if (c->vBands[j].nMode == BAND_PD)
-                        ++num_pd;
+                {
+                    switch (c->vBands[j].nMode)
+                    {
+                        case BAND_PD:
+                        case BAND_PF:
+                            ++num_pd;
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 float pd_makeup     = (num_pd > 0) ? 1.0f / num_pd : 1.0f;
 
                 // Mix the tracks
@@ -1016,8 +1045,8 @@ namespace lsp
                             dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_PF:
-                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain, b->fOutLevel);
-                            dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain, samples);
+                            b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain * pd_makeup, b->fOutLevel);
+                            dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_BP:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vBpData, samples) * b->fGain, b->fOutLevel);
@@ -1102,12 +1131,16 @@ namespace lsp
                 {
                     band_t *b       = &c->vBands[j];
 
+                    // Output meters
                     b->pInLevel->set_value(b->fInLevel);
                     b->pOutLevel->set_value(b->fOutLevel);
+                    b->pPfEnvLevel->set_value(b->fPfInGain);
+                    b->pPfCurveLevel->set_value(b->fPfOutGain);
+                    b->pPfGainLevel->set_value(b->fPfReduction);
 
-                    if ((i == 0) && (b->bSyncCurve))
+                    // Synchronize band transfer function mesh
+                    if ((i == 0) && (b->nSync & SYNC_BAND_FILTER))
                     {
-                        // Pass transfer function of the band
                         mesh        = (b->pFreqMesh != NULL) ? b->pFreqMesh->buffer<plug::mesh_t>() : NULL;
                         if ((mesh != NULL) && (mesh->isEmpty()))
                         {
@@ -1120,17 +1153,25 @@ namespace lsp
                             dsp::copy(&mesh->pvData[1][1], b->vFreqChart, meta::beat_breather::FFT_MESH_POINTS);
                             mesh->data(2, meta::beat_breather::FFT_MESH_POINTS + 2);
 
-                            b->bSyncCurve       = false;
+                            b->nSync        &= ~SYNC_BAND_FILTER;
                         }
                     }
-                }
 
-                // Sync peak detector graph for each band
-                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                {
-                    band_t *b       = &c->vBands[j];
+                    // Synchronize peak filter function mesh
+                    if ((i == 0) && (b->nSync & SYNC_PEAK_FILTER))
+                    {
+                        mesh        = (b->pPfMesh != NULL) ? b->pPfMesh->buffer<plug::mesh_t>() : NULL;
+                        if ((mesh != NULL) && (mesh->isEmpty()))
+                        {
+                            dsp::copy(mesh->pvData[0], vPfMesh, meta::beat_breather::CURVE_MESH_POINTS);
+                            dsp::copy(mesh->pvData[1], b->vPfMesh, meta::beat_breather::CURVE_MESH_POINTS);
+                            mesh->data(2, meta::beat_breather::CURVE_MESH_POINTS);
 
-                    // Get mesh
+                            b->nSync        &= ~SYNC_PEAK_FILTER;
+                        }
+                    }
+
+                    // Synchronize peak detector mesh
                     mesh            = b->pPdMesh->buffer<plug::mesh_t>();
                     if ((mesh != NULL) && (mesh->isEmpty()))
                     {
@@ -1181,7 +1222,7 @@ namespace lsp
                 for (size_t i=0; i<meta::beat_breather::BANDS_MAX; ++i)
                 {
                     band_t *b           = &c->vBands[i];
-                    b->bSyncCurve       = (i == 0);
+                    b->nSync            = SYNC_ALL;
                 }
             }
         }

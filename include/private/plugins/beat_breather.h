@@ -56,6 +56,14 @@ namespace lsp
                     BAND_BP         // + Beat processor
                 };
 
+                enum sync_t
+                {
+                    SYNC_BAND_FILTER    = 1 << 0,       // Band curve
+                    SYNC_PEAK_FILTER    = 1 << 1,       // Peak filter curve
+                    SYNC_PEAK_PROC      = 1 << 2,       // Peak processor curve
+                    SYNC_ALL            = SYNC_BAND_FILTER | SYNC_PEAK_FILTER | SYNC_PEAK_PROC
+                };
+
                 typedef struct split_t
                 {
                     size_t              nBandId;        // Associated band identifier
@@ -84,8 +92,11 @@ namespace lsp
                     float               fGain;          // Band gain
                     float               fInLevel;       // Input level measured
                     float               fOutLevel;      // Output level measured
-                    bool                bSyncCurve;     // Synchronize curve
+                    size_t              nSync;          // Synchronize curve flags
                     float               fPdMakeup;      // Peak detector makeup gain
+                    float               fPfInGain;      // Peak filter input gain
+                    float               fPfOutGain;     // Peak filter output gain
+                    float               fPfReduction;   // Peak filter reduction value
 
                     float              *vInData;        // Original band data after crossover
                     float              *vPdData;        // Peak detector data
@@ -207,7 +218,7 @@ namespace lsp
                 void                bind_inputs();
                 void                split_signal(size_t samples);
                 void                apply_peak_detector(size_t samples);
-                void                apply_peak_filter(size_t samples);
+                void                apply_punch_filter(size_t samples);
                 void                apply_beat_processor(size_t samples);
                 void                mix_bands(size_t samples);
                 void                post_process_block(size_t samples);

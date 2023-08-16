@@ -1,13 +1,18 @@
 {
 	"beat_breather": {
+		"attack:ms": "Attack (ms)",
 		"chan": {
 			"bf": "BF",
 			"bp": "BP",
 			"pd": "PD",
 			"pf": "PF"
 		},
+		"graph": "Graph",
 		"long_rms": "Long RMS",
-		"short_rms": "Short RMS"
+		"release:ms": "Release (ms)",
+		"short_rms": "Short RMS",
+		"threshold:db": "Threshold (dB)",
+		"zone:db": "Zone (dB)"
 	}
 }
 

@@ -1,13 +1,18 @@
 {
 	"beat_breather": {
+		"attack:ms": "Атака (ms)",
 		"chan": {
 			"bf": "ПФ",
 			"bp": "ПУ",
 			"pd": "ДУ",
 			"pf": "ФУ"
 		},
+		"graph": "График",
 		"long_rms": "Долгое СКЗ",
-		"short_rms": "Короткое СКЗ"
+		"release:ms": "Релиз (ms)",
+		"short_rms": "Короткое СКЗ",
+		"threshold:db": "Порог (дБ)",
+		"zone:db": "Зона (дБ)"
 	}
 }
 
