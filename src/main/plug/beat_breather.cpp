@@ -1503,6 +1503,176 @@ namespace lsp
 
         void beat_breather::dump(dspu::IStateDumper *v) const
         {
+            plug::Module::dump(v);
+
+            v->write("nChannels", nChannels);
+            v->begin_array("vChannels", vChannels, nChannels);
+            {
+                for (size_t i=0; i<nChannels; ++i)
+                {
+                    const channel_t *c = &vChannels[i];
+
+                    v->write_object("sBypass", &c->sBypass);
+                    v->write_object("sCrossover", &c->sCrossover);
+                    v->write_object("sDelay", &c->sDelay);
+                    v->write_object("sDryDelay", &c->sDryDelay);
+
+                    v->begin_array("vBands", c->vBands, meta::beat_breather::BANDS_MAX);
+                    {
+                        for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                        {
+                            const band_t *b     = &c->vBands[j];
+
+                            v->write_object("sDelay", &b->sDelay);
+                            v->write_object("sPdLong", &b->sPdLong);
+                            v->write_object("sPdShort", &b->sPdShort);
+                            v->write_object("sPdDelay", &b->sPdDelay);
+                            v->write_object("sPdMeter", &b->sPdMeter);
+                            v->write_object("sPf", &b->sPf);
+                            v->write_object("sPfDelay", &b->sPfDelay);
+                            v->write_object("sBp", &b->sBp);
+                            v->write_object("sBpScDelay", &b->sBpScDelay);
+                            v->write_object("sBpDelay", &b->sBpDelay);
+
+                            v->write("nOldMode", b->nOldMode);
+                            v->write("nMode", b->nMode);
+                            v->write("fGain", b->fGain);
+                            v->write("fInLevel", b->fInLevel);
+                            v->write("fOutLevel", b->fOutLevel);
+                            v->write("fReduction", b->fReduction);
+                            v->write("nSync", b->nSync);
+                            v->write("fPdMakeup", b->fPdMakeup);
+                            v->write("fPdLevel", b->fPdLevel);
+                            v->write("fPfInGain", b->fPfInGain);
+                            v->write("fPfOutGain", b->fPfOutGain);
+                            v->write("fPfReduction", b->fPfReduction);
+                            v->write("fBpMakeup", b->fBpMakeup);
+                            v->write("fBpInGain", b->fBpInGain);
+                            v->write("fBpOutGain", b->fBpOutGain);
+                            v->write("fBpReduction", b->fBpReduction);
+
+                            v->write("vInData", b->vInData);
+                            v->write("vPdData", b->vPdData);
+                            v->write("vPfData", b->vPfData);
+                            v->write("vBpData", b->vBpData);
+                            v->write("vFreqChart", b->vFreqChart);
+                            v->write("vPfMesh", b->vPfMesh);
+                            v->write("vBpMesh", b->vBpMesh);
+
+                            v->write("pSolo", b->pSolo);
+                            v->write("pMute", b->pMute);
+                            v->write("pListen", b->pListen);
+                            v->write("pLpfSlope", b->pLpfSlope);
+                            v->write("pHpfSlope", b->pHpfSlope);
+                            v->write("pFlatten", b->pFlatten);
+                            v->write("pOutGain", b->pOutGain);
+                            v->write("pFreqEnd", b->pFreqEnd);
+                            v->write("pFreqMesh", b->pFreqMesh);
+
+                            v->write("pInLevel", b->pInLevel);
+                            v->write("pOutLevel", b->pOutLevel);
+
+                            v->write("pPdLongTime", b->pPdLongTime);
+                            v->write("pPdShortTime", b->pPdShortTime);
+                            v->write("pPdBias", b->pPdBias);
+                            v->write("pPdMakeup", b->pPdMakeup);
+                            v->write("pPdMesh", b->pPdMesh);
+
+                            v->write("pPfLookahead", b->pPfLookahead);
+                            v->write("pPfAttack", b->pPfAttack);
+                            v->write("pPfRelease", b->pPfRelease);
+                            v->write("pPfThreshold", b->pPfThreshold);
+                            v->write("pPfReduction", b->pPfReduction);
+                            v->write("pPfZone", b->pPfZone);
+                            v->write("pPfMesh", b->pPfMesh);
+                            v->write("pPfEnvLevel", b->pPfEnvLevel);
+                            v->write("pPfCurveLevel", b->pPfCurveLevel);
+                            v->write("pPfGainLevel", b->pPfGainLevel);
+
+                            v->write("pBpAttack", b->pBpAttack);
+                            v->write("pBpRelease", b->pBpRelease);
+                            v->write("pBpTimeShift", b->pBpTimeShift);
+                            v->write("pBpThreshold", b->pBpThreshold);
+                            v->write("pBpRatio", b->pBpRatio);
+                            v->write("pBpMaxGain", b->pBpMaxGain);
+                            v->write("pBpMesh", b->pBpMesh);
+                            v->write("pBpEnvLevel", b->pBpEnvLevel);
+                            v->write("pBpCurveLevel", b->pBpCurveLevel);
+                            v->write("pBpGainLevel", b->pBpGainLevel);
+                        }
+                    }
+                    v->end_array();
+
+                    v->write("nAnIn", c->nAnIn);
+                    v->write("nAnOut", c->nAnOut);
+                    v->write("fInLevel", c->fInLevel);
+                    v->write("fOutLevel", c->fOutLevel);
+
+                    v->write("vIn", c->vIn);
+                    v->write("vOut", c->vOut);
+                    v->write("vInData", c->vInData);
+                    v->write("vOutData", c->vOutData);
+                    v->write("vFreqChart", c->vFreqChart);
+
+                    v->write("pIn", c->pIn);
+                    v->write("pOut", c->pOut);
+
+                    v->write("pInLevel", c->pInLevel);
+                    v->write("pOutLevel", c->pOutLevel);
+                    v->write("pInFft", c->pInFft);
+                    v->write("pOutFft", c->pOutFft);
+                    v->write("pInMesh", c->pInMesh);
+                    v->write("pOutMesh", c->pOutMesh);
+                    v->write("pFreqMesh", c->pFreqMesh);
+                }
+            }
+            v->end_array();
+
+            v->write("bStereoSplit", bStereoSplit);
+            v->write("fInGain", fInGain);
+            v->write("fDryGain", fDryGain);
+            v->write("fWetGain", fWetGain);
+            v->write("fZoom", fZoom);
+            v->writev("vAnalyze", vAnalyze, 4);
+
+            v->write_object("sAnalyzer", &sAnalyzer);
+
+            v->begin_array("vSplits", vSplits, meta::beat_breather::BANDS_MAX-1);
+            {
+                for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
+                {
+                    const split_t *sp   = &vSplits[i];
+                    v->begin_object(sp, sizeof(split_t));
+                    {
+                        v->write("nBandId", sp->nBandId);
+                        v->write("fFrequency", sp->fFrequency);
+                        v->write("bEnabled", sp->bEnabled);
+                        v->write("pEnable", sp->pEnable);
+                        v->write("pFrequency", sp->pFrequency);
+                    }
+                    v->end_object();
+                }
+            }
+            v->end_array();
+
+            v->write("vBuffer", vBuffer);
+            v->write("vFftFreqs", vFftFreqs);
+            v->write("vFftIndexes", vFftIndexes);
+            v->write("vPdMesh", vPdMesh);
+            v->write("vPfMesh", vPfMesh);
+            v->write("vBpMesh", vBpMesh);
+
+            v->write("pBypass", pBypass);
+            v->write("pInGain", pInGain);
+            v->write("pDryGain", pDryGain);
+            v->write("pWetGain", pWetGain);
+            v->write("pOutGain", pOutGain);
+            v->write("pStereoSplit", pStereoSplit);
+            v->write("pFFTReactivity", pFFTReactivity);
+            v->write("pFFTShift", pFFTShift);
+            v->write("pZoom", pZoom);
+            v->write("pIDisplay", pIDisplay);
+            v->write("pData", pData);
         }
 
     } /* namespace plugins */
