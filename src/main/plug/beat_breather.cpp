@@ -912,7 +912,7 @@ namespace lsp
 
             for (size_t offset = 0; offset < samples; )
             {
-                size_t to_do        = lsp_min(offset - samples, BUFFER_SIZE);
+                size_t to_do        = lsp_min(samples - offset, BUFFER_SIZE);
 
                 // Stores band data to band_t::vIn
                 split_signal(to_do);
@@ -926,8 +926,11 @@ namespace lsp
                 // Stores the processed band data to channel_t::vOutData
                 mix_bands(to_do);
 
+                // Post-process data
                 post_process_block(to_do);
 
+                // Update pointers and the offset
+                update_pointers(to_do);
                 offset             += to_do;
             }
 
