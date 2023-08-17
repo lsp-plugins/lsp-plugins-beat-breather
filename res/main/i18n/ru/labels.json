@@ -9,9 +9,11 @@
 		},
 		"graph": "График",
 		"long_rms": "Долгое СКЗ",
+		"max_gain": "Макс\nусиление",
 		"release:ms": "Релиз (ms)",
 		"short_rms": "Короткое СКЗ",
 		"threshold:db": "Порог (дБ)",
+		"time_shift": "Сдвиг\nвремени",
 		"zone:db": "Зона (дБ)"
 	}
 }

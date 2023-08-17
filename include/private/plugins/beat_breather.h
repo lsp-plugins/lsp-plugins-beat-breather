@@ -60,8 +60,8 @@ namespace lsp
                 {
                     SYNC_BAND_FILTER    = 1 << 0,       // Band curve
                     SYNC_PEAK_FILTER    = 1 << 1,       // Peak filter curve
-                    SYNC_PEAK_PROC      = 1 << 2,       // Peak processor curve
-                    SYNC_ALL            = SYNC_BAND_FILTER | SYNC_PEAK_FILTER | SYNC_PEAK_PROC
+                    SYNC_BEAT_PROC      = 1 << 2,       // Peak processor curve
+                    SYNC_ALL            = SYNC_BAND_FILTER | SYNC_PEAK_FILTER | SYNC_BEAT_PROC
                 };
 
                 typedef struct split_t
@@ -97,6 +97,10 @@ namespace lsp
                     float               fPfInGain;      // Peak filter input gain
                     float               fPfOutGain;     // Peak filter output gain
                     float               fPfReduction;   // Peak filter reduction value
+                    float               fBpMakeup;      // Beat processor makeup gain
+                    float               fBpInGain;      // Beat processor input gain
+                    float               fBpOutGain;     // Beat processor output gain
+                    float               fBpReduction;   // Beat processor reduction value
 
                     float              *vInData;        // Original band data after crossover
                     float              *vPdData;        // Peak detector data
@@ -104,6 +108,7 @@ namespace lsp
                     float              *vBpData;        // Output of Beat Processor
                     float              *vFreqChart;     // Frequency chart
                     float              *vPfMesh;        // Peak filter mesh
+                    float              *vBpMesh;        // Beat processor mesh
 
                     plug::IPort        *pSolo;          // Solo band
                     plug::IPort        *pMute;          // Mute band
@@ -194,7 +199,8 @@ namespace lsp
                 float              *vFftFreqs;          // List of FFT frequencies
                 uint32_t           *vFftIndexes;        // List of analyzer FFT indexes
                 float              *vPdMesh;            // Peak detector mesh
-                float              *vPfMesh;            // Horizontal coordinates of peak filter
+                float              *vPfMesh;            // Horizontal coordinates of peak filter curve
+                float              *vBpMesh;            // Horizontal coordinates of beat processor curve
 
                 plug::IPort        *pBypass;            // Bypass
                 plug::IPort        *pInGain;            // Input gain

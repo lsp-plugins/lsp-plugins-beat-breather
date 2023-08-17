@@ -86,7 +86,7 @@ namespace lsp
             static constexpr float  PF_RELEASE_STEP         = 0.005f;
 
             static constexpr float  PF_THRESHOLD_MIN        = GAIN_AMP_M_24_DB;
-            static constexpr float  PF_THRESHOLD_MAX        = GAIN_AMP_P_24_DB;
+            static constexpr float  PF_THRESHOLD_MAX        = GAIN_AMP_P_12_DB;
             static constexpr float  PF_THRESHOLD_DFL        = GAIN_AMP_M_9_DB;
             static constexpr float  PF_THRESHOLD_STEP       = 0.01f;
 
@@ -110,25 +110,25 @@ namespace lsp
             static constexpr float  BP_RELEASE_DFL          = 20.0f;
             static constexpr float  BP_RELEASE_STEP         = 0.001f;
 
-            static constexpr float  BP_TIME_SHIFT_MIN       = -5.0f;
-            static constexpr float  BP_TIME_SHIFT_MAX       = 5.0f;
+            static constexpr float  BP_TIME_SHIFT_MIN       = -10.0f;
+            static constexpr float  BP_TIME_SHIFT_MAX       = 10.0f;
             static constexpr float  BP_TIME_SHIFT_DFL       = 0.0f;
             static constexpr float  BP_TIME_SHIFT_STEP      = 0.01f;
 
-            static constexpr float  BP_THRESHOLD_MIN        = -72.0f;
-            static constexpr float  BP_THRESHOLD_MAX        = 0.0f;
-            static constexpr float  BP_THRESHOLD_DFL        = -24.0f;
-            static constexpr float  BP_THRESHOLD_STEP       = 0.1f;
+            static constexpr float  BP_THRESHOLD_MIN        = GAIN_AMP_M_24_DB;
+            static constexpr float  BP_THRESHOLD_MAX        = GAIN_AMP_P_12_DB;
+            static constexpr float  BP_THRESHOLD_DFL        = GAIN_AMP_M_12_DB;
+            static constexpr float  BP_THRESHOLD_STEP       = 0.01f;
 
             static constexpr float  BP_RATIO_MIN            = 1.0f;
             static constexpr float  BP_RATIO_MAX            = 10.0f;
             static constexpr float  BP_RATIO_DFL            = 2.0f;
             static constexpr float  BP_RATIO_STEP           = 0.001f;
 
-            static constexpr float  BP_MAX_GAIN_MIN         = 0.0f;
-            static constexpr float  BP_MAX_GAIN_MAX         = 24.0f;
-            static constexpr float  BP_MAX_GAIN_DFL         = 6.0f;
-            static constexpr float  BP_MAX_GAIN_STEP        = 0.1f;
+            static constexpr float  BP_MAX_GAIN_MIN         = GAIN_AMP_0_DB;
+            static constexpr float  BP_MAX_GAIN_MAX         = GAIN_AMP_P_24_DB;
+            static constexpr float  BP_MAX_GAIN_DFL         = GAIN_AMP_P_6_DB;
+            static constexpr float  BP_MAX_GAIN_STEP        = 0.01f;
 
             static constexpr float  FFT_REACT_TIME_MIN      = 0.000f;
             static constexpr float  FFT_REACT_TIME_MAX      = 1.000f;
@@ -161,6 +161,8 @@ namespace lsp
             static constexpr size_t FFT_ANALYZER_RATE       = 20;
             static constexpr float  PF_CURVE_MIN            = -36.0f;
             static constexpr float  PF_CURVE_MAX            = 24.0f;
+            static constexpr float  BP_CURVE_MIN            = -36.0f;
+            static constexpr float  BP_CURVE_MAX            = 24.0f;
 
             static constexpr size_t TIME_MESH_POINTS        = 320;
             static constexpr float  TIME_HISTORY_MAX        = 2.0f;     // Time history of punch detector

@@ -709,14 +709,14 @@
 					<cell rows="6" hreduce="true">
 						<ledmeter vexpand="true" height.min="120" angle="1">
 							<ledchannel id="pfgm_${i}l"
-								min="-48 db" max="12 db"
+								min="-48 db" max="0 db"
 								log="true" balance="0 db"
 								balance.visibility="true"
 								type="peak"
 								activity="(ex :se_${:i-1}) ? :se_${:i-1} : true"
 								value.color="blue" />
 							<ledchannel id="pfgm_${i}r"
-								min="-48 db" max="12 db"
+								min="-48 db" max="0 db"
 								log="true" balance="0 db"
 								balance.visibility="true" type="peak"
 								activity="(ex :se_${:i-1}) ? :se_${:i-1} : true"
@@ -775,6 +775,204 @@
 				</ui:for>
 				
 			</grid>
+			
+			<!-- Tab 4: Beat processor -->
+			<grid rows="9" cols="${4*8+1}">
+				<!-- Row 1 -->
+				<label text="labels.band" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<cell rows="9"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<cell cols="3">
+						<ui:if test=":i ieq 1">
+							<button
+								text="labels.chan.num_id" text:id="1"
+								value="1" editable="false"
+								pointer="arrow" hfill="true"
+								ui:inject="Button_ne_Cycle" height="19"
+								pad.h="6" pad.v="4" />
+						</ui:if>
+						<ui:if test=":i igt 1">
+							<button
+								id="se_${:i-1}"
+								text="labels.chan.num_id" text:id="${i}"
+								ui:inject="Button_Cycle"
+								hfill="true"
+								height="19"
+								down.color.hue="${hue}"
+								down.hover.color.hue="${hue}"
+								text.down.color.hue="${hue}"
+								text.down.hover.color.hue="${hue}"
+								border.down.color.hue="${hue}"
+								border.down.hover.color.hue="${hue}"
+								pad.h="6" pad.v="4"/>
+						</ui:if>
+					</cell>
+				</ui:for>
+				
+				<!-- Row 2 -->
+				<label text="labels.controls" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<cell cols="3">
+						<grid rows="2" cols="4">
+							<cell cols="2">
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8"/>
+							</cell>
+							<cell cols="2">
+								<button id="bm_${i}" text="labels.chan.M_ute" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
+							</cell>
+							<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" ui:inject="Button_yellow_8" />
+							<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" ui:inject="Button_yellow_8" />
+							<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" ui:inject="Button_yellow_8" />
+							<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" ui:inject="Button_yellow_8" />
+						</grid>
+					</cell>
+				</ui:for>
+				
+				<!-- Row 3 -->
+				<label text="labels.graph" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<cell cols="3">
+						<graph width="120" height="120" >
+							<origin hpos="-1" vpos="-1" visible="false"/>
+		
+							<!-- Gray grid -->
+							<marker v="-24 db" color="graph_sec"/>
+							<marker v="-12 db" color="graph_sec"/>
+							<marker v="12 db" color="graph_sec"/>
+							<marker v="-24 db" ox="1" oy="0" color="graph_sec"/>
+							<marker v="-12 db" ox="1" oy="0" color="graph_sec"/>
+							<marker v="12 db" ox="1" oy="0" color="graph_sec"/>
+		
+							<!-- Axes and boundaries -->
+							<marker v="1" ox="1" oy="0" dv="1" dx=":_a_width" dy=":_a_height" color="graph_alt_1" width="2" smooth="true"/>
+							<axis min="-36 db" max="24 db" color="graph_prim" angle="0.0" log="true" visibility="false"/>
+							<axis min="-36 db" max="24 db" color="graph_prim" angle="0.5" log="true" visibility="false"/>
+		
+							<!-- 0 dB markers -->
+							<marker v="0 db" ox="0" oy="1" width="2" color="graph_prim"/>
+							<marker v="0 db" ox="1" oy="0" width="2" color="graph_prim"/>
+		
+							<!-- Meshes -->
+							<mesh id="bpg_${i}" width="3"
+								color="graph_mesh_cycle" color.hue="${hue}"
+								smooth="true"
+								visibility="(ex :se_${:i-1}) ? :se_${:i-1} : true"/>
+							<dot x.id="bpem_${i}l" y.id="bpcm_${i}l"
+								color="graph_mesh" bcolor="graph_mesh"
+								visibility="(!:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)" />
+							<dot x.id="bpem_${i}l" y.id="bpcm_${i}l"
+								color="left" bcolor="left"
+								visibility="(:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)" />
+							<dot x.id="bpem_${i}r" y.id="bpcm_${i}r"
+								color="right" bcolor="right"
+								visibility="(:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)" />
+		
+							<!-- Markers -->
+							<marker id="bpth_${i}"
+								color="attack" hcolor="attack"
+								editable="true" pointer="hsize"
+								visibility="(ex :se_${:i-1}) ? :se_${:i-1} : true" />
+		
+							<!-- Text -->
+							<text x="0 db" y="0 db" text="0" value="0" halign="-1" valign="-1"/>
+							<ui:attributes x="0 db" halign="-1" valign="-1">
+								<text y="24 db" text="graph.units.db"/>
+								<text y="12 db" text="+12"/>
+								<text y="-12 db" text="-12"/>
+								<text y="-24 db" text="-24"/>
+								<text y="-36 db" text="graph.axis.out" valign="1"/>
+							</ui:attributes>
+							<ui:attributes y="0 db" halign="-1" valign="-1">
+								<text x="24 db" text="graph.units.db"/>
+								<text x="12 db" text="+12"/>
+								<text x="-12 db" text="-12"/>
+								<text x="-24 db" text="-24"/>
+								<text x="-36 db" text="graph.axis.in" halign="1"/>
+							</ui:attributes>
+						</graph>
+					</cell>
+				</ui:for>
+				
+				<!-- Row 4 -->
+				<label text="labels.beat_breather.time_shift" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="bpts_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<value id="bpts_${i}" />
+					<cell rows="6" hreduce="true">
+						<ledmeter vexpand="true" height.min="120" angle="1">
+							<ledchannel id="bpgm_${i}l"
+								min="0 db" max="24 db"
+								log="true" balance="0 db"
+								balance.visibility="true"
+								type="peak"
+								activity="(ex :se_${:i-1}) ? :se_${:i-1} : true"
+								value.color="blue" />
+							<ledchannel id="bpgm_${i}r"
+								min="0 db" max="24 db"
+								log="true" balance="0 db"
+								balance.visibility="true" type="peak"
+								activity="(ex :se_${:i-1}) ? :se_${:i-1} : true"
+								value.color="blue" />
+						</ledmeter>
+					</cell>
+				</ui:for>
+				
+				<!-- Row 5 -->
+				<vbox bg.color="bg_schema">
+					<label text="labels.beat_breather.attack:ms" />
+					<label text="labels.beat_breather.release:ms" />
+				</vbox>
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="bpat_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<knob id="bprt_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+				</ui:for>
+				
+				<!-- Row 6 -->
+				<void bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<value id="bpat_${i}" detailed="false" />
+					<value id="bprt_${i}" detailed="false" />
+				</ui:for>
+				
+				<!-- Row 7 -->
+				<label text="labels.threshold" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="bpth_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<value id="bpth_${i}" />
+				</ui:for>
+				
+				<!-- Row 8 -->
+				<label text="labels.ratio" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="bper_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<hbox>
+						<value id="bper_${i}" />
+						<label text=":"/>
+						<label text="1"/>
+					</hbox>
+				</ui:for>
+				
+				<!-- Row 9 -->
+				<label text="labels.beat_breather.max_gain" pad.v="4" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="bpmg_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<value id="bpmg_${i}" />
+				</ui:for>
+			</grid>
+			
 		</tabs>
 
 	</vbox>
