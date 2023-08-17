@@ -926,7 +926,7 @@ namespace lsp
                 // Stores the processed band data to channel_t::vOutData
                 mix_bands(to_do);
 
-//                post_process_block(to_do);
+                post_process_block(to_do);
 
                 offset             += to_do;
             }
