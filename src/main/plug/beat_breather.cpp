@@ -931,7 +931,7 @@ namespace lsp
                 offset             += to_do;
             }
 
-//            output_meters();
+            output_meters();
         }
 
         void beat_breather::bind_inputs()
