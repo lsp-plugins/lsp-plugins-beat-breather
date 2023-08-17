@@ -919,8 +919,8 @@ namespace lsp
                 // Stores normalized RMS difference to band_t::vPdData
                 apply_peak_detector(to_do);
                 // Stores processed data to band_t::vPfData
-//                apply_punch_filter(to_do);
-//                // Stores the processed band data to band_t::vBpData
+                apply_punch_filter(to_do);
+                // Stores the processed band data to band_t::vBpData
 //                apply_beat_processor(to_do);
 //
 //                // Stores the processed band data to channel_t::vOutData
