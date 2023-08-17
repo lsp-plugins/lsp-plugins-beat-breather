@@ -29,7 +29,9 @@
 #include <lsp-plug.in/dsp-units/util/FFTCrossover.h>
 #include <lsp-plug.in/dsp-units/util/MeterGraph.h>
 #include <lsp-plug.in/dsp-units/util/Sidechain.h>
+#include <lsp-plug.in/plug-fw/core/IDBuffer.h>
 #include <lsp-plug.in/plug-fw/plug.h>
+
 #include <private/meta/beat_breather.h>
 
 namespace lsp
@@ -193,6 +195,7 @@ namespace lsp
                 float               fInGain;            // Input gain
                 float               fDryGain;           // Dry gain
                 float               fWetGain;           // Wet gain
+                float               fZoom;              // Zoom
                 float              *vAnalyze[4];        // Buffers for spectrum analyzer
 
                 dspu::Analyzer      sAnalyzer;          // Analyzer
@@ -213,6 +216,9 @@ namespace lsp
                 plug::IPort        *pStereoSplit;       // Stereo split
                 plug::IPort        *pFFTReactivity;     // FFT reactivity
                 plug::IPort        *pFFTShift;          // FFT shift
+                plug::IPort        *pZoom;              // Zoom
+
+                core::IDBuffer     *pIDisplay;          // Inline display buffer
 
                 uint8_t            *pData;              // Allocated data
 

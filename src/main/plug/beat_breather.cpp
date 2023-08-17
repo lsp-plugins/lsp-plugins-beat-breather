@@ -26,6 +26,7 @@
 #include <lsp-plug.in/dsp-units/misc/envelope.h>
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
+#include <lsp-plug.in/shared/id_colors.h>
 
 #include <private/plugins/beat_breather.h>
 
@@ -71,6 +72,7 @@ namespace lsp
             fInGain         = GAIN_AMP_0_DB;
             fDryGain        = GAIN_AMP_M_INF_DB;
             fWetGain        = GAIN_AMP_0_DB;
+            fZoom           = GAIN_AMP_0_DB;
 
             vAnalyze[0]     = NULL;
             vAnalyze[1]     = NULL;
@@ -104,6 +106,9 @@ namespace lsp
             pStereoSplit    = NULL;
             pFFTReactivity  = NULL;
             pFFTShift       = NULL;
+            pZoom           = NULL;
+
+            pIDisplay       = NULL;
 
             pData           = NULL;
         }
@@ -146,6 +151,13 @@ namespace lsp
                     }
                 }
                 vChannels   = NULL;
+            }
+
+            // Destroy inline display buffer
+            if (pIDisplay != NULL)
+            {
+                pIDisplay->destroy();
+                pIDisplay   = NULL;
             }
 
             // Free previously allocated data chunk
@@ -392,7 +404,7 @@ namespace lsp
             TRACE_PORT(ports[port_id++]); // skip tab selector
             pFFTReactivity          = TRACE_PORT(ports[port_id++]);
             pFFTShift               = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]); // skip zoom
+            pZoom                   = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]); // skip show filters
             if (nChannels > 1)
                 pStereoSplit            = TRACE_PORT(ports[port_id++]);
@@ -639,6 +651,7 @@ namespace lsp
             fInGain             = pInGain->value();
             fDryGain            = out_gain * pDryGain->value();
             fWetGain            = out_gain * pWetGain->value();
+            fZoom               = pZoom->value();
             size_t an_channels  = 0;
             float bypass        = pBypass->value() >= 0.5f;
             bool sync           = false;
@@ -939,6 +952,9 @@ namespace lsp
             }
 
             output_meters();
+
+            if (pWrapper != NULL)
+                pWrapper->query_display_draw();
         }
 
         void beat_breather::bind_inputs()
@@ -1238,16 +1254,24 @@ namespace lsp
                 channel_t *c        = &vChannels[i];
 
                 // Compute transfer curve
-                dsp::fill_zero(c->vFreqChart, meta::beat_breather::FFT_MESH_POINTS);
-                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                for (size_t offset=0; offset<meta::beat_breather::FFT_MESH_POINTS; )
                 {
-                    band_t *b       = &c->vBands[j];
-                    if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
-                        dsp::fmadd_k3(
-                            c->vFreqChart,
-                            vChannels[0].vBands[j].vFreqChart,
-                            b->fReduction,
-                            meta::beat_breather::FFT_MESH_POINTS);
+                    size_t samples      = lsp_min(meta::beat_breather::FFT_MESH_POINTS - offset, BUFFER_SIZE);
+
+                    dsp::fill_zero(vBuffer, samples);
+                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    {
+                        band_t *b       = &c->vBands[j];
+                        if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
+                            dsp::fmadd_k3(
+                                vBuffer,
+                                &vChannels[0].vBands[j].vFreqChart[offset],
+                                b->fReduction,
+                                samples);
+                    }
+                    dsp::copy(&c->vFreqChart[offset], vBuffer, samples);
+
+                    offset         += samples;
                 }
 
                 // Output input and output level meters
@@ -1383,7 +1407,98 @@ namespace lsp
 
         bool beat_breather::inline_display(plug::ICanvas *cv, size_t width, size_t height)
         {
-            return false;
+            // Check proportions
+            if (height > (M_RGOLD_RATIO * width))
+                height  = M_RGOLD_RATIO * width;
+
+            // Init canvas
+            if (!cv->init(width, height))
+                return false;
+            width   = cv->width();
+            height  = cv->height();
+
+            // Clear background
+            bool bypassing = vChannels[0].sBypass.bypassing();
+            cv->set_color_rgb((bypassing) ? CV_DISABLED : CV_BACKGROUND);
+            cv->paint();
+
+            // Draw axis
+            cv->set_line_width(1.0);
+
+            // "-72 db / (:zoom ** 3)" max="24 db * :zoom"
+
+            float miny  = logf(GAIN_AMP_M_72_DB / dsp::ipowf(fZoom, 3));
+            float maxy  = logf(GAIN_AMP_P_24_DB * fZoom);
+
+            float zx    = 1.0f/SPEC_FREQ_MIN;
+            float zy    = dsp::ipowf(fZoom, 3)/GAIN_AMP_M_72_DB;
+            float dx    = width/(logf(SPEC_FREQ_MAX)-logf(SPEC_FREQ_MIN));
+            float dy    = height/(miny-maxy);
+
+            // Draw vertical lines
+            cv->set_color_rgb(CV_YELLOW, 0.5f);
+            for (float i=100.0f; i<SPEC_FREQ_MAX; i *= 10.0f)
+            {
+                float ax = dx*(logf(i*zx));
+                cv->line(ax, 0, ax, height);
+            }
+
+            // Draw horizontal lines
+            cv->set_color_rgb(CV_WHITE, 0.5f);
+            for (float i=GAIN_AMP_M_72_DB; i<GAIN_AMP_P_24_DB; i *= GAIN_AMP_P_12_DB)
+            {
+                float ay = height + dy*(logf(i*zy));
+                cv->line(0, ay, width, ay);
+            }
+
+            // Allocate buffer: f, x, y, tr
+            pIDisplay           = core::IDBuffer::reuse(pIDisplay, 4, width+2);
+            core::IDBuffer *b   = pIDisplay;
+            if (b == NULL)
+                return false;
+
+            // Initialize mesh
+            b->v[0][0]          = SPEC_FREQ_MIN*0.5f;
+            b->v[0][width+1]    = SPEC_FREQ_MAX*2.0f;
+            b->v[3][0]          = 1.0f;
+            b->v[3][width+1]    = 1.0f;
+
+            static const uint32_t c_colors[] =
+            {
+                CV_MIDDLE_CHANNEL,
+                CV_LEFT_CHANNEL, CV_RIGHT_CHANNEL
+            };
+
+            size_t channels     = ((nChannels < 2) || (!bStereoSplit)) ? 1 : 2;
+            const uint32_t *vc  = (channels == 1) ? &c_colors[0] : &c_colors[1];
+
+            bool aa = cv->set_anti_aliasing(true);
+            lsp_finally { cv->set_anti_aliasing(aa); };
+            cv->set_line_width(2);
+
+            for (size_t i=0; i<channels; ++i)
+            {
+                channel_t *c    = &vChannels[i];
+
+                for (size_t j=0; j<width; ++j)
+                {
+                    size_t k        = (j*meta::beat_breather::FFT_MESH_POINTS)/width;
+                    b->v[0][j+1]    = vFftFreqs[k];
+                    b->v[3][j+1]    = c->vFreqChart[k];
+                }
+
+                dsp::fill(b->v[1], 0.0f, width+2);
+                dsp::fill(b->v[2], height, width+2);
+                dsp::axis_apply_log1(b->v[1], b->v[0], zx, dx, width+2);
+                dsp::axis_apply_log1(b->v[2], b->v[3], zy, dy, width+2);
+
+                // Draw mesh
+                uint32_t color = (bypassing || !(active())) ? CV_SILVER : vc[i];
+                Color stroke(color), fill(color, 0.5f);
+                cv->draw_poly(b->v[1], b->v[2], width+2, stroke, fill);
+            }
+
+            return true;
         }
 
         void beat_breather::dump(dspu::IStateDumper *v) const
