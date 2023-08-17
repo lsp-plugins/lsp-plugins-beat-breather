@@ -921,8 +921,8 @@ namespace lsp
                 // Stores processed data to band_t::vPfData
                 apply_punch_filter(to_do);
                 // Stores the processed band data to band_t::vBpData
-//                apply_beat_processor(to_do);
-//
+                apply_beat_processor(to_do);
+
 //                // Stores the processed band data to channel_t::vOutData
 //                mix_bands(to_do);
 //
