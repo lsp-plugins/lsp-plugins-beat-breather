@@ -552,49 +552,49 @@ namespace lsp
 
         void beat_breather::update_sample_rate(long sr)
         {
-            const size_t fft_rank       = select_fft_rank(sr);
-            const size_t max_delay_pd   = dspu::millis_to_samples(sr,
-                (lsp_max(meta::beat_breather::PD_SHORT_RMS_MAX, meta::beat_breather::PD_LONG_RMS_MAX) + 1)/2);
-            const size_t max_delay_pf   = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
-            const size_t max_delay_bp   = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
-            const size_t max_delay_fft  = (1 << fft_rank);
-            const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
-
-            for (size_t i=0; i<nChannels; ++i)
-            {
-                channel_t *c            = &vChannels[i];
-
-                c->sBypass.init(sr);
-                c->sDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
-                c->sDryDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
-
-                if (fft_rank != c->sCrossover.rank())
-                {
-                    c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
-                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                        c->sCrossover.set_handler(j, process_band, this, c);
-                    c->sCrossover.set_rank(fft_rank);
-                    c->sCrossover.set_phase(float(i) / float(nChannels));
-                }
-                c->sCrossover.set_sample_rate(sr);
-
-                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-                {
-                    band_t *b               = &c->vBands[j];
-
-                    b->sDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
-                    b->sPdLong.set_sample_rate(sr);
-                    b->sPdShort.set_sample_rate(sr);
-                    b->sPdDelay.init(max_delay_pd);
-                    b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
-                    b->sPfDelay.init(max_delay_pf);
-                    b->sBpScDelay.init(max_delay_bp);
-                    b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
-                }
-            }
-
-            // Commit sample rate to analyzer
-            sAnalyzer.set_sample_rate(sr);
+//            const size_t fft_rank       = select_fft_rank(sr);
+//            const size_t max_delay_pd   = dspu::millis_to_samples(sr,
+//                (lsp_max(meta::beat_breather::PD_SHORT_RMS_MAX, meta::beat_breather::PD_LONG_RMS_MAX) + 1)/2);
+//            const size_t max_delay_pf   = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
+//            const size_t max_delay_bp   = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
+//            const size_t max_delay_fft  = (1 << fft_rank);
+//            const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
+//
+//            for (size_t i=0; i<nChannels; ++i)
+//            {
+//                channel_t *c            = &vChannels[i];
+//
+//                c->sBypass.init(sr);
+//                c->sDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
+//                c->sDryDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
+//
+//                if (fft_rank != c->sCrossover.rank())
+//                {
+//                    c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
+//                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+//                        c->sCrossover.set_handler(j, process_band, this, c);
+//                    c->sCrossover.set_rank(fft_rank);
+//                    c->sCrossover.set_phase(float(i) / float(nChannels));
+//                }
+//                c->sCrossover.set_sample_rate(sr);
+//
+//                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+//                {
+//                    band_t *b               = &c->vBands[j];
+//
+//                    b->sDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
+//                    b->sPdLong.set_sample_rate(sr);
+//                    b->sPdShort.set_sample_rate(sr);
+//                    b->sPdDelay.init(max_delay_pd);
+//                    b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
+//                    b->sPfDelay.init(max_delay_pf);
+//                    b->sBpScDelay.init(max_delay_bp);
+//                    b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
+//                }
+//            }
+//
+//            // Commit sample rate to analyzer
+//            sAnalyzer.set_sample_rate(sr);
         }
 
         int beat_breather::compare_splits(const void *a1, const void *a2, void *data)
