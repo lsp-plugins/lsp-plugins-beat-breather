@@ -310,6 +310,7 @@ namespace lsp
 
                     b->pPdLongTime          = NULL;
                     b->pPdShortTime         = NULL;
+                    b->pPdBias              = NULL;
                     b->pPdMakeup            = NULL;
                     b->pPdMesh              = NULL;
 
@@ -447,6 +448,7 @@ namespace lsp
 
                         b->pPdLongTime          = sb->pPdLongTime;
                         b->pPdShortTime         = sb->pPdShortTime;
+                        b->pPdBias              = sb->pPdBias;
                         b->pPdMakeup            = sb->pPdMakeup;
 
                         b->pPfLookahead         = sb->pPfLookahead;
@@ -479,6 +481,7 @@ namespace lsp
 
                         b->pPdLongTime          = TRACE_PORT(ports[port_id++]);
                         b->pPdShortTime         = TRACE_PORT(ports[port_id++]);
+                        b->pPdBias              = TRACE_PORT(ports[port_id++]);
                         b->pPdMakeup            = TRACE_PORT(ports[port_id++]);
 
                         b->pPfLookahead         = TRACE_PORT(ports[port_id++]);
@@ -764,6 +767,7 @@ namespace lsp
                     float pd_short          = b->pPdShortTime->value();
                     size_t pd_short_latency = dspu::millis_to_samples(fSampleRate, pd_long - pd_short) / 2;
                     size_t pd_latency       = dspu::millis_to_samples(fSampleRate, pd_long) / 2;
+                    float pd_bias           = dspu::db_to_gain(b->pPdBias->value());
                     b->fPdMakeup            = dspu::db_to_gain(b->pPdMakeup->value() + meta::beat_breather::PD_MAKEUP_SHIFT);
 
                     b->sPdLong.set_mode(dspu::SCM_RMS);
@@ -774,7 +778,7 @@ namespace lsp
                     b->sPdShort.set_mode(dspu::SCM_RMS);
                     b->sPdShort.set_source(dspu::SCS_MIDDLE);
                     b->sPdShort.set_reactivity(pd_short);
-                    b->sPdShort.set_gain(GAIN_AMP_0_DB);
+                    b->sPdShort.set_gain(pd_bias);
 
                     b->sPdDelay.set_delay(pd_short_latency);
 

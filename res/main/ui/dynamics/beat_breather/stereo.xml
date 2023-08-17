@@ -431,11 +431,11 @@
 			</grid>
 			
 			<!-- Tab 2: Peak detector -->
-			<grid rows="6" cols="${3*8+1}">
+			<grid rows="7" cols="${3*8+1}">
 				<!-- Row 1 -->
 				<label text="labels.band" bg.color="bg_schema" />
 				<ui:for id="i" first="1" count="8">
-					<cell rows="6"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<cell rows="7"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
 					<ui:eval id="hue" value="(:i-1) * 0.125" />
 					<cell cols="2">
 						<ui:if test=":i ieq 1">
@@ -571,6 +571,15 @@
 				</ui:for>
 				
 				<!-- Row 6 -->
+				<label text="labels.beat_breather.rms_bias" bg.color="bg_schema" />
+				<ui:for id="i" first="1" count="8">
+					<ui:eval id="hue" value="(:i-1) * 0.125" />
+					<knob id="pdbs_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
+					<value id="pdbs_${i}" />
+				</ui:for>
+				
+				<!-- Row 7 -->
 				<label text="labels.makeup" bg.color="bg_schema" />
 				<ui:for id="i" first="1" count="8">
 					<ui:eval id="hue" value="(:i-1) * 0.125" />

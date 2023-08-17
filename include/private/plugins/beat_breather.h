@@ -127,6 +127,7 @@ namespace lsp
 
                     plug::IPort        *pPdLongTime;    // Punch detector Long-time RMS estimation
                     plug::IPort        *pPdShortTime;   // Punch detector Short-time RMS estimation
+                    plug::IPort        *pPdBias;        // Punch detector Short-time RMS bias
                     plug::IPort        *pPdMakeup;      // Punch detector Makeup gain
                     plug::IPort        *pPdMesh;        // Punch detector output mesh
 

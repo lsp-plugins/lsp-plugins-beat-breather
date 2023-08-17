@@ -70,6 +70,11 @@ namespace lsp
             static constexpr float  PD_MAKEUP_STEP          = 0.05f;
             static constexpr float  PD_MAKEUP_SHIFT         = -12.0f;
 
+            static constexpr float  PD_BIAS_MIN             = -6.0f;
+            static constexpr float  PD_BIAS_MAX             = 6.0f;
+            static constexpr float  PD_BIAS_DFL             = -0.5f;
+            static constexpr float  PD_BIAS_STEP            = 0.01f;
+
             static constexpr float  PF_LOOKAHEAD_MIN        = 0.0f;
             static constexpr float  PF_LOOKAHEAD_MAX        = 5.0f;
             static constexpr float  PF_LOOKAHEAD_DFL        = 0.0f;

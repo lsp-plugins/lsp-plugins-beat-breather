@@ -11,6 +11,7 @@
 		"long_rms": "Долгое СКЗ",
 		"max_gain:db": "Макс усиление (дБ)",
 		"release:ms": "Релиз (ms)",
+		"rms_bias": "Смещение СКЗ",
 		"short_rms": "Короткое СКЗ",
 		"threshold:db": "Порог (дБ)",
 		"time_shift": "Сдвиг\nвремени",

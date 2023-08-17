@@ -90,6 +90,7 @@ namespace lsp
             \
             CONTROL("pdlt" id, "Punch detector long-time RMS estimation" label, U_MSEC, beat_breather::PD_LONG_RMS), \
             CONTROL_DFL("pdst" id, "Punch detector short-time RMS estimation" label, U_MSEC, beat_breather::PD_SHORT_RMS, short_rms), \
+            CONTROL("pdbs" id, "Punch detector short RMS bias" label, U_DB, beat_breather::PD_BIAS), \
             CONTROL("pdmk" id, "Punch detector makeup" label, U_DB, beat_breather::PD_MAKEUP), \
             \
             CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \

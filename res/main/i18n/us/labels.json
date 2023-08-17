@@ -11,6 +11,7 @@
 		"long_rms": "Long RMS",
 		"max_gain:db": "Max Gain (dB)",
 		"release:ms": "Release (ms)",
+		"rms_bias": "RMS Bias",
 		"short_rms": "Short RMS",
 		"threshold:db": "Threshold (dB)",
 		"time_shift": "Time\nShift",
