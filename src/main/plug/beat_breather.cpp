@@ -906,29 +906,29 @@ namespace lsp
 
         void beat_breather::process(size_t samples)
         {
-            bind_inputs();
-
-            for (size_t offset = 0; offset < samples; )
-            {
-                size_t to_do        = lsp_min(offset - samples, BUFFER_SIZE);
-
-                // Stores band data to band_t::vIn
-                split_signal(to_do);
-                // Stores normalized RMS difference to band_t::vPdData
-                apply_peak_detector(to_do);
-                // Stores processed data to band_t::vPfData
-                apply_punch_filter(to_do);
-                // Stores the processed band data to band_t::vBpData
-                apply_beat_processor(to_do);
-
-                // Stores the processed band data to channel_t::vOutData
-                mix_bands(to_do);
-
-                post_process_block(to_do);
-                offset             += to_do;
-            }
-
-            output_meters();
+//            bind_inputs();
+//
+//            for (size_t offset = 0; offset < samples; )
+//            {
+//                size_t to_do        = lsp_min(offset - samples, BUFFER_SIZE);
+//
+//                // Stores band data to band_t::vIn
+//                split_signal(to_do);
+//                // Stores normalized RMS difference to band_t::vPdData
+//                apply_peak_detector(to_do);
+//                // Stores processed data to band_t::vPfData
+//                apply_punch_filter(to_do);
+//                // Stores the processed band data to band_t::vBpData
+//                apply_beat_processor(to_do);
+//
+//                // Stores the processed band data to channel_t::vOutData
+//                mix_bands(to_do);
+//
+//                post_process_block(to_do);
+//                offset             += to_do;
+//            }
+//
+//            output_meters();
         }
 
         void beat_breather::bind_inputs()
