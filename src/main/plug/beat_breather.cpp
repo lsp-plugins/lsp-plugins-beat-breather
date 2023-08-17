@@ -925,7 +925,8 @@ namespace lsp
 //                mix_bands(to_do);
 //
 //                post_process_block(to_do);
-//                offset             += to_do;
+
+                offset             += to_do;
             }
 
 //            output_meters();
