@@ -92,8 +92,10 @@ namespace lsp
                     float               fGain;          // Band gain
                     float               fInLevel;       // Input level measured
                     float               fOutLevel;      // Output level measured
+                    float               fReduction;     // Band reduction
                     size_t              nSync;          // Synchronize curve flags
                     float               fPdMakeup;      // Peak detector makeup gain
+                    float               fPdLevel;       // Peak detector level
                     float               fPfInGain;      // Peak filter input gain
                     float               fPfOutGain;     // Peak filter output gain
                     float               fPfReduction;   // Peak filter reduction value

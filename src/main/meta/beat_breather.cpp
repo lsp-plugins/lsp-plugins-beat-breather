@@ -58,7 +58,8 @@ namespace lsp
             COMBO("ts", "Tab selector", 0, bb_tabs), \
             LOG_CONTROL("react", "FFT reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \
             CONTROL("shift", "FFT shift gain", U_DB, beat_breather::FFT_SHIFT), \
-            LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, beat_breather::ZOOM)
+            LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, beat_breather::ZOOM), \
+            SWITCH("flt", "Show filters", 1.0f)
 
         #define BB_COMMON_STEREO \
             SWITCH("ssplit", "Stereo split", 0.0f)

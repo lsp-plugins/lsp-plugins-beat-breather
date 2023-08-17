@@ -85,14 +85,14 @@
 						width="2" fill="true"
 						smooth="true" color="graph_mesh_cycle"
 						color.hue="${hue}" fcolor="graph_mesh_cycle"
-						fcolor.hue="${hue}" fcolor.a="0.9" />
+						fcolor.hue="${hue}" fcolor.a="0.9" visibility=":flt" />
 					<ui:for id="i" first="2" count="8">
 						<ui:eval id="hue" value="(:i-1) * 0.125" />
 						<mesh id="bfg_${i}"
 							width="2" fill="true" smooth="true"
 							color="graph_mesh_cycle" color.hue="${hue}"
 							fcolor="graph_mesh_cycle" fcolor.hue="${hue}" fcolor.a="0.9"
-							visibility=":se_${:i-1}"/>
+							visibility=":flt and :se_${:i-1}"/>
 					</ui:for>
 
 					<mesh id="ifg_l" width="0" color="left_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="left_in" visibility=":ife_l"/>
@@ -100,7 +100,9 @@
 					<mesh id="ofg_l" width="3" color="left" visibility=":ofe_l"/>
 					<mesh id="ofg_r" width="3" color="right" visibility=":ofe_r"/>
 
-					<!-- mesh id="ag" width="3" color="bright_cyan" smooth="true" visibility=":crv"/-->
+					<mesh id="ag_l" width="3" color="bright_cyan" smooth="true" visibility="!:ssplit" />
+					<mesh id="ag_l" width="3" color="left" smooth="true" visibility=":ssplit" />
+					<mesh id="ag_r" width="3" color="right" smooth="true" visibility=":ssplit" />
 
 					<!-- Boundaries -->
 					<marker v="1" ox="2" oy="0" color="graph_prim" visibility="false"/>
@@ -246,6 +248,7 @@
 
 			<!-- bottom line -->
 			<hbox spacing="8" vreduce="true" bg.color="bg_schema" pad.h="6">
+				<button id="flt" text="labels.filters" size="22" ui:inject="Button_cyan"/>
 				<void hexpand="true" />
 				<vsep pad.h="2" bg.color="bg" reduce="true" />
 				<button id="ssplit" text="labels.stereo_split" size="22" pad.v="4" ui:inject="Button_blue"/>
@@ -686,14 +689,14 @@
 								<text y="12 db" text="+12"/>
 								<text y="-12 db" text="-12"/>
 								<text y="-24 db" text="-24"/>
-								<text y="-36 db" text="graph.axis.out" valign="1"/>
+								<text y="-36 db" text="graph.axis.out" halign="1" valign="1" />
 							</ui:attributes>
 							<ui:attributes y="0 db" halign="-1" valign="-1">
 								<text x="24 db" text="graph.units.db"/>
 								<text x="12 db" text="+12"/>
 								<text x="-12 db" text="-12"/>
 								<text x="-24 db" text="-24"/>
-								<text x="-36 db" text="graph.axis.in" halign="1"/>
+								<text x="-36 db" text="graph.axis.in" halign="1" valign="1" />
 							</ui:attributes>
 						</graph>
 					</cell>
@@ -882,14 +885,14 @@
 								<text y="12 db" text="+12"/>
 								<text y="-12 db" text="-12"/>
 								<text y="-24 db" text="-24"/>
-								<text y="-36 db" text="graph.axis.out" valign="1"/>
+								<text y="-36 db" text="graph.axis.out" halign="1" valign="1" />
 							</ui:attributes>
 							<ui:attributes y="0 db" halign="-1" valign="-1">
 								<text x="24 db" text="graph.units.db"/>
 								<text x="12 db" text="+12"/>
 								<text x="-12 db" text="-12"/>
 								<text x="-24 db" text="-24"/>
-								<text x="-36 db" text="graph.axis.in" halign="1"/>
+								<text x="-36 db" text="graph.axis.in" halign="1" valign="1" />
 							</ui:attributes>
 						</graph>
 					</cell>
@@ -951,25 +954,27 @@
 				</ui:for>
 				
 				<!-- Row 8 -->
-				<label text="labels.ratio" pad.v="4" bg.color="bg_schema" />
+				<vbox bg.color="bg_schema">
+					<label text="labels.ratio" pad.v="4" />
+					<label text="labels.beat_breather.max_gain:db" pad.v="4" />
+				</vbox>
 				<ui:for id="i" first="1" count="8">
 					<ui:eval id="hue" value="(:i-1) * 0.125" />
 					<knob id="bper_${i}" ssize="3" pad.v="4"
 						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
-					<hbox>
-						<value id="bper_${i}" />
-						<label text=":"/>
-						<label text="1"/>
-					</hbox>
+					<knob id="bpmg_${i}" ssize="3" pad.v="4"
+						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
 				</ui:for>
 				
 				<!-- Row 9 -->
-				<label text="labels.beat_breather.max_gain" pad.v="4" bg.color="bg_schema" />
+				<void bg.color="bg_schema" />
 				<ui:for id="i" first="1" count="8">
-					<ui:eval id="hue" value="(:i-1) * 0.125" />
-					<knob id="bpmg_${i}" ssize="3" pad.v="4"
-						scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}" />
-					<value id="bpmg_${i}" />
+					<hbox fill="false">
+						<value id="bper_${i}" />
+						<label text=":"/>
+						<label text="1"/>
+					</hbox>					
+					<value id="bpmg_${i}" detailed="false" />
 				</ui:for>
 			</grid>
 			

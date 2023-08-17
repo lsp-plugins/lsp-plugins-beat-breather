@@ -9,7 +9,7 @@
 		},
 		"graph": "Graph",
 		"long_rms": "Long RMS",
-		"max_gain": "Max\nGain",
+		"max_gain:db": "Max Gain (dB)",
 		"release:ms": "Release (ms)",
 		"short_rms": "Short RMS",
 		"threshold:db": "Threshold (dB)",

@@ -257,17 +257,19 @@ namespace lsp
                     b->nOldMode             = BAND_OFF;
                     b->nMode                = BAND_OFF;
                     b->fGain                = GAIN_AMP_0_DB;
-                    b->fInLevel             = 0.0f;
-                    b->fOutLevel            = 0.0f;
+                    b->fInLevel             = GAIN_AMP_M_INF_DB;
+                    b->fOutLevel            = GAIN_AMP_M_INF_DB;
+                    b->fReduction           = GAIN_AMP_0_DB;
                     b->nSync                = SYNC_ALL;
                     b->fPdMakeup            = GAIN_AMP_0_DB;
-                    b->fPfInGain            = 0.0f;
-                    b->fPfOutGain           = 0.0f;
-                    b->fPfReduction         = 0.0f;
+                    b->fPdLevel             = GAIN_AMP_M_INF_DB;
+                    b->fPfInGain            = GAIN_AMP_M_INF_DB;
+                    b->fPfOutGain           = GAIN_AMP_M_INF_DB;
+                    b->fPfReduction         = GAIN_AMP_M_INF_DB;
                     b->fBpMakeup            = GAIN_AMP_0_DB;
-                    b->fBpInGain            = 0.0f;
-                    b->fBpOutGain           = 0.0f;
-                    b->fBpReduction         = 0.0f;
+                    b->fBpInGain            = GAIN_AMP_M_INF_DB;
+                    b->fBpOutGain           = GAIN_AMP_M_INF_DB;
+                    b->fBpReduction         = GAIN_AMP_M_INF_DB;
 
                     b->vInData              = reinterpret_cast<float *>(ptr);
                     ptr                    += szof_buffer;
@@ -390,6 +392,7 @@ namespace lsp
             pFFTReactivity          = TRACE_PORT(ports[port_id++]);
             pFFTShift               = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]); // skip zoom
+            TRACE_PORT(ports[port_id++]); // skip show filters
             if (nChannels > 1)
                 pStereoSplit            = TRACE_PORT(ports[port_id++]);
 
@@ -946,6 +949,8 @@ namespace lsp
                     b->fInLevel         = GAIN_AMP_M_INF_DB;
                     b->fOutLevel        = GAIN_AMP_M_INF_DB;
 
+                    b->fPdLevel         = GAIN_AMP_M_INF_DB;
+
                     b->fPfInGain        = GAIN_AMP_M_INF_DB;
                     b->fPfOutGain       = GAIN_AMP_M_INF_DB;
                     b->fPfReduction     = GAIN_AMP_0_DB;
@@ -1040,6 +1045,7 @@ namespace lsp
                     // Produce normalized Peak/RMS signal
                     normalize_rms(b->vPdData, b->vPdData, b->vPfData, b->fPdMakeup, samples);
                     b->sPdMeter.process(b->vPdData, samples);
+                    b->fPdLevel     = lsp_max(b->fPdLevel, dsp::abs_max(b->vPdData, samples));
                 }
             }
         }
@@ -1142,18 +1148,22 @@ namespace lsp
                     {
                         case BAND_BF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vInData, samples) * b->fGain, b->fOutLevel);
+                            b->fReduction           = b->fGain;
                             dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
                             break;
                         case BAND_PD:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPdData, samples) * b->fGain * pd_makeup, b->fOutLevel);
+                            b->fReduction           = b->fPdLevel * b->fGain;
                             dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_PF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain * pd_makeup, b->fOutLevel);
+                            b->fReduction           = b->fPfReduction * b->fGain;
                             dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_BP:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vBpData, samples) * b->fGain, b->fOutLevel);
+                            b->fReduction           = b->fBpReduction * b->fGain;
                             dsp::fmadd_k3(c->vOutData, b->vBpData, b->fGain, samples);
                             break;
 
@@ -1216,6 +1226,19 @@ namespace lsp
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c        = &vChannels[i];
+
+                // Compute transfer curve
+                dsp::fill_zero(c->vFreqChart, meta::beat_breather::FFT_MESH_POINTS);
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b       = &c->vBands[j];
+                    if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
+                        dsp::fmadd_k3(
+                            c->vFreqChart,
+                            vChannels[0].vBands[j].vFreqChart,
+                            b->fReduction,
+                            meta::beat_breather::FFT_MESH_POINTS);
+                }
 
                 // Output input and output level meters
                 c->pInLevel->set_value(c->fInLevel);

@@ -9,7 +9,7 @@
 		},
 		"graph": "График",
 		"long_rms": "Долгое СКЗ",
-		"max_gain": "Макс\nусиление",
+		"max_gain:db": "Макс усиление (дБ)",
 		"release:ms": "Релиз (ms)",
 		"short_rms": "Короткое СКЗ",
 		"threshold:db": "Порог (дБ)",
