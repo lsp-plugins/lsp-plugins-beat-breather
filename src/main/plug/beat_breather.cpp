@@ -72,14 +72,10 @@ namespace lsp
             fDryGain        = GAIN_AMP_M_INF_DB;
             fWetGain        = GAIN_AMP_0_DB;
 
-            pBypass         = NULL;
-            pInGain         = NULL;
-            pDryGain        = NULL;
-            pWetGain        = NULL;
-            pOutGain        = NULL;
-            pStereoSplit    = NULL;
-            pFFTReactivity  = NULL;
-            pFFTShift       = NULL;
+            vAnalyze[0]     = NULL;
+            vAnalyze[1]     = NULL;
+            vAnalyze[2]     = NULL;
+            vAnalyze[3]     = NULL;
 
             for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
             {
@@ -93,17 +89,21 @@ namespace lsp
                 s->pFrequency   = NULL;
             }
 
-            vAnalyze[0]     = NULL;
-            vAnalyze[1]     = NULL;
-            vAnalyze[2]     = NULL;
-            vAnalyze[3]     = NULL;
-
             vBuffer         = NULL;
             vFftFreqs       = NULL;
             vFftIndexes     = NULL;
             vPdMesh         = NULL;
             vPfMesh         = NULL;
             vBpMesh         = NULL;
+
+            pBypass         = NULL;
+            pInGain         = NULL;
+            pDryGain        = NULL;
+            pWetGain        = NULL;
+            pOutGain        = NULL;
+            pStereoSplit    = NULL;
+            pFFTReactivity  = NULL;
+            pFFTShift       = NULL;
 
             pData           = NULL;
         }
@@ -295,9 +295,6 @@ namespace lsp
                         b->vBpMesh              = NULL;
                     }
 
-                    b->pInLevel             = NULL;
-                    b->pOutLevel            = NULL;
-
                     b->pSolo                = NULL;
                     b->pMute                = NULL;
                     b->pListen              = NULL;
@@ -307,6 +304,9 @@ namespace lsp
                     b->pOutGain             = NULL;
                     b->pFreqEnd             = NULL;
                     b->pFreqMesh            = NULL;
+
+                    b->pInLevel             = NULL;
+                    b->pOutLevel            = NULL;
 
                     b->pPdLongTime          = NULL;
                     b->pPdShortTime         = NULL;
@@ -338,8 +338,8 @@ namespace lsp
 
                 c->nAnIn                = an_cid++;
                 c->nAnOut               = an_cid++;
-                c->fInLevel             = 0.0f;
-                c->fOutLevel            = 0.0f;
+                c->fInLevel             = GAIN_AMP_M_INF_DB;
+                c->fOutLevel            = GAIN_AMP_M_INF_DB;
 
                 c->vIn                  = NULL;
                 c->vOut                 = NULL;
@@ -587,7 +587,9 @@ namespace lsp
                     b->sPdShort.set_sample_rate(sr);
                     b->sPdDelay.init(max_delay_pd);
                     b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
+                    b->sPf.set_sample_rate(sr);
                     b->sPfDelay.init(max_delay_pf);
+                    b->sBp.set_sample_rate(sr);
                     b->sBpScDelay.init(max_delay_bp);
                     b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
                 }
@@ -914,22 +916,22 @@ namespace lsp
 
                 // Stores band data to band_t::vIn
                 split_signal(to_do);
-//                // Stores normalized RMS difference to band_t::vPdData
-//                apply_peak_detector(to_do);
-//                // Stores processed data to band_t::vPfData
-//                apply_punch_filter(to_do);
-//                // Stores the processed band data to band_t::vBpData
-//                apply_beat_processor(to_do);
-//
-//                // Stores the processed band data to channel_t::vOutData
-//                mix_bands(to_do);
-//
-//                post_process_block(to_do);
+                // Stores normalized RMS difference to band_t::vPdData
+                apply_peak_detector(to_do);
+                // Stores processed data to band_t::vPfData
+                apply_punch_filter(to_do);
+                // Stores the processed band data to band_t::vBpData
+                apply_beat_processor(to_do);
+
+                // Stores the processed band data to channel_t::vOutData
+                mix_bands(to_do);
+
+                post_process_block(to_do);
 
                 offset             += to_do;
             }
 
-//            output_meters();
+            output_meters();
         }
 
         void beat_breather::bind_inputs()
