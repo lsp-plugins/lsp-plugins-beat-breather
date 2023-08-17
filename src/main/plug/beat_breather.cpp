@@ -552,49 +552,49 @@ namespace lsp
 
         void beat_breather::update_sample_rate(long sr)
         {
-//            const size_t fft_rank       = select_fft_rank(sr);
-//            const size_t max_delay_pd   = dspu::millis_to_samples(sr,
-//                (lsp_max(meta::beat_breather::PD_SHORT_RMS_MAX, meta::beat_breather::PD_LONG_RMS_MAX) + 1)/2);
-//            const size_t max_delay_pf   = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
-//            const size_t max_delay_bp   = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
-//            const size_t max_delay_fft  = (1 << fft_rank);
-//            const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
-//
-//            for (size_t i=0; i<nChannels; ++i)
-//            {
-//                channel_t *c            = &vChannels[i];
-//
-//                c->sBypass.init(sr);
-//                c->sDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
-//                c->sDryDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
-//
-//                if (fft_rank != c->sCrossover.rank())
-//                {
-//                    c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
-//                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                        c->sCrossover.set_handler(j, process_band, this, c);
-//                    c->sCrossover.set_rank(fft_rank);
-//                    c->sCrossover.set_phase(float(i) / float(nChannels));
-//                }
-//                c->sCrossover.set_sample_rate(sr);
-//
-//                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                {
-//                    band_t *b               = &c->vBands[j];
-//
-//                    b->sDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
-//                    b->sPdLong.set_sample_rate(sr);
-//                    b->sPdShort.set_sample_rate(sr);
-//                    b->sPdDelay.init(max_delay_pd);
-//                    b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
-//                    b->sPfDelay.init(max_delay_pf);
-//                    b->sBpScDelay.init(max_delay_bp);
-//                    b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
-//                }
-//            }
-//
-//            // Commit sample rate to analyzer
-//            sAnalyzer.set_sample_rate(sr);
+            const size_t fft_rank       = select_fft_rank(sr);
+            const size_t max_delay_pd   = dspu::millis_to_samples(sr,
+                (lsp_max(meta::beat_breather::PD_SHORT_RMS_MAX, meta::beat_breather::PD_LONG_RMS_MAX) + 1)/2);
+            const size_t max_delay_pf   = dspu::millis_to_samples(sr, meta::beat_breather::PF_LOOKAHEAD_MAX);
+            const size_t max_delay_bp   = dspu::millis_to_samples(sr, meta::beat_breather::BP_TIME_SHIFT_MAX);
+            const size_t max_delay_fft  = (1 << fft_rank);
+            const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
+
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c            = &vChannels[i];
+
+                c->sBypass.init(sr);
+                c->sDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
+                c->sDryDelay.init(max_delay_fft + max_delay_pd + max_delay_pf + max_delay_bp + BUFFER_SIZE);
+
+                if (fft_rank != c->sCrossover.rank())
+                {
+                    c->sCrossover.init(fft_rank, meta::beat_breather::BANDS_MAX);
+                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                        c->sCrossover.set_handler(j, process_band, this, c);
+                    c->sCrossover.set_rank(fft_rank);
+                    c->sCrossover.set_phase(float(i) / float(nChannels));
+                }
+                c->sCrossover.set_sample_rate(sr);
+
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+
+                    b->sDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
+                    b->sPdLong.set_sample_rate(sr);
+                    b->sPdShort.set_sample_rate(sr);
+                    b->sPdDelay.init(max_delay_pd);
+                    b->sPdMeter.init(meta::beat_breather::TIME_MESH_POINTS, samples_per_dot);
+                    b->sPfDelay.init(max_delay_pf);
+                    b->sBpScDelay.init(max_delay_bp);
+                    b->sBpDelay.init(max_delay_pd + max_delay_pf + max_delay_bp);
+                }
+            }
+
+            // Commit sample rate to analyzer
+            sAnalyzer.set_sample_rate(sr);
         }
 
         int beat_breather::compare_splits(const void *a1, const void *a2, void *data)
@@ -628,269 +628,269 @@ namespace lsp
 
         void beat_breather::update_settings()
         {
-//            // Configure global parameters
-//            float out_gain      = pOutGain->value();
-//            bStereoSplit        = ((nChannels > 1) && (pStereoSplit != NULL)) ? pStereoSplit->value() >= 0.5f : false;
-//            fInGain             = pInGain->value();
-//            fDryGain            = out_gain * pDryGain->value();
-//            fWetGain            = out_gain * pWetGain->value();
-//            size_t an_channels  = 0;
-//            float bypass        = pBypass->value() >= 0.5f;
-//            bool sync           = false;
-//
-//            // Update analyzer settings
-//            for (size_t i=0; i<nChannels; ++i)
-//            {
-//                channel_t *c    = &vChannels[i];
-//
-//                // Update analyzer settings
-//                sAnalyzer.enable_channel(c->nAnIn, c->pInFft->value() >= 0.5f);
-//                sAnalyzer.enable_channel(c->nAnOut, c->pOutFft->value() >= 0.5f);
-//
-//                if (sAnalyzer.channel_active(c->nAnIn))
-//                    an_channels ++;
-//                if (sAnalyzer.channel_active(c->nAnOut))
-//                    an_channels ++;
-//            }
-//
-//            // Update analyzer parameters
-//            sAnalyzer.set_reactivity(pFFTReactivity->value());
-//            if (pFFTShift != NULL)
-//                sAnalyzer.set_shift(dspu::db_to_gain(pFFTShift->value()) * 100.0f);
-//            sAnalyzer.set_activity(an_channels > 0);
-//
-//            if (sAnalyzer.needs_reconfiguration())
-//            {
-//                sAnalyzer.reconfigure();
-//                sAnalyzer.get_frequencies(
-//                    vFftFreqs,
-//                    vFftIndexes,
-//                    SPEC_FREQ_MIN,
-//                    SPEC_FREQ_MAX,
-//                    meta::beat_breather::FFT_MESH_POINTS);
-//                sync                = true;
-//            }
-//
-//            // Configure splits and their order
-//            size_t nsplits  = 0;
-//            split_t *vsplits[meta::beat_breather::BANDS_MAX];
-//
-//            for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
-//            {
-//                split_t *sp         = &vSplits[i];
-//                sp->nBandId         = i + 1;
-//                sp->bEnabled        = sp->pEnable->value() >= 0.5f;
-//                sp->fFrequency      = sp->pFrequency->value();
-//                if (sp->bEnabled)
-//                    vsplits[nsplits++]  = sp;
-//            }
-//            if (nsplits > 1)
-//                lsp::qsort_r(vsplits, nsplits, sizeof(split_t *), compare_splits, NULL);
-//
-//            // Configure channels
-//            size_t max_band_latency     = 0;
-//            for (size_t i=0; i<nChannels; ++i)
-//            {
-//                channel_t *c        = &vChannels[i];
-//                bool has_solo       = false;
-//
-//                c->sBypass.set_bypass(bypass);
-//
-//                // Form the list of bands
-//                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                {
-//                    band_t *b           = &c->vBands[j];
-//                    b->nOldMode         = b->nMode;
-//                    b->nMode            = BAND_OFF;
-//                }
-//
-//                // Configure active frequency bands
-//                for (size_t j=0; j<=nsplits; ++j)
-//                {
-//                    size_t band_id  = (j > 0) ? vsplits[j-1]->nBandId : 0;
-//                    band_t *b       = &c->vBands[band_id];
-//                    b->nMode        = decode_band_mode(b->pListen->value());
-//
-//                    // Configure hi-pass filter
-//                    if (j > 0)
-//                    {
-//                        c->sCrossover.enable_hpf(band_id, true);
-//                        c->sCrossover.set_hpf_frequency(band_id, vsplits[j-1]->fFrequency);
-//                        c->sCrossover.set_hpf_slope(band_id, - b->pHpfSlope->value());
-//                    }
-//                    else
-//                        c->sCrossover.disable_hpf(band_id);
-//
-//                    // Configure lo-pass filter
-//                    if (j < nsplits)
-//                    {
-//                        c->sCrossover.enable_lpf(band_id, true);
-//                        c->sCrossover.set_lpf_frequency(band_id, vsplits[j]->fFrequency);
-//                        c->sCrossover.set_lpf_slope(band_id, - b->pLpfSlope->value());
-//                        b->pFreqEnd->set_value(vsplits[j]->fFrequency);
-//                    }
-//                    else
-//                    {
-//                        c->sCrossover.disable_lpf(band_id);
-//                        b->pFreqEnd->set_value(fSampleRate * 0.5f);
-//                    }
-//
-//                    c->sCrossover.set_flatten(band_id, dspu::db_to_gain(-b->pFlatten->value()));
-//
-//                    // Check solo option
-//                    if (b->pSolo->value() >= 0.5f)
-//                        has_solo        = true;
-//                }
-//
-//                // Configure bands
-//                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                {
-//                    band_t *b               = &c->vBands[j];
-//
-//                    bool solo               = b->pSolo->value() >= 0.5f;
-//                    bool mute               = ((has_solo) && (!solo)) ? true : b->pMute->value() >= 0.5f;
-//                    if ((mute) && (b->nMode != BAND_OFF))
-//                        b->nMode                = BAND_MUTE;
-//
-//                    b->fGain                = b->pOutGain->value();
-//
-//                    // Do we have hi-pass filter?
-//                    c->sCrossover.enable_band(j, b->nMode != BAND_OFF);
-//
-//                    // Update Peak detector configuration
-//                    float pd_long           = b->pPdLongTime->value();
-//                    float pd_short          = b->pPdShortTime->value();
-//                    size_t pd_short_latency = dspu::millis_to_samples(fSampleRate, pd_long - pd_short) / 2;
-//                    size_t pd_latency       = dspu::millis_to_samples(fSampleRate, pd_long) / 2;
-//                    b->fPdMakeup            = dspu::db_to_gain(b->pPdMakeup->value() + meta::beat_breather::PD_MAKEUP_SHIFT);
-//
-//                    b->sPdLong.set_mode(dspu::SCM_RMS);
-//                    b->sPdLong.set_source(dspu::SCS_MIDDLE);
-//                    b->sPdLong.set_reactivity(pd_long);
-//                    b->sPdLong.set_gain(GAIN_AMP_0_DB);
-//
-//                    b->sPdShort.set_mode(dspu::SCM_RMS);
-//                    b->sPdShort.set_source(dspu::SCS_MIDDLE);
-//                    b->sPdShort.set_reactivity(pd_short);
-//                    b->sPdShort.set_gain(GAIN_AMP_0_DB);
-//
-//                    b->sPdDelay.set_delay(pd_short_latency);
-//
-//                    b->sPdMeter.set_method(dspu::MM_MAXIMUM);
-//                    if ((b->nOldMode != BAND_OFF) && (b->nMode == BAND_OFF))
-//                        b->sPdMeter.fill(0.0f);
-//
-//                    // Update peak filter configuration
-//                    float pf_thresh         = b->pPfThreshold->value();
-//                    float pf_zone           = b->pPfZone->value();
-//                    size_t pf_latency       = dspu::millis_to_samples(fSampleRate, b->pPfLookahead->value());
-//
-//                    b->sPf.set_attack(b->pPfAttack->value());
-//                    b->sPf.set_release(b->pPfRelease->value());
-//                    b->sPf.set_threshold(pf_thresh, pf_thresh);
-//                    b->sPf.set_zone(pf_zone, pf_zone);
-//                    b->sPf.set_reduction(b->pPfReduction->value());
-//                    if (b->sPf.modified())
-//                    {
-//                        b->sPf.update_settings();
-//                        if (i == 0)
-//                            b->sPf.curve(b->vPfMesh, vPfMesh, meta::beat_breather::CURVE_MESH_POINTS, false);
-//                        b->nSync               |= SYNC_PEAK_FILTER;
-//                    }
-//
-//                    b->sPfDelay.set_delay(pf_latency);
-//
-//                    // Update beat processor configuration
-//                    float bp_ratio          = b->pBpRatio->value() - 1.0f;
-//                    float bp_shift          = b->pBpTimeShift->value();
-//                    size_t bp_sc_latency    = dspu::millis_to_samples(fSampleRate, lsp_max(bp_shift, 0.0f));
-//                    size_t bp_latency       = dspu::millis_to_samples(fSampleRate, lsp_max(-bp_shift, 0.0f));
-//                    if (bp_ratio >= 1e-3f)
-//                    {
-//                        float bp_max_gain       = b->pBpMaxGain->value();
-//                        float bp_user_th        = b->pBpThreshold->value();
-//                        float bp_log_th         = logf(bp_user_th);
-//                        float bp_log_gate_th    = logf(bp_max_gain) / bp_ratio + bp_log_th;
-//                        float bp_th             = expf(bp_log_gate_th);
-//                        float bp_zone           = bp_user_th / bp_th;
-//
-//                        b->sBp.set_threshold(bp_th, bp_th);
-//                        b->sBp.set_reduction(1.0f / bp_max_gain);
-//                        b->sBp.set_zone(bp_zone, bp_zone);
-//                        b->fBpMakeup            = bp_max_gain;
-//                    }
-//                    else
-//                    {
-//                        float bp_th             = b->pBpThreshold->value();
-//                        b->sBp.set_threshold(bp_th, bp_th);
-//                        b->sBp.set_reduction(GAIN_AMP_0_DB);
-//                        b->sBp.set_zone(GAIN_AMP_0_DB, GAIN_AMP_0_DB);
-//                        b->fBpMakeup            = GAIN_AMP_0_DB;
-//                    }
-//
-//
-//                    b->sBp.set_attack(b->pBpAttack->value());
-//                    b->sBp.set_release(b->pBpRelease->value());
-//
-//                    if (b->sBp.modified())
-//                    {
-//                        b->sBp.update_settings();
-//                        if (i == 0)
-//                            b->sBp.curve(b->vBpMesh, vBpMesh, meta::beat_breather::CURVE_MESH_POINTS, false);
-//                        b->nSync               |= SYNC_BEAT_PROC;
-//                    }
-//
-//                    b->sBpScDelay.set_delay(bp_sc_latency);
-//                    b->sBpDelay.set_delay(pd_latency + pf_latency + bp_latency);
-//
-//                    // Compute the overall latency of the band
-//                    if (b->nMode != BAND_OFF)
-//                        max_band_latency        = lsp_max(max_band_latency, b->sBpDelay.delay());
-//                }
-//
-//                // Reconfigure the crossover
-//                bool csync   = (sync) || (c->sCrossover.needs_update());
-//                c->sCrossover.update_settings();
-//
-//                if ((csync) && (i == 0))
-//                {
-//                    // Output band parameters and update sync curve flag
-//                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                    {
-//                        band_t *b               = &c->vBands[j];
-//
-//                        // Get frequency response for band
-//                        c->sCrossover.freq_chart(j, b->vFreqChart, vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
-//                        b->nSync               |= SYNC_BAND_FILTER;
-//                    }
-//                }
-//            }
-//
-//            // Apply latency compensations and report latency
-//            for (size_t i=0; i<nChannels; ++i)
-//            {
-//                channel_t *c        = &vChannels[i];
-//                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
-//                {
-//                    band_t *b               = &c->vBands[j];
-//                    if (b->nMode == BAND_OFF)
-//                        continue;
-//                    b->sDelay.set_delay(max_band_latency - b->sBpDelay.delay());
-//
-//                    lsp_trace("Band #%d: latency=%d, compensation=%d, overall=%d",
-//                        int(i),
-//                        int(b->sBpDelay.delay()),
-//                        int(b->sDelay.delay()),
-//                        int(max_band_latency));
-//                }
-//
-//                size_t overall_latency  = max_band_latency + c->sCrossover.latency();
-//                c->sDelay.set_delay(overall_latency);
-//                c->sDryDelay.set_delay(overall_latency);
-//
-//                if (i == 0)
-//                    set_latency(overall_latency);
-//            }
+            // Configure global parameters
+            float out_gain      = pOutGain->value();
+            bStereoSplit        = ((nChannels > 1) && (pStereoSplit != NULL)) ? pStereoSplit->value() >= 0.5f : false;
+            fInGain             = pInGain->value();
+            fDryGain            = out_gain * pDryGain->value();
+            fWetGain            = out_gain * pWetGain->value();
+            size_t an_channels  = 0;
+            float bypass        = pBypass->value() >= 0.5f;
+            bool sync           = false;
+
+            // Update analyzer settings
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c    = &vChannels[i];
+
+                // Update analyzer settings
+                sAnalyzer.enable_channel(c->nAnIn, c->pInFft->value() >= 0.5f);
+                sAnalyzer.enable_channel(c->nAnOut, c->pOutFft->value() >= 0.5f);
+
+                if (sAnalyzer.channel_active(c->nAnIn))
+                    an_channels ++;
+                if (sAnalyzer.channel_active(c->nAnOut))
+                    an_channels ++;
+            }
+
+            // Update analyzer parameters
+            sAnalyzer.set_reactivity(pFFTReactivity->value());
+            if (pFFTShift != NULL)
+                sAnalyzer.set_shift(dspu::db_to_gain(pFFTShift->value()) * 100.0f);
+            sAnalyzer.set_activity(an_channels > 0);
+
+            if (sAnalyzer.needs_reconfiguration())
+            {
+                sAnalyzer.reconfigure();
+                sAnalyzer.get_frequencies(
+                    vFftFreqs,
+                    vFftIndexes,
+                    SPEC_FREQ_MIN,
+                    SPEC_FREQ_MAX,
+                    meta::beat_breather::FFT_MESH_POINTS);
+                sync                = true;
+            }
+
+            // Configure splits and their order
+            size_t nsplits  = 0;
+            split_t *vsplits[meta::beat_breather::BANDS_MAX];
+
+            for (size_t i=0; i<meta::beat_breather::BANDS_MAX-1; ++i)
+            {
+                split_t *sp         = &vSplits[i];
+                sp->nBandId         = i + 1;
+                sp->bEnabled        = sp->pEnable->value() >= 0.5f;
+                sp->fFrequency      = sp->pFrequency->value();
+                if (sp->bEnabled)
+                    vsplits[nsplits++]  = sp;
+            }
+            if (nsplits > 1)
+                lsp::qsort_r(vsplits, nsplits, sizeof(split_t *), compare_splits, NULL);
+
+            // Configure channels
+            size_t max_band_latency     = 0;
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+                bool has_solo       = false;
+
+                c->sBypass.set_bypass(bypass);
+
+                // Form the list of bands
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b           = &c->vBands[j];
+                    b->nOldMode         = b->nMode;
+                    b->nMode            = BAND_OFF;
+                }
+
+                // Configure active frequency bands
+                for (size_t j=0; j<=nsplits; ++j)
+                {
+                    size_t band_id  = (j > 0) ? vsplits[j-1]->nBandId : 0;
+                    band_t *b       = &c->vBands[band_id];
+                    b->nMode        = decode_band_mode(b->pListen->value());
+
+                    // Configure hi-pass filter
+                    if (j > 0)
+                    {
+                        c->sCrossover.enable_hpf(band_id, true);
+                        c->sCrossover.set_hpf_frequency(band_id, vsplits[j-1]->fFrequency);
+                        c->sCrossover.set_hpf_slope(band_id, - b->pHpfSlope->value());
+                    }
+                    else
+                        c->sCrossover.disable_hpf(band_id);
+
+                    // Configure lo-pass filter
+                    if (j < nsplits)
+                    {
+                        c->sCrossover.enable_lpf(band_id, true);
+                        c->sCrossover.set_lpf_frequency(band_id, vsplits[j]->fFrequency);
+                        c->sCrossover.set_lpf_slope(band_id, - b->pLpfSlope->value());
+                        b->pFreqEnd->set_value(vsplits[j]->fFrequency);
+                    }
+                    else
+                    {
+                        c->sCrossover.disable_lpf(band_id);
+                        b->pFreqEnd->set_value(fSampleRate * 0.5f);
+                    }
+
+                    c->sCrossover.set_flatten(band_id, dspu::db_to_gain(-b->pFlatten->value()));
+
+                    // Check solo option
+                    if (b->pSolo->value() >= 0.5f)
+                        has_solo        = true;
+                }
+
+                // Configure bands
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+
+                    bool solo               = b->pSolo->value() >= 0.5f;
+                    bool mute               = ((has_solo) && (!solo)) ? true : b->pMute->value() >= 0.5f;
+                    if ((mute) && (b->nMode != BAND_OFF))
+                        b->nMode                = BAND_MUTE;
+
+                    b->fGain                = b->pOutGain->value();
+
+                    // Do we have hi-pass filter?
+                    c->sCrossover.enable_band(j, b->nMode != BAND_OFF);
+
+                    // Update Peak detector configuration
+                    float pd_long           = b->pPdLongTime->value();
+                    float pd_short          = b->pPdShortTime->value();
+                    size_t pd_short_latency = dspu::millis_to_samples(fSampleRate, pd_long - pd_short) / 2;
+                    size_t pd_latency       = dspu::millis_to_samples(fSampleRate, pd_long) / 2;
+                    b->fPdMakeup            = dspu::db_to_gain(b->pPdMakeup->value() + meta::beat_breather::PD_MAKEUP_SHIFT);
+
+                    b->sPdLong.set_mode(dspu::SCM_RMS);
+                    b->sPdLong.set_source(dspu::SCS_MIDDLE);
+                    b->sPdLong.set_reactivity(pd_long);
+                    b->sPdLong.set_gain(GAIN_AMP_0_DB);
+
+                    b->sPdShort.set_mode(dspu::SCM_RMS);
+                    b->sPdShort.set_source(dspu::SCS_MIDDLE);
+                    b->sPdShort.set_reactivity(pd_short);
+                    b->sPdShort.set_gain(GAIN_AMP_0_DB);
+
+                    b->sPdDelay.set_delay(pd_short_latency);
+
+                    b->sPdMeter.set_method(dspu::MM_MAXIMUM);
+                    if ((b->nOldMode != BAND_OFF) && (b->nMode == BAND_OFF))
+                        b->sPdMeter.fill(0.0f);
+
+                    // Update peak filter configuration
+                    float pf_thresh         = b->pPfThreshold->value();
+                    float pf_zone           = b->pPfZone->value();
+                    size_t pf_latency       = dspu::millis_to_samples(fSampleRate, b->pPfLookahead->value());
+
+                    b->sPf.set_attack(b->pPfAttack->value());
+                    b->sPf.set_release(b->pPfRelease->value());
+                    b->sPf.set_threshold(pf_thresh, pf_thresh);
+                    b->sPf.set_zone(pf_zone, pf_zone);
+                    b->sPf.set_reduction(b->pPfReduction->value());
+                    if (b->sPf.modified())
+                    {
+                        b->sPf.update_settings();
+                        if (i == 0)
+                            b->sPf.curve(b->vPfMesh, vPfMesh, meta::beat_breather::CURVE_MESH_POINTS, false);
+                        b->nSync               |= SYNC_PEAK_FILTER;
+                    }
+
+                    b->sPfDelay.set_delay(pf_latency);
+
+                    // Update beat processor configuration
+                    float bp_ratio          = b->pBpRatio->value() - 1.0f;
+                    float bp_shift          = b->pBpTimeShift->value();
+                    size_t bp_sc_latency    = dspu::millis_to_samples(fSampleRate, lsp_max(bp_shift, 0.0f));
+                    size_t bp_latency       = dspu::millis_to_samples(fSampleRate, lsp_max(-bp_shift, 0.0f));
+                    if (bp_ratio >= 1e-3f)
+                    {
+                        float bp_max_gain       = b->pBpMaxGain->value();
+                        float bp_user_th        = b->pBpThreshold->value();
+                        float bp_log_th         = logf(bp_user_th);
+                        float bp_log_gate_th    = logf(bp_max_gain) / bp_ratio + bp_log_th;
+                        float bp_th             = expf(bp_log_gate_th);
+                        float bp_zone           = bp_user_th / bp_th;
+
+                        b->sBp.set_threshold(bp_th, bp_th);
+                        b->sBp.set_reduction(1.0f / bp_max_gain);
+                        b->sBp.set_zone(bp_zone, bp_zone);
+                        b->fBpMakeup            = bp_max_gain;
+                    }
+                    else
+                    {
+                        float bp_th             = b->pBpThreshold->value();
+                        b->sBp.set_threshold(bp_th, bp_th);
+                        b->sBp.set_reduction(GAIN_AMP_0_DB);
+                        b->sBp.set_zone(GAIN_AMP_0_DB, GAIN_AMP_0_DB);
+                        b->fBpMakeup            = GAIN_AMP_0_DB;
+                    }
+
+
+                    b->sBp.set_attack(b->pBpAttack->value());
+                    b->sBp.set_release(b->pBpRelease->value());
+
+                    if (b->sBp.modified())
+                    {
+                        b->sBp.update_settings();
+                        if (i == 0)
+                            b->sBp.curve(b->vBpMesh, vBpMesh, meta::beat_breather::CURVE_MESH_POINTS, false);
+                        b->nSync               |= SYNC_BEAT_PROC;
+                    }
+
+                    b->sBpScDelay.set_delay(bp_sc_latency);
+                    b->sBpDelay.set_delay(pd_latency + pf_latency + bp_latency);
+
+                    // Compute the overall latency of the band
+                    if (b->nMode != BAND_OFF)
+                        max_band_latency        = lsp_max(max_band_latency, b->sBpDelay.delay());
+                }
+
+                // Reconfigure the crossover
+                bool csync   = (sync) || (c->sCrossover.needs_update());
+                c->sCrossover.update_settings();
+
+                if ((csync) && (i == 0))
+                {
+                    // Output band parameters and update sync curve flag
+                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    {
+                        band_t *b               = &c->vBands[j];
+
+                        // Get frequency response for band
+                        c->sCrossover.freq_chart(j, b->vFreqChart, vFftFreqs, meta::beat_breather::FFT_MESH_POINTS);
+                        b->nSync               |= SYNC_BAND_FILTER;
+                    }
+                }
+            }
+
+            // Apply latency compensations and report latency
+            for (size_t i=0; i<nChannels; ++i)
+            {
+                channel_t *c        = &vChannels[i];
+                for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                {
+                    band_t *b               = &c->vBands[j];
+                    if (b->nMode == BAND_OFF)
+                        continue;
+                    b->sDelay.set_delay(max_band_latency - b->sBpDelay.delay());
+
+                    lsp_trace("Band #%d: latency=%d, compensation=%d, overall=%d",
+                        int(i),
+                        int(b->sBpDelay.delay()),
+                        int(b->sDelay.delay()),
+                        int(max_band_latency));
+                }
+
+                size_t overall_latency  = max_band_latency + c->sCrossover.latency();
+                c->sDelay.set_delay(overall_latency);
+                c->sDryDelay.set_delay(overall_latency);
+
+                if (i == 0)
+                    set_latency(overall_latency);
+            }
         }
 
         void beat_breather::process_band(void *object, void *subject, size_t band, const float *data, size_t sample, size_t count)
@@ -906,14 +906,14 @@ namespace lsp
 
         void beat_breather::process(size_t samples)
         {
-//            bind_inputs();
-//
-//            for (size_t offset = 0; offset < samples; )
-//            {
-//                size_t to_do        = lsp_min(offset - samples, BUFFER_SIZE);
-//
-//                // Stores band data to band_t::vIn
-//                split_signal(to_do);
+            bind_inputs();
+
+            for (size_t offset = 0; offset < samples; )
+            {
+                size_t to_do        = lsp_min(offset - samples, BUFFER_SIZE);
+
+                // Stores band data to band_t::vIn
+                split_signal(to_do);
 //                // Stores normalized RMS difference to band_t::vPdData
 //                apply_peak_detector(to_do);
 //                // Stores processed data to band_t::vPfData
@@ -926,8 +926,8 @@ namespace lsp
 //
 //                post_process_block(to_do);
 //                offset             += to_do;
-//            }
-//
+            }
+
 //            output_meters();
         }
 
