@@ -562,7 +562,7 @@ namespace lsp
         {
             const size_t k = (sample_rate + meta::beat_breather::FFT_XOVER_FREQ_MIN/2) / meta::beat_breather::FFT_XOVER_FREQ_MIN;
             const size_t n = int_log2(k);
-            return meta::beat_breather::FFT_XOVER_RANK_MIN << n;
+            return meta::beat_breather::FFT_XOVER_RANK_MIN + n;
         }
 
         void beat_breather::update_sample_rate(long sr)
