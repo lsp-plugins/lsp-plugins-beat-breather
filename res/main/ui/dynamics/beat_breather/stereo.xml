@@ -354,13 +354,13 @@
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<cell cols="2" vreduce="true">
 							<ledmeter angle="0">
-								<ledchannel id="ilm_${i}l" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'left' : 'cycle_inactive'" balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"/>
-								<ledchannel id="ilm_${i}r" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'right' : 'cycle_inactive'" balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"/>
+								<ledchannel id="ilm_${i}l" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'left' : 'cycle_inactive'" yellow.color="${act_band} ? 'meter_yellow' : 'cycle_inactive'" red.color="${act_band} ? 'meter_red' : 'cycle_inactive'"/>
+								<ledchannel id="ilm_${i}r" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'right' : 'cycle_inactive'" yellow.color="${act_band} ? 'meter_yellow' : 'cycle_inactive'" red.color="${act_band} ? 'meter_red' : 'cycle_inactive'"/>
 							</ledmeter>
 						</cell>
 						<cell cols="2" vreduce="true">
 							<ledmeter angle="0">
-								<ledchannel id="olm_${i}l" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'left' : 'cycle_inactive'" balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"/>
+								<ledchannel id="olm_${i}l" min="-72 db" max="12 db" log="true" type="rms_peak" peak.visibility="true" value.color="${act_band} ? 'left' : 'cycle_inactive'" yellow.color="${act_band} ? 'meter_yellow' : 'cycle_inactive'" red.color="${act_band} ? 'meter_red' : 'cycle_inactive'"/>
 								<ledchannel
 									id="olm_${i}r"
 									min="-72 db"
@@ -368,9 +368,7 @@
 									log="true"
 									type="rms_peak"
 									peak.visibility="true"
-									value.color="${act_band} ? 'right' : 'cycle_inactive'"
-									balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"
-									peak.color="${act_band} ? 'cyan' : 'cycle_inactive'"/>
+									value.color="${act_band} ? 'right' : 'cycle_inactive'" yellow.color="${act_band} ? 'meter_yellow' : 'cycle_inactive'" red.color="${act_band} ? 'meter_red' : 'cycle_inactive'"/>
 							</ledmeter>
 						</cell>
 					</ui:with>
