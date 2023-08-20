@@ -237,26 +237,24 @@
 		</grid>
 
 		<void height="4" bg.color="bg" vreduce="true"/>
-
-		<void bg.color="bg" height="4"/>
 		<!-- </ui:if> -->
 
 		<!-- Controls -->
 
 		<ui:set id="has_solo" value="
 		:bs_1 or (:bs_2 and :se_1) or (:bs_3 and :se_2) or (:bs_4 and :se_3) or (:bs_5 and :se_4) or (:bs_6 and :se_5) or (:bs_7 and :se_6) or (:bs_8 and :se_7)"/>
-		<tabs id="ts" height.min="414">
+		<tabs id="ts" height.min="427">
 
 			<!-- Tab 1: Band filters -->
 			<grid rows="14" cols="${3*8+1}" transpose="true">
 				<!-- Labels -->
-				<ui:with bg.color="bg_schema">
-					<cell rows="2">
+				<ui:with bg.color="bg_schema" width="76" pad.h="6" hreduce="true">
+					<cell rows="2" pad.h="0">
 						<label text="labels.band"/>
 					</cell>
-					<label text="labels.chain_output" pad.h="6" hreduce="true"/>
+					<label text="labels.chain_output"/>
 					<void/>
-					<vbox fill="false">
+					<vbox fill="false" pad.h="0">
 						<label text="labels.range"/>
 						<label text="labels.units.:hz"/>
 					</vbox>
@@ -312,23 +310,25 @@
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<cell cols="2" vreduce="true" pad.h="6">
 							<hbox>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" visibility="(${act_band})"/>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bm_${i}" text="labels.chan.M_ute" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" width.min="50" visibility="(${act_band})"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" width.min="50" visibility="(!${act_band})"/>
+								<button id="bm_${i}" text="labels.chan.M_ute" width.min="50" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
 							</hbox>
 						</cell>
 
 						<cell cols="2" vreduce="true" pad.h="6" pad.v="4">
 							<!-- Chain Output Buttons -->
 							<hbox>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})"/>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
+								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8" >
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+							</ui:with>
 							</hbox>
 						</cell>
 					</ui:with>
@@ -455,14 +455,16 @@
 			</grid>
 
 			<!-- Tab 2: Peak detector -->
-			<grid rows="9" cols="${3*8+1}" transpose="true">
+			<grid rows="11" cols="${3*8+1}" transpose="true">
 				<!-- Labels -->
-				<ui:with bg.color="bg_schema">
-					<cell rows="2">
+				<ui:with bg.color="bg_schema" width="76" pad.h="6" hreduce="true">
+					<cell rows="2" pad.h="0">
 						<label text="labels.band"/>
 					</cell>
-					<label text="labels.chain_output" pad.h="6" hreduce="true"/>
-					<label text="labels.graphs.time"/>
+					<label text="labels.chain_output"/>
+					<void/>
+					<label text="labels.beat_breather.graphs.punch"/>
+					<void/>
 					<label text="labels.beat_breather.long_rms"/>
 					<label text="labels.beat_breather.short_rms"/>
 					<label text="labels.beat_breather.rms_bias"/>
@@ -473,7 +475,7 @@
 				<ui:for id="i" first="1" count="8">
 					<ui:set id="act_band" value="(!:bm_${:i} and ((${has_solo}) ? :bs_${:i} : true) and (ex :se_${:i-1} ? (:se_${:i-1}) : true ))"/>
 					<!-- Separators -->
-					<cell rows="9"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<cell rows="11"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
 					<ui:eval id="hue" value="(:i-1) * 0.125"/>
 
 					<!-- Active buttons -->
@@ -511,30 +513,35 @@
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<cell cols="2" vreduce="true" pad.h="6">
 							<hbox>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" visibility="(${act_band})"/>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bm_${i}" text="labels.chan.M_ute" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" width.min="50" visibility="(${act_band})"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" width.min="50" visibility="(!${act_band})"/>
+								<button id="bm_${i}" text="labels.chan.M_ute" width.min="50" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
 							</hbox>
 						</cell>
 
 						<cell cols="2" vreduce="true" pad.h="6" pad.v="4">
 							<!-- Chain Output Buttons -->
 							<hbox>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})"/>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
+								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8" >
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+							</ui:with>
 							</hbox>
 						</cell>
 					</ui:with>
 
+					<!-- Separator -->
+					<cell cols="2" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
+
 					<!-- Graph -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<cell cols="2" vreduce="true" pad.h="6" pad.v="4">
+						<cell cols="2" vreduce="true">
 							<graph width.min="120" height="120">
 								<origin hpos="1" vpos="-1" visible="false"/>
 
@@ -593,6 +600,9 @@
 						</cell>
 					</ui:with>
 
+					<!-- Separator -->
+					<cell cols="2" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
+
 					<!-- Long RMS -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<hbox>
@@ -639,38 +649,40 @@
 			</grid>
 
 			<!-- Tab 3: Peak filter -->
-			<grid rows="11" cols="${4*8+1}" transpose="true">
+			<grid rows="13" cols="${5*8+1}" transpose="true">
 				<!-- Labels -->
-				<ui:with bg.color="bg_schema">
-					<cell rows="2">
+				<ui:with bg.color="bg_schema" width="76" pad.h="6" hreduce="true">
+					<cell rows="2" pad.h="0">
 						<label text="labels.band"/>
 					</cell>
-					<label text="labels.chain_output" pad.h="6" hreduce="true"/>
-					<label text="labels.graphs.time"/>
-					<label text="labels.sc.lookahead"/>
+					<label text="labels.chain_output"/>
 					<void/>
-					<vbox vfill="false">
-						<label text="labels.beat_breather.attack:ms" pad.b="4"/>
+					<label text="labels.beat_breather.graphs.reduction"/>
+				<void/>
+					<label text="labels.sc.lookahead" pad.t="4" pad.b="2"/>
+					<void/>
+					<vbox vfill="false" pad.h="0">
+						<label text="labels.beat_breather.attack:ms"/>
 						<label text="labels.beat_breather.release:ms"/>
 					</vbox>
 					<void/>
-					<vbox vfill="false">
+					<vbox vfill="false" pad.h="0">
 						<label text="labels.beat_breather.threshold:db"/>
 						<label text="labels.beat_breather.zone:db"/>
 					</vbox>
 					<void/>
-					<label text="labels.reduction"/>
+					<label text="labels.reduction" pad.t="4" pad.b="2"/>
 				</ui:with>
 
 				<ui:for id="i" first="1" count="8">
 					<ui:set id="act_band" value="(!:bm_${:i} and ((${has_solo}) ? :bs_${:i} : true) and (ex :se_${:i-1} ? (:se_${:i-1}) : true ))"/>
 					<!-- Separators -->
-					<cell rows="11"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
+					<cell rows="13"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
 					<ui:eval id="hue" value="(:i-1) * 0.125"/>
 
 					<!-- Active buttons -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<cell cols="3" vreduce="true" pad.h="6" pad.v="4">
+						<cell cols="4" vreduce="true" pad.h="6" pad.v="4">
 							<vbox>
 								<ui:if test=":i ieq 1">
 									<button text="labels.chan.num_id" text:id="1" value="1" editable="false" pointer="arrow" hfill="true" ui:inject="Button_ne_Cycle" height="19" visibility="(${act_band})"/>
@@ -701,32 +713,36 @@
 
 					<!-- Solo Mute Buttons -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<cell cols="3" vreduce="true" pad.h="6">
+						<cell cols="4" vreduce="true" pad.h="6">
 							<hbox>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" visibility="(${act_band})"/>
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bm_${i}" text="labels.chan.M_ute" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" width.min="50" visibility="(${act_band})"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" width.min="50" visibility="(!${act_band})"/>
+								<button id="bm_${i}" text="labels.chan.M_ute" width.min="50" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
 							</hbox>
 						</cell>
 
-						<cell cols="3" vreduce="true" pad.h="6" pad.v="4">
+						<cell cols="4" vreduce="true" pad.h="6" pad.v="4">
 							<!-- Chain Output Buttons -->
 							<hbox>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})"/>
-								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_yellow_8" visibility="(${act_band})" pad.l="4"/>
-								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" height="19" hfill="true" ui:inject="Button_inactive_8" visibility="(!${act_band})" pad.l="4"/>
+								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8" >
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+							</ui:with>
 							</hbox>
 						</cell>
 					</ui:with>
+					<!-- Separator -->
+					<cell cols="4" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
 
 					<!-- Graph -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<cell cols="3" vreduce="true" pad.h="6" pad.v="4">
+						<cell cols="4" vreduce="true">
 							<graph width.min="120" height="120">
 								<origin hpos="-1" vpos="-1" visible="false"/>
 
@@ -762,10 +778,10 @@
 								<dot x.id="pfem_${i}r" y.id="pfcm_${i}r" color="cycle_inactive" bcolor="cycle_inactive" visibility="(:ssplit) and (!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
 
 								<!-- Markers -->
-								<marker id="pfth_${i}" color="attack" hcolor="attack" editable="true" pointer="hsize" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
-								<marker id="pfth_${i}" color="cycle_inactive" hcolor="cycle_inactive" editable="true" pointer="hsize" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
-								<marker value=":pfth_${i} * :pfrz_${i}" color="kscale" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
-								<marker value=":pfth_${i} * :pfrz_${i}" color="cycle_inactive" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<marker id="pfth_${i}" width="2" hwidth="2" color="graph_mesh_cycle" color.hue="${hue}" hcolor="graph_mesh_cycle" hcolor.hue="${hue}" color.a="0.3" hcolor.a="0" editable="true" pointer="hsize" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<marker id="pfth_${i}" width="2" hwidth="2" color.a="0.3" hcolor.a="0" color="cycle_inactive" hcolor="cycle_inactive" editable="true" pointer="hsize" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<marker value=":pfth_${i} * :pfrz_${i}" width="2" color="graph_mesh_cycle" color.hue="${hue}" color.a="0.6" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<marker value=":pfth_${i} * :pfrz_${i}" width="2" color.a="0.6" color="cycle_inactive" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
 
 								<!-- Text -->
 								<text x="0 db" y="0 db" text="0" value="0" halign="-1" valign="-1"/>
@@ -786,10 +802,12 @@
 							</graph>
 						</cell>
 					</ui:with>
+					<!-- Separator -->
+					<cell cols="4" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
 
 					<!-- Lookahead -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<hbox>
+						<hbox pad.t="4" pad.b="2">
 							<knob id="pflk_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pflk_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 						</hbox>
@@ -799,7 +817,7 @@
 
 					<!-- Attack Release -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<vbox vfill="false">
+						<vbox vfill="false" pad.t="4" pad.b="2">
 							<knob id="pfat_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pfat_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							<value id="pfat_${i}" detailed="false"/>
@@ -810,7 +828,7 @@
 
 					<!-- Threshold Zone -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<vbox vfill="false">
+						<vbox vfill="false" pad.t="4">
 							<knob id="pfth_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pfth_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							<value id="pfth_${i}" detailed="false"/>
@@ -822,16 +840,17 @@
 
 					<!-- Reduction -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<hbox>
+						<hbox pad.t="4" pad.b="2">
 							<knob id="pfrl_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pfrl_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 						</hbox>
 					</ui:with>
+
 					<!-- Lookahead -->
-					<value id="pflk_${i}" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
+					<value id="pflk_${i}" pad.t="4" pad.b="2" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
 					<!-- Attack Release -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<vbox vfill="false">
+						<vbox vfill="false" pad.t="4" pad.b="2">
 							<knob id="pfrt_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pfrt_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							<value id="pfrt_${i}" detailed="false"/>
@@ -839,14 +858,18 @@
 					</ui:with>
 					<!-- Threshold Zone -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
-						<vbox vfill="false">
+						<vbox vfill="false" pad.t="4">
 							<knob id="pfrz_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 							<knob id="pfrz_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							<value id="pfrz_${i}" detailed="false"/>
 						</vbox>
 					</ui:with>
 					<!-- Reduction -->
-					<value id="pfrl_${i}" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
+					<value id="pfrl_${i}" pad.t="4" pad.b="2" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
+
+					<cell rows="7" bg.color="bg" hreduce="true">
+						<void  pad.h="2" hreduce="true" />
+					</cell>
 
 					<cell rows="7" hreduce="true">
 						<ledmeter vexpand="true" height.min="120" angle="1">
@@ -858,169 +881,239 @@
 			</grid>
 
 			<!-- Tab 4: Beat processor -->
-			<grid rows="9" cols="${4*8+1}">
-				<!-- Row 1 -->
-				<label text="labels.band" bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
-					<cell rows="9"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
-					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<cell cols="3">
-						<ui:if test=":i ieq 1">
-							<button text="labels.chan.num_id" text:id="1" value="1" editable="false" pointer="arrow" hfill="true" ui:inject="Button_ne_Cycle" height="19" pad.h="6" pad.v="4"/>
-						</ui:if>
-						<ui:if test=":i igt 1">
-							<button
-								id="se_${:i-1}"
-								text="labels.chan.num_id"
-								text:id="${i}"
-								ui:inject="Button_Cycle"
-								hfill="true"
-								height="19"
-								down.color.hue="${hue}"
-								down.hover.color.hue="${hue}"
-								text.down.color.hue="${hue}"
-								text.down.hover.color.hue="${hue}"
-								border.down.color.hue="${hue}"
-								border.down.hover.color.hue="${hue}"
-								pad.h="6"
-								pad.v="4"/>
-						</ui:if>
+			<grid rows="13" cols="${5*8+1}" transpose="true">
+				<!-- Labels -->
+				<ui:with bg.color="bg_schema" width="76" pad.h="6" hreduce="true">
+					<cell rows="2" pad.h="0">
+						<label text="labels.band"/>
 					</cell>
-				</ui:for>
+					<label text="labels.chain_output" />
+					<void/>
+					<label text="labels.beat_breather.graphs.gain"/>
+				<void/>
+					<label text="labels.beat_breather.time_shift" pad.t="4" pad.b="2"/>
+					<void/>
+					<vbox vfill="false" pad.h="0">
+						<label text="labels.beat_breather.attack:ms"/>
+						<label text="labels.beat_breather.release:ms"/>
+					</vbox>
+					<void/>
+						<label text="labels.threshold" pad.t="4" pad.b="2"/>
+					<void/>
+					<vbox vfill="false" pad.h="0">
+						<label text="labels.ratio" />
+						<label text="labels.beat_breather.max_gain:db"/>
+					</vbox>
+				</ui:with>
 
-				<!-- Row 2 -->
-				<label text="labels.controls" pad.v="4" bg.color="bg_schema"/>
 				<ui:for id="i" first="1" count="8">
-					<cell cols="3">
-						<grid rows="2" cols="4">
-							<cell cols="2">
-								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8"/>
-							</cell>
-							<cell cols="2">
-								<button id="bm_${i}" text="labels.chan.M_ute" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
-							</cell>
-							<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" ui:inject="Button_yellow_8"/>
-							<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" ui:inject="Button_yellow_8"/>
-							<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" ui:inject="Button_yellow_8"/>
-							<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" ui:inject="Button_yellow_8"/>
-						</grid>
-					</cell>
-				</ui:for>
-
-				<!-- Row 3 -->
-				<label text="labels.graph" pad.v="4" bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
+					<ui:set id="act_band" value="(!:bm_${:i} and ((${has_solo}) ? :bs_${:i} : true) and (ex :se_${:i-1} ? (:se_${:i-1}) : true ))"/>
+					<!-- Separators -->
+					<cell rows="13"><vsep pad.h="2" bg.color="bg" hreduce="true"/></cell>
 					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<cell cols="3">
-						<graph width="120" height="120">
-							<origin hpos="-1" vpos="-1" visible="false"/>
 
-							<!-- Gray grid -->
-							<marker v="-24 db" color="graph_sec"/>
-							<marker v="-12 db" color="graph_sec"/>
-							<marker v="12 db" color="graph_sec"/>
-							<marker v="-24 db" ox="1" oy="0" color="graph_sec"/>
-							<marker v="-12 db" ox="1" oy="0" color="graph_sec"/>
-							<marker v="12 db" ox="1" oy="0" color="graph_sec"/>
+					<!-- Active buttons -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<cell cols="4" vreduce="true" pad.h="6" pad.v="4">
+							<vbox>
+								<ui:if test=":i ieq 1">
+									<button text="labels.chan.num_id" text:id="1" value="1" editable="false" pointer="arrow" hfill="true" ui:inject="Button_ne_Cycle" height="19" visibility="(${act_band})"/>
+									<button text="labels.chan.num_id" text:id="1" value="1" editable="false" pointer="arrow" hfill="true" ui:inject="Button_inactive_8" height="19" visibility="(!${act_band})"/>
 
-							<!-- Axes and boundaries -->
-							<marker v="1" ox="1" oy="0" dv="1" dx=":_a_width" dy=":_a_height" color="graph_alt_1" width="2" smooth="true"/>
-							<axis min="-36 db" max="24 db" color="graph_prim" angle="0.0" log="true" visibility="false"/>
-							<axis min="-36 db" max="24 db" color="graph_prim" angle="0.5" log="true" visibility="false"/>
+								</ui:if>
 
-							<!-- 0 dB markers -->
-							<marker v="0 db" ox="0" oy="1" width="2" color="graph_prim"/>
-							<marker v="0 db" ox="1" oy="0" width="2" color="graph_prim"/>
+								<ui:if test=":i igt 1">
+									<button
+										id="se_${:i-1}"
+										text="labels.chan.num_id"
+										text:id="${i}"
+										ui:inject="Button_Cycle"
+										hfill="true"
+										height="19"
+										down.color.hue="${hue}"
+										down.hover.color.hue="${hue}"
+										text.down.color.hue="${hue}"
+										text.down.hover.color.hue="${hue}"
+										border.down.color.hue="${hue}"
+										border.down.hover.color.hue="${hue}"
+										visibility="(${act_band})"/>
+									<button id="se_${:i-1}" text="labels.chan.num_id" text:id="${i}" ui:inject="Button_inactive_8" hfill="true" height="19" visibility="(!${act_band})"/>
+								</ui:if>
+							</vbox>
+						</cell>
+					</ui:with>
 
-							<!-- Meshes -->
-							<mesh id="bpg_${i}" width="3" color="graph_mesh_cycle" color.hue="${hue}" smooth="true" visibility="(ex :se_${:i-1}) ? :se_${:i-1} : true"/>
-							<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="graph_mesh" bcolor="graph_mesh" visibility="(!:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
-							<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="left" bcolor="left" visibility="(:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
-							<dot x.id="bpem_${i}r" y.id="bpcm_${i}r" color="right" bcolor="right" visibility="(:ssplit) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+					<!-- Solo Mute Buttons -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<cell cols="4" vreduce="true" pad.h="6">
+							<hbox>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_green_8" width.min="50" visibility="(${act_band})"/>
+								<button id="bs_${i}" text="labels.chan.S_olo" height="19" hfill="true" ui:inject="Button_inactive_8" width.min="50" visibility="(!${act_band})"/>
+								<button id="bm_${i}" text="labels.chan.M_ute" width.min="50" height="19" hfill="true" ui:inject="Button_red_8" pad.l="4"/>
+							</hbox>
+						</cell>
 
-							<!-- Markers -->
-							<marker id="bpth_${i}" color="attack" hcolor="attack" editable="true" pointer="hsize" visibility="(ex :se_${:i-1}) ? :se_${:i-1} : true"/>
+						<cell cols="4" vreduce="true" pad.h="6" pad.v="4">
+							<!-- Chain Output Buttons -->
+							<hbox>
+								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8" >
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
+								<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
+								<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+							</ui:with>
+							</hbox>
+						</cell>
+					</ui:with>
+					<!-- Separator -->
+					<cell cols="4" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
 
-							<!-- Text -->
-							<text x="0 db" y="0 db" text="0" value="0" halign="-1" valign="-1"/>
-							<ui:attributes x="0 db" halign="-1" valign="-1">
-								<text y="24 db" text="graph.units.db"/>
-								<text y="12 db" text="+12"/>
-								<text y="-12 db" text="-12"/>
-								<text y="-24 db" text="-24"/>
-								<text y="-36 db" text="graph.axis.out" halign="1" valign="1"/>
-							</ui:attributes>
-							<ui:attributes y="0 db" halign="-1" valign="-1">
-								<text x="24 db" text="graph.units.db"/>
-								<text x="12 db" text="+12"/>
-								<text x="-12 db" text="-12"/>
-								<text x="-24 db" text="-24"/>
-								<text x="-36 db" text="graph.axis.in" halign="1" valign="1"/>
-							</ui:attributes>
-						</graph>
+					<!-- Graph -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<cell cols="4" vreduce="true">
+							<graph width.min="120" height="120">
+								<origin hpos="-1" vpos="-1" visible="false"/>
+
+								<!-- Gray grid -->
+								<marker v="-24 db" color="graph_sec"/>
+								<marker v="-12 db" color="graph_sec"/>
+								<marker v="12 db" color="graph_sec"/>
+								<marker v="-24 db" ox="1" oy="0" color="graph_sec"/>
+								<marker v="-12 db" ox="1" oy="0" color="graph_sec"/>
+								<marker v="12 db" ox="1" oy="0" color="graph_sec"/>
+
+								<!-- Axes and boundaries -->
+								<marker v="1" ox="1" oy="0" dv="1" dx=":_a_width" dy=":_a_height" color="graph_alt_1" width="2" smooth="true"/>
+								<axis min="-36 db" max="24 db" color="graph_prim" angle="0.0" log="true" visibility="false"/>
+								<axis min="-36 db" max="24 db" color="graph_prim" angle="0.5" log="true" visibility="false"/>
+
+								<!-- 0 dB markers -->
+								<marker v="0 db" ox="0" oy="1" width="1" color="graph_prim"/>
+								<marker v="0 db" ox="1" oy="0" width="1" color="graph_prim"/>
+
+								<!-- Meshes -->
+
+								<mesh id="bpg_${i}" width="2" color="graph_mesh_cycle" color.hue="${hue}" smooth="true" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<mesh id="bpg_${i}" width="2" color="cycle_inactive" smooth="true" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+
+								<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="graph_mesh" bcolor="graph_mesh" visibility="(!:ssplit) and (${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="cycle_inactive" bcolor="cycle_inactive" visibility="(!:ssplit) and (!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+
+								<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="left" bcolor="left" visibility="(:ssplit) and (${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<dot x.id="bpem_${i}l" y.id="bpcm_${i}l" color="cycle_inactive" bcolor="cycle_inactive" visibility="(:ssplit) and (!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+
+								<dot x.id="bpem_${i}r" y.id="bpcm_${i}r" color="right" bcolor="right" visibility="(:ssplit) and (${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<dot x.id="bpem_${i}r" y.id="bpcm_${i}r" color="cycle_inactive" bcolor="cycle_inactive" visibility="(:ssplit) and (!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+
+								<!-- Markers -->
+								<marker id="bpth_${i}" width="2" hwidth="2" color="graph_mesh_cycle" color.hue="${hue}" hcolor="graph_mesh_cycle" hcolor.hue="${hue}" color.a="0.3" hcolor.a="0" editable="true" pointer="hsize" visibility="(${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+								<marker id="bpth_${i}" width="2" hwidth="2" color.a="0.3" hcolor.a="0" color="cycle_inactive" hcolor="cycle_inactive" editable="true" pointer="hsize" visibility="(!${act_band}) and ((ex :se_${:i-1}) ? :se_${:i-1} : true)"/>
+
+
+								<!-- Text -->
+								<text x="0 db" y="0 db" text="0" value="0" halign="-1" valign="-1"/>
+								<ui:attributes x="0 db" halign="-1" valign="-1">
+									<text y="24 db" text="graph.units.db"/>
+									<text y="12 db" text="+12"/>
+									<text y="-12 db" text="-12"/>
+									<text y="-24 db" text="-24"/>
+									<text y="-36 db" text="graph.axis.out" halign="1" valign="1"/>
+								</ui:attributes>
+								<ui:attributes y="0 db" halign="-1" valign="-1">
+									<text x="24 db" text="graph.units.db"/>
+									<text x="12 db" text="+12"/>
+									<text x="-12 db" text="-12"/>
+									<text x="-24 db" text="-24"/>
+									<text x="-36 db" text="graph.axis.in" halign="1" valign="1"/>
+								</ui:attributes>
+							</graph>
+						</cell>
+					</ui:with>
+					<!-- Separator -->
+					<cell cols="4" bg.color="bg"><void pad.v="2" vreduce="true"/></cell>
+
+					<!-- Time shift -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<hbox pad.t="4" pad.b="2">
+							<knob id="bpts_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bpts_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+						</hbox>
+					</ui:with>
+					<!-- Separator -->
+					<cell cols="2" bg.color="bg"><hsep pad.v="2" vreduce="true"/></cell>
+
+					<!-- Attack Release -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<vbox vfill="false" pad.t="4" pad.b="2">
+							<knob id="bpat_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bpat_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+							<value id="bpat_${i}" detailed="false"/>
+						</vbox>
+					</ui:with>
+					<!-- Separator -->
+					<cell cols="2" bg.color="bg"><hsep pad.v="2" vreduce="true"/></cell>
+
+					<!-- Threshold -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<hbox pad.t="4" pad.b="2">
+							<knob id="bpth_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bpth_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+						</hbox>
+					</ui:with>
+
+					<!-- Separator -->
+					<cell cols="2" bg.color="bg"><hsep pad.v="2" vreduce="true"/></cell>
+
+					<!-- Ratio Max gain -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<vbox vfill="false" pad.t="4" pad.b="2">
+							<knob id="bper_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bper_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+							<hbox fill="false">
+								<value id="bper_${i}"/>
+								<label text=":"/>
+								<label text="1"/>
+							</hbox>
+						</vbox>
+					</ui:with>
+
+					<!-- Time shift -->
+					<value id="bpts_${i}" pad.t="4" pad.b="2" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
+					<!-- Attack Release -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<vbox vfill="false" pad.t="4" pad.b="2">
+							<knob id="bprt_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bprt_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+							<value id="bprt_${i}" detailed="false"/>
+						</vbox>
+					</ui:with>
+
+					<!-- Threshold -->
+					<value id="bpth_${i}" pad.t="4" pad.b="2" bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0"/>
+
+					<!-- Ratio Max gain -->
+					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
+						<vbox vfill="false" pad.t="4" pad.b="2">
+							<knob id="bpmg_${i}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
+							<knob id="bpmg_${i}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
+							<value id="bpmg_${i}" detailed="false"/>
+						</vbox>
+					</ui:with>
+
+					<cell rows="7" bg.color="bg" hreduce="true">
+						<void  pad.h="2" hreduce="true" />
 					</cell>
-				</ui:for>
 
-				<!-- Row 4 -->
-				<label text="labels.beat_breather.time_shift" pad.v="4" bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
-					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<knob id="bpts_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-					<value id="bpts_${i}"/>
-					<cell rows="6" hreduce="true">
+					<cell rows="7" hreduce="true">
 						<ledmeter vexpand="true" height.min="120" angle="1">
-							<ledchannel id="bpgm_${i}l" min="0 db" max="24 db" log="true" balance="0 db" balance.visibility="true" type="peak" activity="(ex :se_${:i-1}) ? :se_${:i-1} : true" value.color="blue"/>
-							<ledchannel id="bpgm_${i}r" min="0 db" max="24 db" log="true" balance="0 db" balance.visibility="true" type="peak" activity="(ex :se_${:i-1}) ? :se_${:i-1} : true" value.color="blue"/>
+							<ledchannel id="bpgm_${i}l" min="0 db" max="24 db" log="true" balance="0 db" balance.visibility="true" type="peak" activity="(ex :se_${:i-1}) ? :se_${:i-1} : true" value.color="${act_band} ? 'blue' : 'cycle_inactive'" balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"/>
+							<ledchannel id="bpgm_${i}r" min="0 db" max="24 db" log="true" balance="0 db" balance.visibility="true" type="peak" activity="(ex :se_${:i-1}) ? :se_${:i-1} : true" value.color="${act_band} ? 'blue' : 'cycle_inactive'" balance.color="${act_band} ? 'yellow' : 'cycle_inactive'"/>
 						</ledmeter>
 					</cell>
-				</ui:for>
-
-				<!-- Row 5 -->
-				<vbox bg.color="bg_schema">
-					<label text="labels.beat_breather.attack:ms"/>
-					<label text="labels.beat_breather.release:ms"/>
-				</vbox>
-				<ui:for id="i" first="1" count="8">
-					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<knob id="bpat_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-					<knob id="bprt_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-				</ui:for>
-
-				<!-- Row 6 -->
-				<void bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
-					<value id="bpat_${i}" detailed="false"/>
-					<value id="bprt_${i}" detailed="false"/>
-				</ui:for>
-
-				<!-- Row 7 -->
-				<label text="labels.threshold" pad.v="4" bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
-					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<knob id="bpth_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-					<value id="bpth_${i}"/>
-				</ui:for>
-
-				<!-- Row 8 -->
-				<vbox bg.color="bg_schema">
-					<label text="labels.ratio" pad.v="4"/>
-					<label text="labels.beat_breather.max_gain:db" pad.v="4"/>
-				</vbox>
-				<ui:for id="i" first="1" count="8">
-					<ui:eval id="hue" value="(:i-1) * 0.125"/>
-					<knob id="bper_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-					<knob id="bpmg_${i}" ssize="3" pad.v="4" scolor="(ex :se_${:i-1} ? :se_${:i-1} : true) ? 'cycle' : 'cycle_inactive'" scolor.hue="${hue}"/>
-				</ui:for>
-
-				<!-- Row 9 -->
-				<void bg.color="bg_schema"/>
-				<ui:for id="i" first="1" count="8">
-					<hbox fill="false">
-						<value id="bper_${i}"/>
-						<label text=":"/>
-						<label text="1"/>
-					</hbox>
-					<value id="bpmg_${i}" detailed="false"/>
 				</ui:for>
 			</grid>
 
