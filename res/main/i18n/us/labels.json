@@ -1,0 +1,25 @@
+{
+	"beat_breather": {
+		"attack:ms": "Attack (ms)",
+		"chan": {
+			"bf": "BF",
+			"bp": "BP",
+			"pd": "PD",
+			"pf": "PF"
+		},
+		"graphs": {
+			"punch": "Punch\nGraph",
+			"reduction": "Reduction\nGraph",
+			"gain": "Gain\nGraph"
+		},
+		"long_rms": "Long RMS",
+		"max_gain:db": "Max Gain (dB)",
+		"release:ms": "Release (ms)",
+		"rms_bias": "RMS Bias",
+		"short_rms": "Short RMS",
+		"threshold:db": "Threshold (dB)",
+		"time_shift": "Time Shift",
+		"zone:db": "Zone (dB)"
+	}
+}
+
