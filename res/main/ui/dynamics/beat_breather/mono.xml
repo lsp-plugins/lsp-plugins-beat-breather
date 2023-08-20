@@ -309,14 +309,10 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
+									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
+									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
 								</ui:with>
 							</hbox>
 						</cell>
@@ -492,14 +488,10 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
+									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
+									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
 								</ui:with>
 							</hbox>
 						</cell>
@@ -688,14 +680,10 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
+									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
+									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
 								</ui:with>
 							</hbox>
 						</cell>
@@ -935,14 +923,10 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(${act_band})"/>
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" visibility="(!${act_band})"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" visibility="(!${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(${act_band})" pad.l="4"/>
-									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" visibility="(!${act_band})" pad.l="4"/>
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
+									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
+									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
 								</ui:with>
 							</hbox>
 						</cell>
