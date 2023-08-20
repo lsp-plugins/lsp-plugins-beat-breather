@@ -248,7 +248,7 @@ namespace lsp
             "beat_breather",
             "Beat Breather",
             B_DYNAMICS,
-            "", // TODO: provide ID of the video on YouTube
+            "-mJ0fQqwAy4",
             "This plugin allows to drive much more dynamics into punchy sounds like drums and make them breathe again."
         };
 
