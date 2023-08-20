@@ -1,7 +1,7 @@
 {
 	"beat_breather": {
-		"name": "Plugin Template",
-		"description": "TODO: write description"
+		"name": "Beat Breather",
+		"description": "This plugin allows to drive much more dynamics into punchy sounds like drums and make them breathe again."
 	}
 }
 

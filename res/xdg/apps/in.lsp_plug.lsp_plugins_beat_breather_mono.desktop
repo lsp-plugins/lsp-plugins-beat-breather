@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=TODO: Template Plugin
-GenericName=TODO: Template Plugin
-Comment=TODO: add description what plugin does
+Name=Beat Breather
+GenericName=Beat Breather
+Comment=This plugin allows to drive much more dynamics into punchy sounds like drums and make them breathe again
 Exec=lsp-plugins-beat-breather-mono
 Icon=lsp-plugins
 Terminal=false
