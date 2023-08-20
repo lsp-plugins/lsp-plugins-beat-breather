@@ -1,131 +1,131 @@
 <plugin resizable="true">
 
 	<vbox vspacing="4" hspacing="4" expand="true">
-		<!-- <ui:if test="false"> -->
-		<grid rows="2" cols="5" vspacing="4" hspacing="4" expand="true">
+
+		<grid rows="2" cols="6" vspacing="4" hspacing="4" expand="true">
+
 			<group ui:inject="GraphGroup" ipadding="0" expand="true" fill="true" text="labels.graphs.spectrum">
-				<graph width.min="640" height.min="320" expand="true" fill="true">
-					<origin hpos="-1" vpos="-1" visible="false"/>
+				<graph width.min="590" height.min="160" expand="true" fill="true">
+						<origin hpos="-1" vpos="-1" visible="false"/>
 
-					<!-- Additional grid -->
-					<ui:with color="graph_alt_1">
-						<ui:for id="f" first="20" last="90" step="10">
-							<marker v="${:f}"/>
-							<marker v="${:f*10}"/>
-							<marker v="${:f*100}"/>
-						</ui:for>
-						<marker v="20000"/>
-						<ui:with ox="1" oy="0">
-							<marker v="+12 db"/>
-							<marker v="-12 db"/>
-							<marker v="-36 db"/>
-							<marker v="-60 db"/>
-
-							<ui:for id="g" first="-42" last="6" step="12">
-								<marker v="${g} db" visibility=":zoom le -9 db"/>
+						<!-- Additional grid -->
+						<ui:with color="graph_alt_1">
+							<ui:for id="f" first="20" last="90" step="10">
+								<marker v="${:f}"/>
+								<marker v="${:f*10}"/>
+								<marker v="${:f*100}"/>
 							</ui:for>
-							<ui:for id="g" first="-21" last="3" step="6">
-								<marker v="${g} db" visibility=":zoom le -15 db"/>
+							<marker v="20000"/>
+							<ui:with ox="1" oy="0">
+								<marker v="+12 db"/>
+								<marker v="-12 db"/>
+								<marker v="-36 db"/>
+								<marker v="-60 db"/>
+
+								<ui:for id="g" first="-42" last="6" step="12">
+									<marker v="${g} db" visibility=":zoom le -9 db"/>
+								</ui:for>
+								<ui:for id="g" first="-21" last="3" step="6">
+									<marker v="${g} db" visibility=":zoom le -15 db"/>
+								</ui:for>
+							</ui:with>
+						</ui:with>
+
+						<!-- Secondary grid -->
+						<ui:with color="graph_sec">
+							<marker v="100"/>
+							<marker v="1000"/>
+							<marker v="10000"/>
+							<marker value="0 db" ox="1" oy="0"/>
+							<marker value="-24 db" ox="1" oy="0"/>
+							<marker value="-48 db" ox="1" oy="0"/>
+						</ui:with>
+
+						<!-- Band markers -->
+						<ui:with
+							width="2"
+							fill="0.5"
+							color.a="0.2"
+							hcolor.a="0.8"
+							lcolor.a="0.8"
+							hlcolor.a="0.8"
+							rcolor.a="0.8"
+							hrcolor.a="0.8"
+							color="graph_marker_cycle"
+							hcolor="graph_marker_cycle"
+							lcolor="graph_marker_cycle"
+							hlcolor="graph_marker_cycle"
+							rcolor="graph_marker_cycle"
+							hrcolor="graph_marker_cycle">
+
+							<ui:set id="hue" value="0"/>
+							<marker v="10" color.hue="${hue}" hcolor.hue="${hue}" rborder="16" rcolor.hue="${hue}" hrborder="16" hrcolor.hue="${hue}"/>
+							<marker id="fre_1" color.hue="${hue}" hcolor.hue="${hue}" lborder="16" lcolor.hue="${hue}" hlborder="16" hlcolor.hue="${hue}"/>
+
+							<ui:for id="i" first="2" count="7">
+								<ui:eval id="hue" value="(:i-1) * 0.125"/>
+								<marker id="sf_${:i-1}" editable="true" visibility=":se_${:i-1}" color.hue="${hue}" hcolor.hue="${hue}" rborder="16" rcolor.hue="${hue}" hrborder="16" hrcolor.hue="${hue}" pointer="hsize"/>
+								<marker id="fre_${i}" visibility=":se_${:i-1}" color.hue="${hue}" hcolor.hue="${hue}" lborder="16" lcolor.hue="${hue}" hlborder="16" hlcolor.hue="${hue}"/>
 							</ui:for>
 						</ui:with>
-					</ui:with>
 
-					<!-- Secondary grid -->
-					<ui:with color="graph_sec">
-						<marker v="100"/>
-						<marker v="1000"/>
-						<marker v="10000"/>
-						<marker value="0 db" ox="1" oy="0"/>
-						<marker value="-24 db" ox="1" oy="0"/>
-						<marker value="-48 db" ox="1" oy="0"/>
-					</ui:with>
-
-					<!-- Band markers -->
-					<ui:with
-						width="2"
-						fill="0.5"
-						color.a="0.2"
-						hcolor.a="0.8"
-						lcolor.a="0.8"
-						hlcolor.a="0.8"
-						rcolor.a="0.8"
-						hrcolor.a="0.8"
-						color="graph_marker_cycle"
-						hcolor="graph_marker_cycle"
-						lcolor="graph_marker_cycle"
-						hlcolor="graph_marker_cycle"
-						rcolor="graph_marker_cycle"
-						hrcolor="graph_marker_cycle">
-
+						<!-- Meshes -->
 						<ui:set id="hue" value="0"/>
-						<marker v="10" color.hue="${hue}" hcolor.hue="${hue}" rborder="16" rcolor.hue="${hue}" hrborder="16" hrcolor.hue="${hue}"/>
-						<marker id="fre_1" color.hue="${hue}" hcolor.hue="${hue}" lborder="16" lcolor.hue="${hue}" hlborder="16" hlcolor.hue="${hue}"/>
-
-						<ui:for id="i" first="2" count="7">
+						<mesh id="bfg_1" width="2" fill="true" smooth="true" color="graph_mesh_cycle" color.hue="${hue}" fcolor="graph_mesh_cycle" fcolor.hue="${hue}" fcolor.a="0.9" visibility=":flt"/>
+						<ui:for id="i" first="2" count="8">
 							<ui:eval id="hue" value="(:i-1) * 0.125"/>
-							<marker id="sf_${:i-1}" editable="true" visibility=":se_${:i-1}" color.hue="${hue}" hcolor.hue="${hue}" rborder="16" rcolor.hue="${hue}" hrborder="16" hrcolor.hue="${hue}" pointer="hsize"/>
-							<marker id="fre_${i}" visibility=":se_${:i-1}" color.hue="${hue}" hcolor.hue="${hue}" lborder="16" lcolor.hue="${hue}" hlborder="16" hlcolor.hue="${hue}"/>
+							<mesh id="bfg_${i}" width="2" fill="true" smooth="true" color="graph_mesh_cycle" color.hue="${hue}" fcolor="graph_mesh_cycle" fcolor.hue="${hue}" fcolor.a="0.9" visibility=":flt and :se_${:i-1}"/>
 						</ui:for>
-					</ui:with>
 
-					<!-- Meshes -->
-					<ui:set id="hue" value="0"/>
-					<mesh id="bfg_1" width="2" fill="true" smooth="true" color="graph_mesh_cycle" color.hue="${hue}" fcolor="graph_mesh_cycle" fcolor.hue="${hue}" fcolor.a="0.9" visibility=":flt"/>
-					<ui:for id="i" first="2" count="8">
-						<ui:eval id="hue" value="(:i-1) * 0.125"/>
-						<mesh id="bfg_${i}" width="2" fill="true" smooth="true" color="graph_mesh_cycle" color.hue="${hue}" fcolor="graph_mesh_cycle" fcolor.hue="${hue}" fcolor.a="0.9" visibility=":flt and :se_${:i-1}"/>
-					</ui:for>
+						<mesh id="ifg_l" width="0" color="left_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="left_in" visibility=":ife_l"/>
+						<mesh id="ifg_r" width="0" color="right_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="right_in" visibility=":ife_r"/>
+						<mesh id="ofg_l" width="3" color="left" visibility=":ofe_l"/>
+						<mesh id="ofg_r" width="3" color="right" visibility=":ofe_r"/>
 
-					<mesh id="ifg_l" width="0" color="left_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="left_in" visibility=":ife_l"/>
-					<mesh id="ifg_r" width="0" color="right_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="right_in" visibility=":ife_r"/>
-					<mesh id="ofg_l" width="3" color="left" visibility=":ofe_l"/>
-					<mesh id="ofg_r" width="3" color="right" visibility=":ofe_r"/>
+						<mesh id="ag_l" width="3" color="bright_cyan" smooth="true" visibility="!:ssplit"/>
+						<mesh id="ag_l" width="3" color="left" smooth="true" visibility=":ssplit"/>
+						<mesh id="ag_r" width="3" color="right" smooth="true" visibility=":ssplit"/>
 
-					<mesh id="ag_l" width="3" color="bright_cyan" smooth="true" visibility="!:ssplit"/>
-					<mesh id="ag_l" width="3" color="left" smooth="true" visibility=":ssplit"/>
-					<mesh id="ag_r" width="3" color="right" smooth="true" visibility=":ssplit"/>
+						<!-- Boundaries -->
+						<marker v="1" ox="2" oy="0" color="graph_prim" visibility="false"/>
+						<marker v="24000" color="graph_prim" visibility="false"/>
 
-					<!-- Boundaries -->
-					<marker v="1" ox="2" oy="0" color="graph_prim" visibility="false"/>
-					<marker v="24000" color="graph_prim" visibility="false"/>
+						<!-- Axis -->
+						<axis min="10" max="24000" angle="0.0" log="true" visibility="false"/>
+						<axis min="-72 db / (:zoom ** 3)" max="24 db * :zoom" color="graph_prim" angle="0.5" log="true"/>
+						<axis min="-1" max="1" visibility="false" angle="0.5"/>
 
-					<!-- Axis -->
-					<axis min="10" max="24000" angle="0.0" log="true" visibility="false"/>
-					<axis min="-72 db / (:zoom ** 3)" max="24 db * :zoom" color="graph_prim" angle="0.5" log="true"/>
-					<axis min="-1" max="1" visibility="false" angle="0.5"/>
-
-					<!-- Text -->
-					<ui:with ox="0" oy="2" y="0" halign="1" valign="1">
-						<text x="10" text="graph.units.hz"/>
-						<text x="20" text="20"/>
-						<text x="30" text="30"/>
-						<text x="50" text="50"/>
-						<text x="100" text="100"/>
-						<text x="200" text="200"/>
-						<text x="300" text="300"/>
-						<text x="500" text="500"/>
-						<text x="1000" text="graph.values.x_k" text:value="1"/>
-						<text x="2000" text="graph.values.x_k" text:value="2"/>
-						<text x="3000" text="graph.values.x_k" text:value="3"/>
-						<text x="5000" text="graph.values.x_k" text:value="5"/>
-						<text x="10000" text="graph.values.x_k" text:value="10"/>
-						<text x="20000" text="graph.values.x_k" text:value="20"/>
-					</ui:with>
-					<ui:with x="10" halign="1" valign="1">
-						<ui:for id="g" first="-60" last="12" step="12">
-							<text y="${g} db" text="${g}"/>
-						</ui:for>
-						<text y="0 db" ox="0" oy="2" text="graph.units.db" valign="-1"/>
-						<ui:for id="g" first="-42" last="6" step="12">
-							<text y="${g} db" text="${g}" visibility=":zoom le -9 db"/>
-						</ui:for>
-						<ui:for id="g" first="-21" last="3" step="6">
-							<text y="${g} db" text="${g}" visibility=":zoom le -15 db"/>
-						</ui:for>
-					</ui:with>
-				</graph>
+						<!-- Text -->
+						<ui:with ox="0" oy="2" y="0" halign="1" valign="1">
+							<text x="10" text="graph.units.hz"/>
+							<text x="20" text="20"/>
+							<text x="30" text="30"/>
+							<text x="50" text="50"/>
+							<text x="100" text="100"/>
+							<text x="200" text="200"/>
+							<text x="300" text="300"/>
+							<text x="500" text="500"/>
+							<text x="1000" text="graph.values.x_k" text:value="1"/>
+							<text x="2000" text="graph.values.x_k" text:value="2"/>
+							<text x="3000" text="graph.values.x_k" text:value="3"/>
+							<text x="5000" text="graph.values.x_k" text:value="5"/>
+							<text x="10000" text="graph.values.x_k" text:value="10"/>
+							<text x="20000" text="graph.values.x_k" text:value="20"/>
+						</ui:with>
+						<ui:with x="10" halign="1" valign="1">
+							<ui:for id="g" first="-60" last="12" step="12">
+								<text y="${g} db" text="${g}"/>
+							</ui:for>
+							<text y="0 db" ox="0" oy="2" text="graph.units.db" valign="-1"/>
+							<ui:for id="g" first="-42" last="6" step="12">
+								<text y="${g} db" text="${g}" visibility=":zoom le -9 db"/>
+							</ui:for>
+							<ui:for id="g" first="-21" last="3" step="6">
+								<text y="${g} db" text="${g}" visibility=":zoom le -15 db"/>
+							</ui:for>
+						</ui:with>
+					</graph>
 			</group>
-
 			<!-- zoom -->
 			<cell rows="2">
 				<vbox vexpand="true" bg.color="bg_schema">
@@ -133,6 +133,47 @@
 					<fader id="zoom" angle="1" vexpand="true" bg.inherit="true" flat="true"/>
 					<value id="zoom" width="40"/>
 				</vbox>
+			</cell>
+
+			<!-- Analysis -->
+			<cell rows="2">
+				<group text="groups.analysis" expand="false" ipadding="0">
+					<vbox>
+						<grid rows="4" cols="2">
+							<align halign="-1" pad.t="4" pad.l="6">
+								<label text="labels.fft.fft_in"/>
+							</align>
+							<hbox spacing="4" pad.v="4" pad.h="6" hfill="false"><button id="ife_l" text="labels.chan.L_eft" size="19" ui:inject="Button_left_8"/>
+								<button id="ife_r" text="labels.chan.R_ight" size="19" ui:inject="Button_right_8"/></hbox>
+
+							<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+
+							<align halign="-1" pad.t="4" pad.l="6">
+								<label text="labels.fft.fft_out" halign="0"/>
+							</align>
+							<hbox spacing="4" pad.v="4" pad.h="6" hfill="false"><button id="ofe_l" text="labels.chan.L_eft" size="19" ui:inject="Button_left_8"/>
+								<button id="ofe_r" text="labels.chan.R_ight" size="19" ui:inject="Button_right_8"/></hbox>
+
+							<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
+						</grid>
+
+						<grid rows="2" cols="2" transpose="false" vexpand="false" height.min="100" hspacing="4">
+							<knob id="react" size="20" pad.r="4" pad.l="6"/>
+							<vbox vfill="false" pad.r="6">
+								<label text="labels.metering.reactivity" halign="0"/>
+								<value id="react" width.min="50" sline="true" halign="0"/>
+							</vbox>
+
+							<knob id="shift" size="20" pad.r="4" pad.l="6"/>
+							<vbox vfill="false" pad.r="6">
+								<label text="labels.metering.shift" halign="0"/>
+								<value id="shift" width.min="50" sline="true" halign="0"/>
+							</vbox>
+						</grid>
+						<hsep pad.v="2" bg.color="bg" vreduce="true"/>
+						<void vexpand="true"/>
+					</vbox>
+				</group>
 			</cell>
 
 			<!-- meter in -->
@@ -159,9 +200,9 @@
 
 			<!-- signal -->
 			<cell rows="2">
-				<vbox spacing="4">
-					<group text="groups.signal" expand="true">
-						<grid rows="4" cols="2" hspacing="4">
+				<group text="groups.signal" ipadding="0" vexpand="false">
+					<vbox>
+						<grid rows="4" cols="2" height.min="154" pad.v="4" pad.h="6">
 							<knob id="g_in" pad.r="4"/>
 							<vbox vfill="false">
 								<label text="labels.input" halign="0"/>
@@ -186,47 +227,13 @@
 								<value id="g_wet" width.min="50" sline="true" halign="0"/>
 							</vbox>
 						</grid>
-					</group>
-
-					<!-- Analysis -->
-					<group text="groups.analysis" expand="true" ipadding="0">
-						<vbox>
-							<grid rows="4" cols="2">
-								<align halign="-1" pad.t="4" pad.l="6">
-									<label text="labels.fft.fft_in"/>
-								</align>
-								<hbox spacing="4" pad.v="4" pad.h="6" hfill="false"><button id="ife_l" text="labels.chan.L_eft" size="19" ui:inject="Button_left_8"/>
-									<button id="ife_r" text="labels.chan.R_ight" size="19" ui:inject="Button_right_8"/></hbox>
-
-								<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
-
-								<align halign="-1" pad.t="4" pad.l="6">
-									<label text="labels.fft.fft_out" halign="0"/>
-								</align>
-								<hbox spacing="4" pad.v="4" pad.h="6" hfill="false"><button id="ofe_l" text="labels.chan.L_eft" size="19" ui:inject="Button_left_8"/>
-									<button id="ofe_r" text="labels.chan.R_ight" size="19" ui:inject="Button_right_8"/></hbox>
-
-								<cell cols="2"><hsep pad.v="2" bg.color="bg" vreduce="true"/></cell>
-							</grid>
-
-							<grid rows="2" cols="2" transpose="false" expand="true" hspacing="4">
-								<knob id="react" size="20" pad.r="4" pad.l="6"/>
-								<vbox vfill="false" pad.r="6">
-									<label text="labels.metering.reactivity" halign="0"/>
-									<value id="react" width.min="50" sline="true" halign="0"/>
-								</vbox>
-
-								<knob id="shift" size="20" pad.r="4" pad.l="6"/>
-								<vbox vfill="false" pad.r="6">
-									<label text="labels.metering.shift" halign="0"/>
-									<value id="shift" width.min="50" sline="true" halign="0"/>
-								</vbox>
-							</grid>
-						</vbox>
-					</group>
-				</vbox>
+						<hsep pad.v="2" bg.color="bg" vreduce="true"/>
+						<void vexpand="true" bg.color="bg_schema"/>
+					</vbox>
+				</group>
 			</cell>
 
+			<!-- bottom line -->
 			<!-- bottom line -->
 			<hbox vreduce="true" bg.color="bg_schema" pad.h="6">
 				<button id="flt" text="labels.filters" size="22" ui:inject="Button_cyan"/>
@@ -237,8 +244,8 @@
 		</grid>
 
 		<void height="4" bg.color="bg" vreduce="true"/>
-		<!-- </ui:if> -->
 
+<!-- <ui:if test="false"> -->
 		<!-- Controls -->
 
 		<ui:set id="has_solo" value="
@@ -1118,6 +1125,7 @@
 			</grid>
 
 		</tabs>
+	<!-- </ui:if> -->
 
 	</vbox>
 
