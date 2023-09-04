@@ -239,6 +239,7 @@ namespace lsp
                 void                post_process_block(size_t samples);
                 void                update_pointers(size_t samples);
                 void                output_meters();
+                void                do_destroy();
 
             public:
                 explicit beat_breather(const meta::plugin_t *meta);
