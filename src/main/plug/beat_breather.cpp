@@ -115,13 +115,17 @@ namespace lsp
 
         beat_breather::~beat_breather()
         {
-            destroy();
+            do_destroy();
         }
 
         void beat_breather::destroy()
         {
             Module::destroy();
+            do_destroy();
+        }
 
+        void beat_breather::do_destroy()
+        {
             // Destroy channels
             if (vChannels != NULL)
             {
@@ -653,7 +657,7 @@ namespace lsp
             fWetGain            = out_gain * pWetGain->value();
             fZoom               = pZoom->value();
             size_t an_channels  = 0;
-            float bypass        = pBypass->value() >= 0.5f;
+            bool bypass         = pBypass->value() >= 0.5f;
             bool sync           = false;
 
             // Update analyzer settings
