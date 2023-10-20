@@ -31,7 +31,7 @@
 #include <private/plugins/beat_breather.h>
 
 /* The size of temporary buffer for audio processing */
-#define BUFFER_SIZE         0x400U
+#define BUFFER_SIZE         0x1000U
 
 namespace lsp
 {
@@ -188,6 +188,8 @@ namespace lsp
             sAnalyzer.set_envelope(dspu::envelope::WHITE_NOISE);
             sAnalyzer.set_window(meta::beat_breather::FFT_ANALYZER_WINDOW);
             sAnalyzer.set_rate(meta::beat_breather::FFT_ANALYZER_RATE);
+
+            sCounter.set_frequency(meta::beat_breather::FFT_ANALYZER_RATE, true);
 
             // Allocate data
             const size_t szof_channels  = align_size(sizeof(channel_t) * nChannels, DEFAULT_ALIGN);
@@ -579,6 +581,8 @@ namespace lsp
             const size_t max_delay_fft  = (1 << fft_rank);
             const size_t samples_per_dot= dspu::seconds_to_samples(sr, meta::beat_breather::TIME_HISTORY_MAX / meta::beat_breather::TIME_MESH_POINTS);
 
+            sCounter.set_sample_rate(sr, true);
+
             for (size_t i=0; i<nChannels; ++i)
             {
                 channel_t *c            = &vChannels[i];
@@ -955,10 +959,13 @@ namespace lsp
                 offset             += to_do;
             }
 
+            sCounter.submit(samples);
+
             output_meters();
 
-            if (pWrapper != NULL)
+            if ((pWrapper != NULL) && (sCounter.fired()))
                 pWrapper->query_display_draw();
+            sCounter.commit();
         }
 
         void beat_breather::bind_inputs()
@@ -1258,24 +1265,27 @@ namespace lsp
                 channel_t *c        = &vChannels[i];
 
                 // Compute transfer curve
-                for (size_t offset=0; offset<meta::beat_breather::FFT_MESH_POINTS; )
+                if (sCounter.fired())
                 {
-                    size_t samples      = lsp_min(meta::beat_breather::FFT_MESH_POINTS - offset, BUFFER_SIZE);
-
-                    dsp::fill_zero(vBuffer, samples);
-                    for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                    for (size_t offset=0; offset<meta::beat_breather::FFT_MESH_POINTS; )
                     {
-                        band_t *b       = &c->vBands[j];
-                        if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
-                            dsp::fmadd_k3(
-                                vBuffer,
-                                &vChannels[0].vBands[j].vFreqChart[offset],
-                                b->fReduction,
-                                samples);
-                    }
-                    dsp::copy(&c->vFreqChart[offset], vBuffer, samples);
+                        size_t samples      = lsp_min(meta::beat_breather::FFT_MESH_POINTS - offset, BUFFER_SIZE);
 
-                    offset         += samples;
+                        dsp::fill_zero(vBuffer, samples);
+                        for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
+                        {
+                            band_t *b       = &c->vBands[j];
+                            if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
+                                dsp::fmadd_k3(
+                                    vBuffer,
+                                    &vChannels[0].vBands[j].vFreqChart[offset],
+                                    b->fReduction,
+                                    samples);
+                        }
+                        dsp::copy(&c->vFreqChart[offset], vBuffer, samples);
+
+                        offset         += samples;
+                    }
                 }
 
                 // Output input and output level meters
@@ -1640,6 +1650,7 @@ namespace lsp
             v->writev("vAnalyze", vAnalyze, 4);
 
             v->write_object("sAnalyzer", &sAnalyzer);
+            v->write_object("sCounter", &sCounter);
 
             v->begin_array("vSplits", vSplits, meta::beat_breather::BANDS_MAX-1);
             {
