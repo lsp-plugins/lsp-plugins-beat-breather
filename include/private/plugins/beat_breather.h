@@ -23,6 +23,7 @@
 #define PRIVATE_PLUGINS_BEAT_BREATHER_H_
 
 #include <lsp-plug.in/dsp-units/ctl/Bypass.h>
+#include <lsp-plug.in/dsp-units/ctl/Counter.h>
 #include <lsp-plug.in/dsp-units/dynamics/Gate.h>
 #include <lsp-plug.in/dsp-units/util/Analyzer.h>
 #include <lsp-plug.in/dsp-units/util/Delay.h>
@@ -199,6 +200,7 @@ namespace lsp
                 float              *vAnalyze[4];        // Buffers for spectrum analyzer
 
                 dspu::Analyzer      sAnalyzer;          // Analyzer
+                dspu::Counter       sCounter;           // Sync counter
                 split_t             vSplits[meta::beat_breather::BANDS_MAX-1];
 
                 float              *vBuffer;            // Temporary buffer for processing
