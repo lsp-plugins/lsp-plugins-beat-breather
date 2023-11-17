@@ -3,7 +3,7 @@
 *******************************************************************************
 
 === 1.0.5 ===
-
+* Implemented automatic scale of spectrum graph switch.
 
 === 1.0.4 ===
 * Reduced the rate of the gain curve update.
