@@ -5,6 +5,10 @@
 			"beat_processor": "Просессор ударов",
 			"punch_detector": "Детектор ударов",
 			"punch_filter": "Фильтр ударов"
+		},
+		"notes": {
+			"full": "{@frequency} Гц\n{@note}{@octave}{@cents}",
+			"unknown": "{@frequency} Гц"
 		}
 	}
 }
