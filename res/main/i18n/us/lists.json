@@ -7,8 +7,8 @@
 			"punch_filter": "Punch Filter"
 		},
 		"notes": {
-			"full": "{@frequency} Hz\n{@note}{@octave}{@cents}",
-			"unknown": "{@frequency} Hz"
+			"full": "Split #{@id}\n{@frequency} Hz\n{@note}{@octave}{@cents}",
+			"unknown": "Split #{@id}\n{@frequency} Hz"
 		}
 	}
 }

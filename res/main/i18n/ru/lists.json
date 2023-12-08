@@ -7,8 +7,8 @@
 			"punch_filter": "Фильтр ударов"
 		},
 		"notes": {
-			"full": "{@frequency} Гц\n{@note}{@octave}{@cents}",
-			"unknown": "{@frequency} Гц"
+			"full": "Раздел №{@id}\n{@frequency} Гц\n{@note}{@octave}{@cents}",
+			"unknown": "Раздел №{@id}\n{@frequency} Гц"
 		}
 	}
 }
