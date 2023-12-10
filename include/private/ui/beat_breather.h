@@ -36,7 +36,7 @@ namespace lsp
             protected:
                 typedef struct split_t
                 {
-                    beat_breather_ui      *pUI;
+                    beat_breather_ui   *pUI;
                     ui::IPort          *pFreq;
 
                     tk::GraphMarker    *wMarker;        // Graph marker for editing
