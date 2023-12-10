@@ -29,7 +29,7 @@ namespace lsp
     namespace plugui
     {
         /**
-         * UI for Multiband Clipper plugin series
+         * UI for Beat breather plugin series
          */
         class beat_breather_ui: public ui::Module, public ui::IPortListener
         {
