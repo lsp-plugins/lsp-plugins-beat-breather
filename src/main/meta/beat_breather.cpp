@@ -256,6 +256,7 @@ namespace lsp
         {
             "Beat Breather Mono",
             "Beat Breather Mono",
+            "Beat Breather Mono",
             "BB1M",
             &developers::v_sadovnikov,
             "beat_breather_mono",
@@ -278,6 +279,7 @@ namespace lsp
 
         const plugin_t beat_breather_stereo =
         {
+            "Beat Breather Stereo",
             "Beat Breather Stereo",
             "Beat Breather Stereo",
             "BB1S",
