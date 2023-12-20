@@ -5,6 +5,7 @@
 === 1.0.5 ===
 * Implemented automatic scale of spectrum graph switch.
 * Implemented split frequency display.
+* Updated build scripts and dependencies.
 
 === 1.0.4 ===
 * Reduced the rate of the gain curve update.
