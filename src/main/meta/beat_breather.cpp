@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MAJOR       1
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MINOR       0
-#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       4
+#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       5
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -256,6 +256,7 @@ namespace lsp
         {
             "Beat Breather Mono",
             "Beat Breather Mono",
+            "Beat Breather Mono",
             "BB1M",
             &developers::v_sadovnikov,
             "beat_breather_mono",
@@ -278,6 +279,7 @@ namespace lsp
 
         const plugin_t beat_breather_stereo =
         {
+            "Beat Breather Stereo",
             "Beat Breather Stereo",
             "Beat Breather Stereo",
             "BB1S",

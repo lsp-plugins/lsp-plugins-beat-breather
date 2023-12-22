@@ -1158,8 +1158,6 @@ namespace lsp
             {
                 channel_t *c        = &vChannels[i];
 
-                dsp::fill_zero(c->vOutData, samples);
-
                 // Compute the averaging value for all peak-detected and peak-filtered tracks
                 // Because peak-detected tracks have constant bias, they should be mixed in different way
                 ssize_t num_pd      = 0;
@@ -1178,6 +1176,7 @@ namespace lsp
                 float pd_makeup     = (num_pd > 0) ? 1.0f / num_pd : 1.0f;
 
                 // Mix the tracks
+                size_t mixed        = 0;
                 for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                 {
                     band_t *b           = &c->vBands[j];
@@ -1186,22 +1185,34 @@ namespace lsp
                         case BAND_BF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vInData, samples) * b->fGain, b->fOutLevel);
                             b->fReduction           = b->fGain;
-                            dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
+                            if (mixed++)
+                                dsp::fmadd_k3(c->vOutData, b->vInData, b->fGain, samples);
+                            else
+                                dsp::mul_k3(c->vOutData, b->vInData, b->fGain, samples);
                             break;
                         case BAND_PD:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPdData, samples) * b->fGain * pd_makeup, b->fOutLevel);
                             b->fReduction           = b->fPdLevel * b->fGain;
-                            dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
+                            if (mixed++)
+                                dsp::fmadd_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
+                            else
+                                dsp::mul_k3(c->vOutData, b->vPdData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_PF:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vPfData, samples) * b->fGain * pd_makeup, b->fOutLevel);
                             b->fReduction           = b->fPfReduction * b->fGain;
-                            dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain * pd_makeup, samples);
+                            if (mixed++)
+                                dsp::fmadd_k3(c->vOutData, b->vPfData, b->fGain * pd_makeup, samples);
+                            else
+                                dsp::mul_k3(c->vOutData, b->vPfData, b->fGain * pd_makeup, samples);
                             break;
                         case BAND_BP:
                             b->fOutLevel            = lsp_max(dsp::abs_max(b->vBpData, samples) * b->fGain, b->fOutLevel);
                             b->fReduction           = b->fBpReduction * b->fGain;
-                            dsp::fmadd_k3(c->vOutData, b->vBpData, b->fGain, samples);
+                            if (mixed++)
+                                dsp::fmadd_k3(c->vOutData, b->vBpData, b->fGain, samples);
+                            else
+                                dsp::mul_k3(c->vOutData, b->vBpData, b->fGain, samples);
                             break;
 
                         case BAND_MUTE:
@@ -1210,6 +1221,10 @@ namespace lsp
                             break;
                     }
                 }
+
+                // Clear audio output if there is no one band active
+                if (!mixed)
+                    dsp::fill_zero(c->vOutData, samples);
             }
         }
 
@@ -1271,18 +1286,33 @@ namespace lsp
                     {
                         size_t samples      = lsp_min(meta::beat_breather::FFT_MESH_POINTS - offset, BUFFER_SIZE);
 
-                        dsp::fill_zero(vBuffer, samples);
+                        // Perform mix of band transfer characteristics
+                        size_t mixed        = 0;
                         for (size_t j=0; j<meta::beat_breather::BANDS_MAX; ++j)
                         {
                             band_t *b       = &c->vBands[j];
                             if ((b->nMode != BAND_OFF) && (b->nMode != BAND_MUTE))
-                                dsp::fmadd_k3(
-                                    vBuffer,
-                                    &vChannels[0].vBands[j].vFreqChart[offset],
-                                    b->fReduction,
-                                    samples);
+                            {
+                                if (mixed++)
+                                    dsp::fmadd_k3(
+                                        vBuffer,
+                                        &vChannels[0].vBands[j].vFreqChart[offset],
+                                        b->fReduction,
+                                        samples);
+                                else
+                                    dsp::mul_k3(
+                                        vBuffer,
+                                        &vChannels[0].vBands[j].vFreqChart[offset],
+                                        b->fReduction,
+                                        samples);
+                            }
                         }
-                        dsp::copy(&c->vFreqChart[offset], vBuffer, samples);
+
+                        // Fill the output frequency chart
+                        if (mixed)
+                            dsp::copy(&c->vFreqChart[offset], vBuffer, samples);
+                        else
+                            dsp::fill_zero(&c->vFreqChart[offset], samples);
 
                         offset         += samples;
                     }

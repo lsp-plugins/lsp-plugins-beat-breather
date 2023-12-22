@@ -264,4 +264,3 @@ namespace lsp
 
 
 #endif /* PRIVATE_PLUGINS_BEAT_BREATHER_H_ */
-

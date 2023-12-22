@@ -5,6 +5,10 @@
 			"beat_processor": "Beat Processor",
 			"punch_detector": "Punch Detector",
 			"punch_filter": "Punch Filter"
+		},
+		"notes": {
+			"full": "Split #{@id}\n{@frequency} Hz\n{@note}{@octave}{@cents}",
+			"unknown": "Split #{@id}\n{@frequency} Hz"
 		}
 	}
 }
