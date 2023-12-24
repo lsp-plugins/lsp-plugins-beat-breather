@@ -1247,7 +1247,8 @@ namespace lsp
             }
 
             // Measure levels
-            sAnalyzer.process(vAnalyze, samples);
+            if (sAnalyzer.activity())
+                sAnalyzer.process(vAnalyze, samples);
 
             // Apply bypass switch
             for (size_t i=0; i<nChannels; ++i)
