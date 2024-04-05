@@ -26,23 +26,18 @@
 #include <lsp-plug.in/dsp-units/misc/envelope.h>
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
+#include <lsp-plug.in/shared/debug.h>
 #include <lsp-plug.in/shared/id_colors.h>
 
 #include <private/plugins/beat_breather.h>
 
-/* The size of temporary buffer for audio processing */
-#define BUFFER_SIZE         0x1000U
-
 namespace lsp
 {
-    static plug::IPort *TRACE_PORT(plug::IPort *p)
-    {
-        lsp_trace("  port id=%s", (p)->metadata()->id);
-        return p;
-    }
-
     namespace plugins
     {
+        /* The size of temporary buffer for audio processing */
+        static constexpr size_t BUFFER_SIZE = 0x1000;
+
         //---------------------------------------------------------------------
         // Plugin factory
         static const meta::plugin_t *plugins[] =
@@ -394,28 +389,28 @@ namespace lsp
             // Input ports
             lsp_trace("Binding input ports");
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pIn        = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pIn);
 
             // Output ports
             lsp_trace("Binding output ports");
             for (size_t i=0; i<nChannels; ++i)
-                vChannels[i].pOut       = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(vChannels[i].pOut);
 
             // Common ports
             lsp_trace("Binding common ports");
-            pBypass                 = TRACE_PORT(ports[port_id++]);
-            pInGain                 = TRACE_PORT(ports[port_id++]);
-            pDryGain                = TRACE_PORT(ports[port_id++]);
-            pWetGain                = TRACE_PORT(ports[port_id++]);
-            pDryWet                 = TRACE_PORT(ports[port_id++]);
-            pOutGain                = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]); // skip tab selector
-            pFFTReactivity          = TRACE_PORT(ports[port_id++]);
-            pFFTShift               = TRACE_PORT(ports[port_id++]);
-            pZoom                   = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]); // skip show filters
+            BIND_PORT(pBypass);
+            BIND_PORT(pInGain);
+            BIND_PORT(pDryGain);
+            BIND_PORT(pWetGain);
+            BIND_PORT(pDryWet);
+            BIND_PORT(pOutGain);
+            SKIP_PORT("Tab selector"); // skip tab selector
+            BIND_PORT(pFFTReactivity);
+            BIND_PORT(pFFTShift);
+            BIND_PORT(pZoom);
+            SKIP_PORT("Show filters"); // skip show filters
             if (nChannels > 1)
-                pStereoSplit            = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(pStereoSplit);
 
             // Channel meters
             lsp_trace("Binding channel meters");
@@ -423,13 +418,13 @@ namespace lsp
             {
                 channel_t *c            = &vChannels[i];
 
-                c->pInLevel             = TRACE_PORT(ports[port_id++]);
-                c->pOutLevel            = TRACE_PORT(ports[port_id++]);
-                c->pInFft               = TRACE_PORT(ports[port_id++]);
-                c->pOutFft              = TRACE_PORT(ports[port_id++]);
-                c->pInMesh              = TRACE_PORT(ports[port_id++]);
-                c->pOutMesh             = TRACE_PORT(ports[port_id++]);
-                c->pFreqMesh            = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(c->pInLevel);
+                BIND_PORT(c->pOutLevel);
+                BIND_PORT(c->pInFft);
+                BIND_PORT(c->pOutFft);
+                BIND_PORT(c->pInMesh);
+                BIND_PORT(c->pOutMesh);
+                BIND_PORT(c->pFreqMesh);
             }
 
             // Splits
@@ -438,8 +433,8 @@ namespace lsp
             {
                 split_t *s              = &vSplits[i];
 
-                s->pEnable              = TRACE_PORT(ports[port_id++]);
-                s->pFrequency           = TRACE_PORT(ports[port_id++]);
+                BIND_PORT(s->pEnable);
+                BIND_PORT(s->pFrequency);
             }
 
             // Band controls
@@ -489,36 +484,36 @@ namespace lsp
                     }
                     else
                     {
-                        b->pSolo                = TRACE_PORT(ports[port_id++]);
-                        b->pMute                = TRACE_PORT(ports[port_id++]);
-                        b->pListen              = TRACE_PORT(ports[port_id++]);
-                        b->pLpfSlope            = TRACE_PORT(ports[port_id++]);
-                        b->pHpfSlope            = TRACE_PORT(ports[port_id++]);
-                        b->pFlatten             = TRACE_PORT(ports[port_id++]);
-                        b->pOutGain             = TRACE_PORT(ports[port_id++]);
-                        b->pFreqEnd             = TRACE_PORT(ports[port_id++]);
-                        b->pFreqMesh            = TRACE_PORT(ports[port_id++]);
+                        BIND_PORT(b->pSolo);
+                        BIND_PORT(b->pMute);
+                        BIND_PORT(b->pListen);
+                        BIND_PORT(b->pLpfSlope);
+                        BIND_PORT(b->pHpfSlope);
+                        BIND_PORT(b->pFlatten);
+                        BIND_PORT(b->pOutGain);
+                        BIND_PORT(b->pFreqEnd);
+                        BIND_PORT(b->pFreqMesh);
 
-                        b->pPdLongTime          = TRACE_PORT(ports[port_id++]);
-                        b->pPdShortTime         = TRACE_PORT(ports[port_id++]);
-                        b->pPdBias              = TRACE_PORT(ports[port_id++]);
-                        b->pPdMakeup            = TRACE_PORT(ports[port_id++]);
+                        BIND_PORT(b->pPdLongTime);
+                        BIND_PORT(b->pPdShortTime);
+                        BIND_PORT(b->pPdBias);
+                        BIND_PORT(b->pPdMakeup);
 
-                        b->pPfLookahead         = TRACE_PORT(ports[port_id++]);
-                        b->pPfAttack            = TRACE_PORT(ports[port_id++]);
-                        b->pPfRelease           = TRACE_PORT(ports[port_id++]);
-                        b->pPfThreshold         = TRACE_PORT(ports[port_id++]);
-                        b->pPfReduction         = TRACE_PORT(ports[port_id++]);
-                        b->pPfZone              = TRACE_PORT(ports[port_id++]);
-                        b->pPfMesh              = TRACE_PORT(ports[port_id++]);
+                        BIND_PORT(b->pPfLookahead);
+                        BIND_PORT(b->pPfAttack);
+                        BIND_PORT(b->pPfRelease);
+                        BIND_PORT(b->pPfThreshold);
+                        BIND_PORT(b->pPfReduction);
+                        BIND_PORT(b->pPfZone);
+                        BIND_PORT(b->pPfMesh);
 
-                        b->pBpAttack            = TRACE_PORT(ports[port_id++]);
-                        b->pBpRelease           = TRACE_PORT(ports[port_id++]);
-                        b->pBpTimeShift         = TRACE_PORT(ports[port_id++]);
-                        b->pBpThreshold         = TRACE_PORT(ports[port_id++]);
-                        b->pBpRatio             = TRACE_PORT(ports[port_id++]);
-                        b->pBpMaxGain           = TRACE_PORT(ports[port_id++]);
-                        b->pBpMesh              = TRACE_PORT(ports[port_id++]);
+                        BIND_PORT(b->pBpAttack);
+                        BIND_PORT(b->pBpRelease);
+                        BIND_PORT(b->pBpTimeShift);
+                        BIND_PORT(b->pBpThreshold);
+                        BIND_PORT(b->pBpRatio);
+                        BIND_PORT(b->pBpMaxGain);
+                        BIND_PORT(b->pBpMesh);
                     }
                 }
             }
@@ -533,18 +528,18 @@ namespace lsp
                 {
                     band_t *b               = &c->vBands[j];
 
-                    b->pInLevel             = TRACE_PORT(ports[port_id++]);
-                    b->pOutLevel            = TRACE_PORT(ports[port_id++]);
+                    BIND_PORT(b->pInLevel);
+                    BIND_PORT(b->pOutLevel);
 
-                    b->pPdMesh              = TRACE_PORT(ports[port_id++]);
+                    BIND_PORT(b->pPdMesh);
 
-                    b->pPfEnvLevel          = TRACE_PORT(ports[port_id++]);
-                    b->pPfCurveLevel        = TRACE_PORT(ports[port_id++]);
-                    b->pPfGainLevel         = TRACE_PORT(ports[port_id++]);
+                    BIND_PORT(b->pPfEnvLevel);
+                    BIND_PORT(b->pPfCurveLevel);
+                    BIND_PORT(b->pPfGainLevel);
 
-                    b->pBpEnvLevel          = TRACE_PORT(ports[port_id++]);
-                    b->pBpCurveLevel        = TRACE_PORT(ports[port_id++]);
-                    b->pBpGainLevel         = TRACE_PORT(ports[port_id++]);
+                    BIND_PORT(b->pBpEnvLevel);
+                    BIND_PORT(b->pBpCurveLevel);
+                    BIND_PORT(b->pBpGainLevel);
                 }
             }
 
