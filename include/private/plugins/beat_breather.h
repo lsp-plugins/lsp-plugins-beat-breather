@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -44,10 +44,6 @@ namespace lsp
          */
         class beat_breather: public plug::Module
         {
-            private:
-                beat_breather & operator = (const beat_breather &);
-                beat_breather (const beat_breather &);
-
             protected:
                 enum band_mode_t
                 {
@@ -214,6 +210,7 @@ namespace lsp
                 plug::IPort        *pInGain;            // Input gain
                 plug::IPort        *pDryGain;           // Dry gain
                 plug::IPort        *pWetGain;           // Wet gain
+                plug::IPort        *pDryWet;            // Dry/Wet balance
                 plug::IPort        *pOutGain;           // Output gain
                 plug::IPort        *pStereoSplit;       // Stereo split
                 plug::IPort        *pFFTReactivity;     // FFT reactivity
@@ -245,7 +242,12 @@ namespace lsp
 
             public:
                 explicit beat_breather(const meta::plugin_t *meta);
+                beat_breather(const beat_breather &) = delete;
+                beat_breather(beat_breather &&) = delete;
                 virtual ~beat_breather() override;
+
+                beat_breather & operator = (const beat_breather &) = delete;
+                beat_breather & operator = (beat_breather &&) = delete;
 
                 virtual void        init(plug::IWrapper *wrapper, plug::IPort **ports) override;
                 virtual void        destroy() override;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -102,6 +102,7 @@ namespace lsp
             pInGain         = NULL;
             pDryGain        = NULL;
             pWetGain        = NULL;
+            pDryWet         = NULL;
             pOutGain        = NULL;
             pStereoSplit    = NULL;
             pFFTReactivity  = NULL;
@@ -406,6 +407,7 @@ namespace lsp
             pInGain                 = TRACE_PORT(ports[port_id++]);
             pDryGain                = TRACE_PORT(ports[port_id++]);
             pWetGain                = TRACE_PORT(ports[port_id++]);
+            pDryWet                 = TRACE_PORT(ports[port_id++]);
             pOutGain                = TRACE_PORT(ports[port_id++]);
             TRACE_PORT(ports[port_id++]); // skip tab selector
             pFFTReactivity          = TRACE_PORT(ports[port_id++]);
@@ -654,11 +656,14 @@ namespace lsp
         void beat_breather::update_settings()
         {
             // Configure global parameters
+            float dry_gain      = pDryGain->value();
+            float wet_gain      = pWetGain->value();
+            float drywet        = pDryWet->value() * 0.01f;
             float out_gain      = pOutGain->value();
             bStereoSplit        = ((nChannels > 1) && (pStereoSplit != NULL)) ? pStereoSplit->value() >= 0.5f : false;
             fInGain             = pInGain->value();
-            fDryGain            = out_gain * pDryGain->value();
-            fWetGain            = out_gain * pWetGain->value();
+            fDryGain            = (dry_gain * drywet + 1.0f - drywet) * out_gain;
+            fWetGain            = wet_gain * drywet * out_gain;
             fZoom               = pZoom->value();
             size_t an_channels  = 0;
             bool bypass         = pBypass->value() >= 0.5f;
@@ -1712,6 +1717,7 @@ namespace lsp
             v->write("pInGain", pInGain);
             v->write("pDryGain", pDryGain);
             v->write("pWetGain", pWetGain);
+            v->write("pDryWet", pDryWet);
             v->write("pOutGain", pOutGain);
             v->write("pStereoSplit", pStereoSplit);
             v->write("pFFTReactivity", pFFTReactivity);

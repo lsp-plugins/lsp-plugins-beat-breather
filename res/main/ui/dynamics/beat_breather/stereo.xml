@@ -210,7 +210,7 @@
 			<cell rows="2">
 				<group text="groups.signal" ipadding="0" vexpand="false">
 					<vbox>
-						<grid rows="4" cols="2" height.min="154" pad.v="4" pad.h="6">
+						<grid rows="6" cols="2" height.min="154" pad.v="4" pad.h="6">
 							<knob id="g_in" pad.r="4"/>
 							<vbox vfill="false">
 								<label text="labels.input" halign="0"/>
@@ -233,6 +233,12 @@
 							<vbox vfill="false">
 								<label text="labels.signal.wet" halign="0"/>
 								<value id="g_wet" width.min="50" sline="true" halign="0"/>
+							</vbox>
+							
+							<knob id="drywet" scolor="drywet" pad.r="4"/>
+							<vbox vfill="false">
+								<label text="labels.signal.drywet" halign="0"/>
+								<value id="drywet" width.min="50" sline="true" halign="0"/>
 							</vbox>
 						</grid>
 						<hsep pad.v="2" bg.color="bg" vreduce="true"/>

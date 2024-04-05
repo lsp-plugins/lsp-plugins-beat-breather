@@ -54,6 +54,7 @@
 	<li><b>Output</b> - the amount of gain applied to the output signal before processing.</li>
 	<li><b>Dry</b> - the amount of dry (unprocessed) signal passed to the output.</li>
 	<li><b>Wet</b> - the amount of wet (processed) signal passed to the output.</li>
+	<li><b>Dry/Wet</b> - the balance between the mixed signal (see Dry and Wet knobs) and unprocessed (Dry) signal.</li>
 	<li><b>In</b> - the input signal meter.</li>
 	<li><b>Out</b> - the output signal meter.</li>
 </ul>
