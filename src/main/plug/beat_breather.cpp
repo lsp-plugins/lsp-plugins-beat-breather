@@ -224,20 +224,13 @@ namespace lsp
                 return;
             lsp_guard_assert(uint8_t *ptr_check = &ptr[to_alloc]);
 
-            vChannels               = reinterpret_cast<channel_t *>(ptr);
-            ptr                    += szof_channels;
-            vBuffer                 = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_buffer;
-            vFftFreqs               = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_fft;
-            vFftIndexes             = reinterpret_cast<uint32_t *>(ptr);
-            ptr                    += szof_ffti;
-            vPdMesh                 = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_time;
-            vPfMesh                 = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_curve;
-            vBpMesh                 = reinterpret_cast<float *>(ptr);
-            ptr                    += szof_curve;
+            vChannels               = advance_ptr_bytes<channel_t>(ptr, szof_channels);
+            vBuffer                 = advance_ptr_bytes<float>(ptr, szof_buffer);
+            vFftFreqs               = advance_ptr_bytes<float>(ptr, szof_fft);
+            vFftIndexes             = advance_ptr_bytes<uint32_t>(ptr, szof_ffti);
+            vPdMesh                 = advance_ptr_bytes<float>(ptr, szof_time);
+            vPfMesh                 = advance_ptr_bytes<float>(ptr, szof_curve);
+            vBpMesh                 = advance_ptr_bytes<float>(ptr, szof_curve);
 
             // Initialize channels
             for (size_t i=0; i<nChannels; ++i)
@@ -285,22 +278,15 @@ namespace lsp
                     b->fBpOutGain           = GAIN_AMP_M_INF_DB;
                     b->fBpReduction         = GAIN_AMP_M_INF_DB;
 
-                    b->vInData              = reinterpret_cast<float *>(ptr);
-                    ptr                    += szof_buffer;
-                    b->vPdData              = reinterpret_cast<float *>(ptr);
-                    ptr                    += szof_buffer;
-                    b->vPfData              = reinterpret_cast<float *>(ptr);
-                    ptr                    += szof_buffer;
-                    b->vBpData              = reinterpret_cast<float *>(ptr);
-                    ptr                    += szof_buffer;
+                    b->vInData              = advance_ptr_bytes<float>(ptr, szof_buffer);
+                    b->vPdData              = advance_ptr_bytes<float>(ptr, szof_buffer);
+                    b->vPfData              = advance_ptr_bytes<float>(ptr, szof_buffer);
+                    b->vBpData              = advance_ptr_bytes<float>(ptr, szof_buffer);
                     if (i == 0)
                     {
-                        b->vFreqChart           = reinterpret_cast<float *>(ptr);
-                        ptr                    += szof_fft;
-                        b->vPfMesh              = reinterpret_cast<float *>(ptr);
-                        ptr                    += szof_curve;
-                        b->vBpMesh              = reinterpret_cast<float *>(ptr);
-                        ptr                    += szof_curve;
+                        b->vFreqChart           = advance_ptr_bytes<float>(ptr, szof_fft);
+                        b->vPfMesh              = advance_ptr_bytes<float>(ptr, szof_curve);
+                        b->vBpMesh              = advance_ptr_bytes<float>(ptr, szof_curve);
                     }
                     else
                     {
@@ -358,12 +344,9 @@ namespace lsp
 
                 c->vIn                  = NULL;
                 c->vOut                 = NULL;
-                c->vInData              = reinterpret_cast<float *>(ptr);
-                ptr                    += szof_buffer;
-                c->vOutData             = reinterpret_cast<float *>(ptr);
-                ptr                    += szof_buffer;
-                c->vFreqChart           = reinterpret_cast<float *>(ptr);
-                ptr                    += szof_fft;
+                c->vInData              = advance_ptr_bytes<float>(ptr, szof_buffer);
+                c->vOutData             = advance_ptr_bytes<float>(ptr, szof_buffer);
+                c->vFreqChart           = advance_ptr_bytes<float>(ptr, szof_fft);
 
                 vAnalyze[c->nAnIn]      = c->vInData;
                 vAnalyze[c->nAnOut]     = c->vOutData;
