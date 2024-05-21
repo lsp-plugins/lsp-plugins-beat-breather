@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MAJOR       1
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MINOR       0
-#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       6
+#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       7
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -54,6 +54,7 @@ namespace lsp
             IN_GAIN, \
             AMP_GAIN("g_dry", "Dry gain", 0.0f, 10.0f), \
             AMP_GAIN("g_wet", "Wet gain", 1.0f, 10.0f), \
+            DRYWET(100.0f), \
             OUT_GAIN, \
             COMBO("ts", "Tab selector", 0, bb_tabs), \
             LOG_CONTROL("react", "FFT reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \

@@ -195,35 +195,37 @@
 			<!-- signal -->
 			<cell rows="2">
 				<group text="groups.signal" ipadding="0" vexpand="false">
-					<vbox>
-						<grid rows="4" cols="2" height.min="154" pad.v="4" pad.h="6">
-							<knob id="g_in" pad.r="4"/>
-							<vbox vfill="false">
-								<label text="labels.input" halign="0"/>
-								<value id="g_in" sline="true" halign="0"/>
-							</vbox>
+					<grid rows="6" cols="2" height.min="154" pad.v="4" pad.h="6">
+						<knob id="g_in" pad.r="4"/>
+						<vbox vfill="false">
+							<label text="labels.input" halign="0"/>
+							<value id="g_in" sline="true" halign="0"/>
+						</vbox>
 
-							<knob id="g_out" pad.r="4"/>
-							<vbox vfill="false">
-								<label text="labels.output" expand="true" halign="0"/>
-								<value id="g_out" width.min="50" sline="true" halign="0"/>
-							</vbox>
+						<knob id="g_out" pad.r="4"/>
+						<vbox vfill="false">
+							<label text="labels.output" expand="true" halign="0"/>
+							<value id="g_out" width.min="50" sline="true" halign="0"/>
+						</vbox>
 
-							<knob id="g_dry" scolor="dry" pad.r="4"/>
-							<vbox vfill="false">
-								<label text="labels.signal.dry" halign="0"/>
-								<value id="g_dry" width.min="50" sline="true" halign="0"/>
-							</vbox>
+						<knob id="g_dry" scolor="dry" pad.r="4"/>
+						<vbox vfill="false">
+							<label text="labels.signal.dry" halign="0"/>
+							<value id="g_dry" width.min="50" sline="true" halign="0"/>
+						</vbox>
 
-							<knob id="g_wet" scolor="wet" pad.r="4"/>
-							<vbox vfill="false">
-								<label text="labels.signal.wet" halign="0"/>
-								<value id="g_wet" width.min="50" sline="true" halign="0"/>
-							</vbox>
-						</grid>
-						<hsep pad.v="2" bg.color="bg" vreduce="true"/>
-						<void vexpand="true" bg.color="bg_schema"/>
-					</vbox>
+						<knob id="g_wet" scolor="wet" pad.r="4"/>
+						<vbox vfill="false">
+							<label text="labels.signal.wet" halign="0"/>
+							<value id="g_wet" width.min="50" sline="true" halign="0"/>
+						</vbox>
+
+						<knob id="drywet" scolor="drywet" pad.r="4"/>
+						<vbox vfill="false">
+							<label text="labels.signal.drywet" halign="0"/>
+							<value id="drywet" width.min="50" sline="true" halign="0"/>
+						</vbox>
+					</grid>
 				</group>
 			</cell>
 
@@ -316,7 +318,7 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf"/>
 									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
 									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
 									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
@@ -406,7 +408,7 @@
 							<vbox vfill="false" height.min="40">
 								<value id="sf_${:i-1}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
 								<value id="fre_${i}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
-								<label text="labels.chan.off" visibility="not :se_${:i-1}" />
+								<label text="labels.chan.off" visibility="not :se_${:i-1}"/>
 							</vbox>
 						</ui:if>
 
@@ -495,7 +497,7 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf"/>
 									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
 									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
 									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
@@ -687,7 +689,7 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf"/>
 									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
 									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
 									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
@@ -930,7 +932,7 @@
 							<!-- Chain Output Buttons -->
 							<hbox>
 								<ui:with width.min="25" height="19" hfill="true" ui:inject="Button_yellow_8">
-									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf" />
+									<button id="bls_${i}" value="0" text="labels.beat_breather.chan.bf"/>
 									<button id="bls_${i}" value="1" text="labels.beat_breather.chan.pd" pad.l="4"/>
 									<button id="bls_${i}" value="2" text="labels.beat_breather.chan.pf" pad.l="4"/>
 									<button id="bls_${i}" value="3" text="labels.beat_breather.chan.bp" pad.l="4"/>
