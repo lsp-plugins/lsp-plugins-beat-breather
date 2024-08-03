@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MAJOR       1
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MINOR       0
-#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       8
+#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       9
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -261,14 +261,17 @@ namespace lsp
             "BB1M",
             &developers::v_sadovnikov,
             "beat_breather_mono",
-            LSP_LV2_URI("beat_breather_mono"),
-            LSP_LV2UI_URI("beat_breather_mono"),
-            "bb1m",
-            LSP_VST3_UID("bb1m    bb1m"),
-            LSP_VST3UI_UID("bb1m    bb1m"),
-            LSP_LADSPA_BIT_BREATHER_BASE + 0,
-            LSP_LADSPA_URI("beat_breather_mono"),
-            LSP_CLAP_URI("beat_breather_mono"),
+            {
+                LSP_LV2_URI("beat_breather_mono"),
+                LSP_LV2UI_URI("beat_breather_mono"),
+                "bb1m",
+                LSP_VST3_UID("bb1m    bb1m"),
+                LSP_VST3UI_UID("bb1m    bb1m"),
+                LSP_LADSPA_BIT_BREATHER_BASE + 0,
+                LSP_LADSPA_URI("beat_breather_mono"),
+                LSP_CLAP_URI("beat_breather_mono"),
+                LSP_GST_UID("beat_breather_mono"),
+            },
             LSP_PLUGINS_BEAT_BREATHER_VERSION,
             plugin_classes,
             clap_features_mono,
@@ -288,14 +291,17 @@ namespace lsp
             "BB1S",
             &developers::v_sadovnikov,
             "beat_breather_stereo",
-            LSP_LV2_URI("beat_breather_stereo"),
-            LSP_LV2UI_URI("beat_breather_stereo"),
-            "bb1s",
-            LSP_VST3_UID("bb1s    bb1s"),
-            LSP_VST3UI_UID("bb1s    bb1s"),
-            LSP_LADSPA_BIT_BREATHER_BASE + 1,
-            LSP_LADSPA_URI("beat_breather_stereo"),
-            LSP_CLAP_URI("beat_breather_stereo"),
+            {
+                LSP_LV2_URI("beat_breather_stereo"),
+                LSP_LV2UI_URI("beat_breather_stereo"),
+                "bb1s",
+                LSP_VST3_UID("bb1s    bb1s"),
+                LSP_VST3UI_UID("bb1s    bb1s"),
+                LSP_LADSPA_BIT_BREATHER_BASE + 1,
+                LSP_LADSPA_URI("beat_breather_stereo"),
+                LSP_CLAP_URI("beat_breather_stereo"),
+                LSP_GST_UID("beat_breather_stereo"),
+            },
             LSP_PLUGINS_BEAT_BREATHER_VERSION,
             plugin_classes,
             clap_features_stereo,
