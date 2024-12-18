@@ -786,7 +786,7 @@ namespace lsp
 
                     b->sPdDelay.set_delay(pd_short_latency);
 
-                    b->sPdMeter.set_method(dspu::MM_MAXIMUM);
+                    b->sPdMeter.set_method(dspu::MM_ABS_MAXIMUM);
                     if ((b->nOldMode != BAND_OFF) && (b->nMode == BAND_OFF))
                         b->sPdMeter.fill(0.0f);
 
