@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -76,7 +76,7 @@ namespace lsp
 
         #define BB_SPLIT(id, label, on, freq) \
             SWITCH("se" id, "Frequency split enable" label, on), \
-            LOG_CONTROL_DFL("sf" id, "Split frequency" label, U_HZ, beat_breather::FREQ, freq)
+            LOG_CONTROL_DFL("sf" id, "Split frequency" label, "Split" label, U_HZ, beat_breather::FREQ, freq)
 
         #define BB_BAND(id, label, short_rms, pf_attack, pf_release, bp_attack, bp_release) \
             SWITCH("bs" id, "Solo band" label, 0.0f), \
@@ -95,15 +95,15 @@ namespace lsp
             CONTROL("pdmk" id, "Punch detector makeup" label, U_DB, beat_breather::PD_MAKEUP), \
             \
             CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \
-            LOG_CONTROL_DFL("pfat" id, "Punch filter attack time" label, U_MSEC, beat_breather::PF_ATTACK, pf_attack), \
-            LOG_CONTROL_DFL("pfrt" id, "Punch filter release time" label, U_MSEC, beat_breather::PF_RELEASE, pf_release), \
+            LOG_CONTROL_DFL("pfat" id, "Punch filter attack time" label, "Punch att" label, U_MSEC, beat_breather::PF_ATTACK, pf_attack), \
+            LOG_CONTROL_DFL("pfrt" id, "Punch filter release time" label, "Punch rel" label, U_MSEC, beat_breather::PF_RELEASE, pf_release), \
             LOG_CONTROL("pfth" id, "Punch filter threshold" label, U_GAIN_AMP, beat_breather::PF_THRESHOLD), \
             LOG_CONTROL("pfrl" id, "Punch filter reduction level" label, U_GAIN_AMP, beat_breather::PF_REDUCTION), \
             LOG_CONTROL("pfrz" id, "Punch filter reduction zone" label, U_GAIN_AMP, beat_breather::PF_ZONE), \
             MESH("pfg" id, "Punch filter curve graph" label, 2, beat_breather::CURVE_MESH_POINTS), \
             \
-            LOG_CONTROL_DFL("bpat" id, "Beat processor attack time" label, U_DB, beat_breather::BP_ATTACK, bp_attack), \
-            LOG_CONTROL_DFL("bprt" id, "Beat processor release time" label, U_DB, beat_breather::BP_RELEASE, bp_release), \
+            LOG_CONTROL_DFL("bpat" id, "Beat processor attack time" label, "Beat att" label, U_DB, beat_breather::BP_ATTACK, bp_attack), \
+            LOG_CONTROL_DFL("bprt" id, "Beat processor release time" label, "Beat rel" label, U_DB, beat_breather::BP_RELEASE, bp_release), \
             CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
             LOG_CONTROL("bpth" id, "Beat processor threshold" label, U_GAIN_AMP, beat_breather::BP_THRESHOLD), \
             CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
