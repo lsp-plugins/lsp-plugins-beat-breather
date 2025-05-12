@@ -58,7 +58,7 @@ namespace lsp
             OUT_GAIN, \
             COMBO("ts", "Tab selector", "Tab selector", 0, bb_tabs), \
             LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, beat_breather::FFT_REACT_TIME), \
-            CONTROL("shift", "FFT shift gain", U_DB, beat_breather::FFT_SHIFT), \
+            CONTROL("shift", "FFT shift gain", "FFT shift", U_DB, beat_breather::FFT_SHIFT), \
             LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, beat_breather::ZOOM), \
             SWITCH("flt", "Show filters", "Show flt", 1.0f)
 
@@ -82,32 +82,32 @@ namespace lsp
             SWITCH("bs" id, "Solo band" label, "Solo" alias, 0.0f), \
             SWITCH("bm" id, "Mute band" label, "Mute" alias, 0.0f), \
             COMBO("bls" id, "Band listen stage" label, "Listen" alias, beat_breather::LISTEN_DFL, bb_tabs), \
-            CONTROL("lps" id, "Lo-pass slope" label, U_DB, beat_breather::SLOPE), \
-            CONTROL("hps" id, "Hi-pass slope" label, U_DB, beat_breather::SLOPE), \
-            CONTROL("flat" id, "Filter cap flatten" label, U_DB, beat_breather::FLATTEN), \
-            LOG_CONTROL("bg" id, "Band output gain" label, "Out lvl" label, U_GAIN_AMP, beat_breather::BAND_GAIN), \
+            CONTROL("lps" id, "Lo-pass slope" label, "LP slope" alias, U_DB, beat_breather::SLOPE), \
+            CONTROL("hps" id, "Hi-pass slope" label, "HP slope" alias, U_DB, beat_breather::SLOPE), \
+            CONTROL("flat" id, "Filter cap flatten" label, "Flatten" alias, U_DB, beat_breather::FLATTEN), \
+            LOG_CONTROL("bg" id, "Band output gain" label, "Out lvl" alias, U_GAIN_AMP, beat_breather::BAND_GAIN), \
             METER("fre" id, "Frequency range end" label, U_HZ,  beat_breather::OUT_FREQ), \
             MESH("bfg" id, "Band filter graph" label, 2, beat_breather::FFT_MESH_POINTS + 2), \
             \
-            CONTROL("pdlt" id, "Punch detector long-time RMS estimation" label, U_MSEC, beat_breather::PD_LONG_RMS), \
-            CONTROL_DFL("pdst" id, "Punch detector short-time RMS estimation" label, U_MSEC, beat_breather::PD_SHORT_RMS, short_rms), \
-            CONTROL("pdbs" id, "Punch detector short RMS bias" label, U_DB, beat_breather::PD_BIAS), \
-            CONTROL("pdmk" id, "Punch detector makeup" label, U_DB, beat_breather::PD_MAKEUP), \
+            CONTROL("pdlt" id, "Punch detector long-time RMS estimation" label, "Punch RMS" alias, U_MSEC, beat_breather::PD_LONG_RMS), \
+            CONTROL_DFL("pdst" id, "Punch detector short-time RMS estimation" label, "Punch S-RMS" alias, U_MSEC, beat_breather::PD_SHORT_RMS, short_rms), \
+            CONTROL("pdbs" id, "Punch detector short RMS bias" label, "Punch bias" alias, U_DB, beat_breather::PD_BIAS), \
+            CONTROL("pdmk" id, "Punch detector makeup" label, "Punch makeup" alias, U_DB, beat_breather::PD_MAKEUP), \
             \
-            CONTROL("pflk" id, "Punch filter lookahead" label, U_MSEC, beat_breather::PF_LOOKAHEAD), \
-            LOG_CONTROL_DFL("pfat" id, "Punch filter attack time" label, "Punch att" label, U_MSEC, beat_breather::PF_ATTACK, pf_attack), \
-            LOG_CONTROL_DFL("pfrt" id, "Punch filter release time" label, "Punch rel" label, U_MSEC, beat_breather::PF_RELEASE, pf_release), \
-            LOG_CONTROL("pfth" id, "Punch filter threshold" label, "Punch thresh" label, U_GAIN_AMP, beat_breather::PF_THRESHOLD), \
-            LOG_CONTROL("pfrl" id, "Punch filter reduction level" label, "Punch red" label, U_GAIN_AMP, beat_breather::PF_REDUCTION), \
-            LOG_CONTROL("pfrz" id, "Punch filter reduction zone" label, "Punch zone" label, U_GAIN_AMP, beat_breather::PF_ZONE), \
+            CONTROL("pflk" id, "Punch filter lookahead" label, "Punch look" alias, U_MSEC, beat_breather::PF_LOOKAHEAD), \
+            LOG_CONTROL_DFL("pfat" id, "Punch filter attack time" label, "Punch att" alias, U_MSEC, beat_breather::PF_ATTACK, pf_attack), \
+            LOG_CONTROL_DFL("pfrt" id, "Punch filter release time" label, "Punch rel" alias, U_MSEC, beat_breather::PF_RELEASE, pf_release), \
+            LOG_CONTROL("pfth" id, "Punch filter threshold" label, "Punch thresh" alias, U_GAIN_AMP, beat_breather::PF_THRESHOLD), \
+            LOG_CONTROL("pfrl" id, "Punch filter reduction level" label, "Punch red" alias, U_GAIN_AMP, beat_breather::PF_REDUCTION), \
+            LOG_CONTROL("pfrz" id, "Punch filter reduction zone" label, "Punch zone" alias, U_GAIN_AMP, beat_breather::PF_ZONE), \
             MESH("pfg" id, "Punch filter curve graph" label, 2, beat_breather::CURVE_MESH_POINTS), \
             \
-            LOG_CONTROL_DFL("bpat" id, "Beat processor attack time" label, "Beat att" label, U_DB, beat_breather::BP_ATTACK, bp_attack), \
-            LOG_CONTROL_DFL("bprt" id, "Beat processor release time" label, "Beat rel" label, U_DB, beat_breather::BP_RELEASE, bp_release), \
-            CONTROL("bpts" id, "Beat processor time shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
-            LOG_CONTROL("bpth" id, "Beat processor threshold" label, "Beat thresh" label, U_GAIN_AMP, beat_breather::BP_THRESHOLD), \
-            CONTROL("bper" id, "Beat processor expand ratio" label, U_NONE, beat_breather::BP_RATIO), \
-            LOG_CONTROL("bpmg" id, "Beat processor maximum gain" label, "Beat gain" label, U_GAIN_AMP, beat_breather::BP_MAX_GAIN), \
+            LOG_CONTROL_DFL("bpat" id, "Beat processor attack time" label, "Beat att" alias, U_DB, beat_breather::BP_ATTACK, bp_attack), \
+            LOG_CONTROL_DFL("bprt" id, "Beat processor release time" label, "Beat rel" alias, U_DB, beat_breather::BP_RELEASE, bp_release), \
+            CONTROL("bpts" id, "Beat processor time shift" label, "Beat shift" label, U_MSEC, beat_breather::BP_TIME_SHIFT), \
+            LOG_CONTROL("bpth" id, "Beat processor threshold" label, "Beat thresh" alias, U_GAIN_AMP, beat_breather::BP_THRESHOLD), \
+            CONTROL("bper" id, "Beat processor expand ratio" label, "Beat ratio" alias, U_NONE, beat_breather::BP_RATIO), \
+            LOG_CONTROL("bpmg" id, "Beat processor maximum gain" label, "Beat gain" alias, U_GAIN_AMP, beat_breather::BP_MAX_GAIN), \
             MESH("bpg" id, "Beat processor curve graph" label, 2, beat_breather::CURVE_MESH_POINTS)
 
         #define BB_BAND_METERS(id, label, alias) \
