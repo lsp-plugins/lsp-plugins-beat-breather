@@ -52,8 +52,8 @@ namespace lsp
         #define BB_COMMON \
             BYPASS, \
             IN_GAIN, \
-            AMP_GAIN("g_dry", "Dry gain", 0.0f, 10.0f), \
-            AMP_GAIN("g_wet", "Wet gain", 1.0f, 10.0f), \
+            AMP_GAIN("g_dry", "Dry gain", "Dry", 0.0f, 10.0f), \
+            AMP_GAIN("g_wet", "Wet gain", "Wet", 1.0f, 10.0f), \
             DRYWET(100.0f), \
             OUT_GAIN, \
             COMBO("ts", "Tab selector", "Tab selector", 0, bb_tabs), \
