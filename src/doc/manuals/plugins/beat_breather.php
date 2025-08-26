@@ -13,21 +13,21 @@
 	<ul>
 		<li>Unlike classic crossovers which use IIR (Infinite Impulse Response) filters to split signal into multiple bands and shift the phase
 		of the audio signal at band split points, the <b>Linear Phase</b> allows to use FIR (Finite Impulse Response) filters which are deprived of this.
-		<li>Unlike most IIR filters which are designed using bilinear transform, linear phase filters allow simulate their tranfer function
+		<li>Unlike most IIR filters which are designed using bilinear transform, linear phase filters allow simulate their transfer function
 		to look like the transfer function of analog filters, without deforming it's magnitude envelope near the nyquist frequency.</li>
 		<li>Unlike design of classic Linkwitz-Riley filters, the design of IIR filters provides shorter transition zone of the filter.</li>
 		<li>Unlike classic IIR filters the slope of the FIR filter is not restricted to be the multiple of 6 dB.</li>
 	</ul>
 	<li><b>Punch detection</b> - detection of peaks above the average level of the audio. For that case two type of RMS values are computed:</li>
 	<ul>
-		<li><b>Long time</b> - the long-time RMS value (by default, the esimation period is 400 ms) to estimate the average level of the audio signal.</li> 
+		<li><b>Long time</b> - the long-time RMS value (by default, the esitmation period is 400 ms) to estimate the average level of the audio signal.</li> 
 		<li><b>Short time</b> - the short-time RMS value (by default, the estimation period is less than 20 ms and depends on the frequency range) to estimate the envelope of the changing in time signal.</li>
 	</ul>
 	<li><b>Punch filtering</b> - additional stage to eliminate some noise from the signal not associated with punches.</li>
-	<li><b>Beat processing</b> - short-time dynamic amplification of the frequency band accoding to the signal passed from the punch filter.</li>
+	<li><b>Beat processing</b> - short-time dynamic amplification of the frequency band according to the signal passed from the punch filter.</li>
 </ul>
 
-<p>The simlified schema of the device is shown on the figure below.</p>
+<p>The simplified schema of the device is shown on the figure below.</p>
 <?php out_image('graph/beat-breather-scheme', 'Simplified scheme of the audio processing') ?>
 
 <p><b>Controls:</b></p>
@@ -38,7 +38,7 @@
 	<?php if ($m == 's') { ?>
 	<li><b>Stereo Split</b> - enables independent compression of left and right channels.</li>
 	<?php } ?>
-	<li><b>Filters<?= $sm ?></b> - enables drawing tranfer function of each sidechain filter on the spectrum graph.</li>
+	<li><b>Filters<?= $sm ?></b> - enables drawing transfer function of each sidechain filter on the spectrum graph.</li>
 	<li><b>Zoom</b> - zoom fader, allows to adjust zoom on the frequency chart.</li>
 </ul>
 <p><b>'Analysis' section:</b></p>
