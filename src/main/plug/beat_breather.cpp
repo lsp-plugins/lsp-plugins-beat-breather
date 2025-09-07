@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -788,7 +788,7 @@ namespace lsp
 
                     b->sPdMeter.set_method(dspu::MM_ABS_MAXIMUM);
                     if ((b->nOldMode != BAND_OFF) && (b->nMode == BAND_OFF))
-                        b->sPdMeter.fill(0.0f);
+                        b->sPdMeter.clear();
 
                     // Update peak filter configuration
                     float pf_thresh         = b->pPfThreshold->value();
@@ -1355,7 +1355,7 @@ namespace lsp
                     {
                         // Fill mesh with new values
                         dsp::copy(mesh->pvData[0], vPdMesh, meta::beat_breather::TIME_MESH_POINTS);
-                        dsp::copy(mesh->pvData[1], b->sPdMeter.data(), meta::beat_breather::TIME_MESH_POINTS);
+                        b->sPdMeter.read(mesh->pvData[1], meta::beat_breather::TIME_MESH_POINTS);
                         mesh->data(2, meta::beat_breather::TIME_MESH_POINTS);
                     }
 
