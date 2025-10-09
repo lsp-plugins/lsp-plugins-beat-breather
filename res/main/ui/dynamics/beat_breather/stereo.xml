@@ -42,7 +42,7 @@
 					</ui:with>
 
 					<!-- Piano keys -->
-					<embed oy="2" start.x="midi_freq_start(12, 127)" start.y="0.1" end.x="midi_freq_end(12, 127)" end.y="0.15" valign="1" alpha="0" visibility=":_ui_graph_piano_layout">
+					<embed oy="2" start.x="midi_freq_start(12, 127)" start.y="0.15" end.x="midi_freq_end(12, 127)" end.y="0.1" valign="1" alpha="0" visibility=":_ui_graph_piano_layout">
 						<piano natural="false" note.min="12" note.max="127" height="24" editable="false" selectable="false" border="0"/>
 					</embed>
 
