@@ -359,15 +359,15 @@
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<ui:if test=":i ieq 1">
 							<cell cols="2" fill="false">
-								<vbox vfill="false">
+								<vbox vfill="false" width.min="30">
 									<label text="0"/>
-									<value id="fre_${i}" width.min="30" sline="true" detailed="false"/>
+									<value id="fre_${i}" sline="true" detailed="false"/>
 								</vbox>
 							</cell>
 						</ui:if>
 
 						<ui:if test=":i igt 1">
-							<hbox>
+							<hbox width.min="62">
 								<knob id="sf_${:i-1}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 								<knob id="sf_${:i-1}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							</hbox>
@@ -453,7 +453,7 @@
 					<!-- Freq Range -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<ui:if test=":i igt 1">
-							<vbox vfill="false" height.min="40">
+							<vbox vfill="false" height.min="40" width.min="62">
 								<value id="sf_${:i-1}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
 								<value id="fre_${i}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
 								<label text="labels.chan.off" visibility="not :se_${:i-1}"/>

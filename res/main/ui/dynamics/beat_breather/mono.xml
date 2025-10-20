@@ -101,9 +101,8 @@
 					<axis min="10" max="24000" angle="0.0" log="true" visibility="false"/>
 					<axis min="-72 db / (:zoom ** 3)" max="24 db * :zoom" color="graph_prim" angle="0.5" log="true"/>
 					<axis min="-1" max="1" visibility="false" angle="0.5"/>
-					<axis min="-72 db" max="24 db" color="graph_prim" angle="0.5" log="true" visibility="false"/>					
+					<axis min="-72 db" max="24 db" color="graph_prim" angle="0.5" log="true" visibility="false"/>
 					<axis min="0" max=":_a_scaled_height" visibility="false" angle="0.5"/>
-
 
 					<!-- Text -->
 					<ui:with ox="0" oy="2" y="0" halign="1" valign="1">
@@ -345,7 +344,7 @@
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<ui:if test=":i ieq 1">
 							<cell cols="2" fill="false">
-								<vbox vfill="false">
+								<vbox vfill="false" width.min="62">
 									<label text="0"/>
 									<value id="fre_${i}" width.min="30" sline="true" detailed="false"/>
 								</vbox>
@@ -353,7 +352,7 @@
 						</ui:if>
 
 						<ui:if test=":i igt 1">
-							<hbox>
+							<hbox vfill="false" height.min="40" width.min="62">
 								<knob id="sf_${:i-1}" ssize="3" scolor="cycle" scolor.hue="${hue}" visibility="(${act_band})"/>
 								<knob id="sf_${:i-1}" ssize="3" scolor="cycle_inactive" visibility="(!${act_band})"/>
 							</hbox>
@@ -419,7 +418,7 @@
 					<!-- Freq Range -->
 					<ui:with bg.color="bg_schema" bg.bright="(!${act_band}) ? :const_bg_darken : 1.0" bright="(!${act_band}) ? 0.75 : 1.0">
 						<ui:if test=":i igt 1">
-							<vbox vfill="false" height.min="40">
+							<vbox vfill="false" height.min="40" width.min="62">
 								<value id="sf_${:i-1}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
 								<value id="fre_${i}" width.min="30" sline="true" detailed="false" visibility=":se_${:i-1}"/>
 								<label text="labels.chan.off" visibility="not :se_${:i-1}"/>
