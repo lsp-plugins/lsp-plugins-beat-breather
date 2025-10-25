@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -149,6 +149,10 @@ namespace lsp
                 s.wNote         = find_split_widget<tk::GraphText>(fmt, "split_note", port_id);
 
                 s.pFreq         = find_port(fmt, "sf", port_id);
+                s.pOn           = find_port(fmt, "se", port_id);
+
+                s.fFreq         = (s.pFreq != NULL) ? s.pFreq->value() : 0.0f;
+                s.bOn           = (s.pOn != NULL) ? s.pOn->value() >= 0.5f : false;
 
                 if (s.wMarker != NULL)
                 {
@@ -158,6 +162,8 @@ namespace lsp
 
                 if (s.pFreq != NULL)
                     s.pFreq->bind(this);
+                if (s.pOn != NULL)
+                    s.pOn->bind(this);
 
                 vSplits.add(&s);
             }
@@ -220,7 +226,6 @@ namespace lsp
                 else
                     s->wNote->text()->set("lists.beat_breather.notes.unknown", &params);
             }
-
         }
 
         status_t beat_breather_ui::post_init()
@@ -231,19 +236,128 @@ namespace lsp
 
             // Add splits widgets
             add_splits();
+            resort_active_splits();
 
             return STATUS_OK;
         }
 
         void beat_breather_ui::notify(ui::IPort *port, size_t flags)
         {
+            bool need_resort_active_splits = false;
+            split_t *freq_initiator = NULL;
+
             for (size_t i=0, n=vSplits.size(); i<n; ++i)
             {
-                split_t *d = vSplits.uget(i);
-                if (d->pFreq == port)
-                    update_split_note_text(d);
+                split_t *s = vSplits.uget(i);
+                if (s->pOn == port)
+                {
+                    s->bOn          = port->value() >= 0.5f;
+                    need_resort_active_splits = true;
+                }
+                if (s->pFreq == port)
+                {
+                    s->fFreq        = port->value();
+                    update_split_note_text(s);
+
+                    if (flags & ui::PORT_USER_EDIT)
+                    {
+                        if (s->bOn)
+                            freq_initiator = s;
+                    }
+                    else if (s->bOn)
+                        need_resort_active_splits = true;
+                }
             }
 
+            // Resort order of active splits if needed
+            if (need_resort_active_splits)
+                resort_active_splits();
+            if (freq_initiator != NULL)
+                toggle_active_split_fequency(freq_initiator);
+        }
+
+        ssize_t beat_breather_ui::compare_splits_by_freq(const split_t *a, const split_t *b)
+        {
+            if (a->fFreq < b->fFreq)
+                return -1;
+            return (a->fFreq > b->fFreq) ? 1 : 0;
+        }
+
+        void beat_breather_ui::resort_active_splits()
+        {
+            vActiveSplits.clear();
+
+            // Form unsorted list of active splits
+            for (lltl::iterator<split_t> it = vSplits.values(); it; ++it)
+            {
+                split_t *s = it.get();
+                if (!s->bOn)
+                    continue;
+                vActiveSplits.add(s);
+            }
+
+            // Sort active splits
+            vActiveSplits.qsort(compare_splits_by_freq);
+        }
+
+
+        void beat_breather_ui::toggle_active_split_fequency(split_t *initiator)
+        {
+            lltl::parray<ui::IPort> notify_list;
+            bool left_position  = true;
+            const float freq    = initiator->pFreq->value();
+
+            // Start editing
+            for (lltl::iterator<split_t> it = vActiveSplits.values(); it; ++it)
+            {
+                split_t *s = it.get();
+                if (s->bOn)
+                    s->pFreq->begin_edit();
+            }
+
+            // Form unsorted list of active splits
+            for (lltl::iterator<split_t> it = vActiveSplits.values(); it; ++it)
+            {
+                split_t *s = it.get();
+                if (!s->bOn)
+                    continue;
+
+                // Main logic
+                if (s == initiator)
+                {
+                    left_position = false;
+                    continue;
+                }
+
+                if (left_position)
+                {
+                    if ((s->pFreq != NULL) && (s->fFreq > freq * 0.999f))
+                    {
+                        s->pFreq->set_value(freq * 0.999f);
+                        notify_list.add(s->pFreq);
+                    }
+                }
+                else
+                {
+                    if ((s->pFreq != NULL) && (s->fFreq < freq * 1.001f))
+                    {
+                        s->pFreq->set_value(freq * 1.001f);
+                        notify_list.add(s->pFreq);
+                    }
+                }
+            }
+
+            // Notify all modified ports
+            for (lltl::iterator<ui::IPort> it = notify_list.values(); it; ++it)
+                it->notify_all(ui::PORT_NONE);
+
+            // End editing
+            for (lltl::iterator<split_t> it = vActiveSplits.values(); it; ++it)
+            {
+                split_t *s = it.get();
+                if (s->bOn)
+                    s->pFreq->end_edit();
+            }
         }
 
     } /* namespace plugui */

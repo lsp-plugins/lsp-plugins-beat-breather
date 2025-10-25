@@ -38,25 +38,32 @@ namespace lsp
                 {
                     beat_breather_ui   *pUI;
                     ui::IPort          *pFreq;
+                    ui::IPort          *pOn;
 
                     tk::GraphMarker    *wMarker;        // Graph marker for editing
                     tk::GraphText      *wNote;          // Text with note and frequency
+                    float               fFreq;          // Frequency
+                    bool                bOn;            // Split is enabled
                 } split_t;
 
             protected:
                 lltl::darray<split_t> vSplits;          // List of split widgets and ports
+                lltl::parray<split_t> vActiveSplits;    // List of active split widgets and ports
 
             protected:
-
                 static status_t slot_split_mouse_in(tk::Widget *sender, void *ptr, void *data);
                 static status_t slot_split_mouse_out(tk::Widget *sender, void *ptr, void *data);
 
             protected:
+                static ssize_t  compare_splits_by_freq(const split_t *a, const split_t *b);
 
+            protected:
                 template <class T>
                 T              *find_split_widget(const char *fmt, const char *base, size_t id);
                 ui::IPort      *find_port(const char *fmt, const char *base, size_t id);
                 split_t        *find_split_by_widget(tk::Widget *widget);
+                void            resort_active_splits();
+                void            toggle_active_split_fequency(split_t *initiator);
 
             protected:
                 void            on_split_mouse_in(split_t *s);
