@@ -1,0 +1,11 @@
+{
+	"beat_breather": {
+		"description": "Этот плагин позволяет привнести значительно больше динамики в энергичные звуки\nвроде барабанов и придать им второе дыхание.",
+		"name": "Beat Breather"
+	},
+	"launcher": {
+		"beat_breather_mono": "Моно",
+		"beat_breather_stereo": "Стерео"
+	}
+}
+

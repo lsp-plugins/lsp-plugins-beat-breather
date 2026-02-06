@@ -1,7 +1,11 @@
 {
 	"beat_breather": {
-		"name": "Beat Breather",
-		"description": "This plugin allows to drive much more dynamics into punchy sounds\nlike drums and make them breathe again."
+		"description": "This plugin allows to drive much more dynamics into punchy sounds\nlike drums and make them breathe again.",
+		"name": "Дышащие такты"
+	},
+	"launcher": {
+		"beat_breather_mono": "Mono",
+		"beat_breather_stereo": "Stereo"
 	}
 }
 
