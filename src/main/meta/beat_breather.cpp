@@ -278,7 +278,7 @@ namespace lsp
             clap_features_mono,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_mono_ports,
-            "dynamics/beat_breather/mono.xml",
+            "plugins/dynamics/beat_breather/mono.xml",
             NULL,
             mono_plugin_port_groups,
             &beat_breather_bundle
@@ -309,7 +309,7 @@ namespace lsp
             clap_features_stereo,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_stereo_ports,
-            "dynamics/beat_breather/stereo.xml",
+            "plugins/dynamics/beat_breather/stereo.xml",
             NULL,
             stereo_plugin_port_groups,
             &beat_breather_bundle
