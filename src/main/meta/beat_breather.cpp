@@ -281,7 +281,8 @@ namespace lsp
             "plugins/dynamics/beat_breather/mono.xml",
             NULL,
             mono_plugin_port_groups,
-            &beat_breather_bundle
+            &beat_breather_bundle,
+            2
         };
         LSP_REGISTER_METADATA(beat_breather_mono);
 
@@ -312,12 +313,10 @@ namespace lsp
             "plugins/dynamics/beat_breather/stereo.xml",
             NULL,
             stereo_plugin_port_groups,
-            &beat_breather_bundle
+            &beat_breather_bundle,
+            1
         };
         LSP_REGISTER_METADATA(beat_breather_stereo);
 
     } /* namespace meta */
 } /* namespace lsp */
-
-
-
