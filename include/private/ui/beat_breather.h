@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 8 дек. 2023 г.
@@ -74,7 +74,12 @@ namespace lsp
 
             public:
                 explicit beat_breather_ui(const meta::plugin_t *meta);
+                beat_breather_ui(const beat_breather_ui &) = delete;
+                beat_breather_ui(beat_breather_ui &&) = delete;
                 virtual ~beat_breather_ui() override;
+
+                beat_breather_ui & operator = (const beat_breather_ui &) = delete;
+                beat_breather_ui & operator = (beat_breather_ui &&) = delete;
 
                 virtual status_t    post_init() override;
 

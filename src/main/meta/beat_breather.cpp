@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -20,12 +20,13 @@
  */
 
 #include <lsp-plug.in/plug-fw/meta/ports.h>
+#include <lsp-plug.in/plug-fw/meta/registry.h>
 #include <lsp-plug.in/shared/meta/developers.h>
 #include <private/meta/beat_breather.h>
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MAJOR       1
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION_MINOR       0
-#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       18
+#define LSP_PLUGINS_BEAT_BREATHER_VERSION_MICRO       19
 
 #define LSP_PLUGINS_BEAT_BREATHER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -277,11 +278,13 @@ namespace lsp
             clap_features_mono,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_mono_ports,
-            "dynamics/beat_breather/mono.xml",
+            "plugins/dynamics/beat_breather/mono.xml",
             NULL,
             mono_plugin_port_groups,
-            &beat_breather_bundle
+            &beat_breather_bundle,
+            2
         };
+        LSP_REGISTER_METADATA(beat_breather_mono);
 
         const plugin_t beat_breather_stereo =
         {
@@ -307,13 +310,13 @@ namespace lsp
             clap_features_stereo,
             E_DUMP_STATE | E_INLINE_DISPLAY,
             beat_breather_stereo_ports,
-            "dynamics/beat_breather/stereo.xml",
+            "plugins/dynamics/beat_breather/stereo.xml",
             NULL,
             stereo_plugin_port_groups,
-            &beat_breather_bundle
+            &beat_breather_bundle,
+            1
         };
+        LSP_REGISTER_METADATA(beat_breather_stereo);
+
     } /* namespace meta */
 } /* namespace lsp */
-
-
-
