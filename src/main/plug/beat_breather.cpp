@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-beat-breather
  * Created on: 14 авг 2023 г.
@@ -694,7 +694,7 @@ namespace lsp
                     vsplits[nsplits++]  = sp;
             }
             if (nsplits > 1)
-                lsp::qsort_r(vsplits, nsplits, sizeof(split_t *), compare_splits, NULL);
+                lsp::ssort_r(vsplits, nsplits, sizeof(split_t *), compare_splits, NULL);
 
             // Configure channels
             size_t max_band_latency     = 0;
