@@ -643,7 +643,6 @@ namespace lsp
             fDryGain            = (dry_gain * drywet + 1.0f - drywet) * out_gain;
             fWetGain            = wet_gain * drywet * out_gain;
             fZoom               = pZoom->value();
-            size_t an_channels  = 0;
             bool bypass         = pBypass->value() >= 0.5f;
             bool sync           = false;
 
@@ -655,18 +654,12 @@ namespace lsp
                 // Update analyzer settings
                 sAnalyzer.enable_channel(c->nAnIn, c->pInFft->value() >= 0.5f);
                 sAnalyzer.enable_channel(c->nAnOut, c->pOutFft->value() >= 0.5f);
-
-                if (sAnalyzer.channel_active(c->nAnIn))
-                    an_channels ++;
-                if (sAnalyzer.channel_active(c->nAnOut))
-                    an_channels ++;
             }
 
             // Update analyzer parameters
             sAnalyzer.set_reactivity(pFFTReactivity->value());
             if (pFFTShift != NULL)
                 sAnalyzer.set_shift(dspu::db_to_gain(pFFTShift->value()) * 100.0f);
-            sAnalyzer.set_activity(an_channels > 0);
 
             if (sAnalyzer.needs_reconfiguration())
             {
@@ -1420,6 +1413,8 @@ namespace lsp
 
         void beat_breather::ui_activated()
         {
+            sAnalyzer.set_activity(true);
+
             // Determine number of channels
             for (size_t i=0; i<nChannels; ++i)
             {
@@ -1431,6 +1426,11 @@ namespace lsp
                     b->nSync            = SYNC_ALL;
                 }
             }
+        }
+
+        void beat_breather::ui_deactivated()
+        {
+            sAnalyzer.set_activity(false);
         }
 
         bool beat_breather::inline_display(plug::ICanvas *cv, size_t width, size_t height)
